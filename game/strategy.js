@@ -43,17 +43,66 @@ buildingPanel=function(b){strategy.selected=b;openTab('buildings');let d=$('sele
 const baseTryBuild=tryBuild;tryBuild=function(type,t){const result=baseTryBuild(type,t);if(result)notice(result);else{notice(DEF[type].name+' placed. See the building queue.');sound();S.eco=compute();syncScene();}return result;};window.G.tryBuild=tryBuild;
 const baseModal=modal;modal=function(m){if(!m.keepOpen&&m.buttons?.length===1&&!/Mission|Mars Colony|site|Correct|Not quite|School|Science|Data sources|Credits/i.test(m.title)){notice(m.title);S.journal.push({title:m.title,why:m.html.replace(/<[^>]*>/g,' '),src:'Mission record',u:''});return;}baseModal(m);};
 const baseTick=tickSol;tickSol=function(){baseTick();if(S.sol%10===0){strategy.history.push({sol:S.sol,pop:S.pop,rivals:S.rivals.map(r=>r.pop)});if(strategy.history.length>200)strategy.history.shift();}};window.G.tickSol=tickSol;
-function saveMission(){try{const clean=o=>Object.fromEntries(Object.entries(o).filter(([k])=>!['mesh','astro','decor','solid','build'].includes(k)));const state={...S,tiles:S.tiles.map(clean),builds:S.builds.map(clean)};localStorage.setItem('mars-colony-save',JSON.stringify({version:1,state,rngState:rng.state,me:ME,diff:DIFFS.indexOf(DF),history:strategy.history}));notice('Mission saved on this device.');}catch(e){console.error(e);notice('Save failed. Device storage may be full.');}}
-function loadMission(){try{const data=JSON.parse(localStorage.getItem('mars-colony-save'));if(data?.version!==1||!Array.isArray(data.state.tiles)||data.state.tiles.length!==COLS*ROWS)throw Error();S=data.state;rng=mulberry(data.rngState??S.seed);ME=data.me;DF=DIFFS[data.diff]||DIFFS[1];DEF.reactor.cost=S.tech.reactor?14:24;S.builds.forEach(b=>{tileAt(b.c,b.r).build=b;});strategy.history=data.history||[];S.speed=0;modalQ=[];modalOpen=false;$('overlay').style.display='none';if(R3.fp)toggleWalk();buildWorld();buildMenu();render();setLens(strategy.lens);notice('Saved mission restored, paused.');}catch{notice('No readable saved mission on this device.');}}
+const SAVE_KEY='mars-colony-save',SAVE_VERSION=2;
+function captureMission(){
+ const clean=o=>Object.fromEntries(Object.entries(o).filter(([k])=>!['mesh','astro','decor','solid','build'].includes(k)));
+ const captured=window.Junior?.capture?Junior.capture():{state:{...S,tiles:S.tiles.map(clean),builds:S.builds.map(clean)},rngState:rng.state};
+ if(captured.state.junior&&S.junior.checkpoint)captured.state.junior.checkpoint=JSON.parse(JSON.stringify(S.junior.checkpoint));
+ return {version:SAVE_VERSION,state:captured.state,rngState:captured.rngState,me:{...ME},diff:DIFFS.indexOf(DF),history:strategy.history.slice(-200)};
+}
+function validateMission(data){
+ if(!data||![1,SAVE_VERSION].includes(data.version))throw Error('This save version is not supported. Your current mission is unchanged.');
+ const s=data.state;
+ if(!s||!Array.isArray(s.tiles)||s.tiles.length!==COLS*ROWS||!Array.isArray(s.builds)||!s.builds.length||s.builds.length>COLS*ROWS)throw Error('This save has an incomplete map.');
+ for(const key of ['seed','sol','pop','o2','food','parts','metal','battery','fame'])if(!Number.isFinite(s[key]))throw Error('This save has an invalid '+key+' value.');
+ if(s.sol<1||!Number.isInteger(s.pop)||s.pop<0||s.o2<0||s.food<0||s.parts<0||s.battery<0)throw Error('This save has invalid resource values.');
+ for(const [i,t] of s.tiles.entries())if(!t||t.c!==i%COLS||t.r!==Math.floor(i/COLS)||!['plain','ice','lava','rock'].includes(t.type)||!['sun','air','elev'].every(k=>Number.isFinite(t[k])))throw Error('This save has invalid terrain.');
+ const occupied=new Set();
+ for(const b of s.builds){const k=b?.c+','+b?.r;if(!b||!DEF[b.type]||!Number.isInteger(b.c)||!Number.isInteger(b.r)||b.c<0||b.c>=COLS||b.r<0||b.r>=ROWS||occupied.has(k))throw Error('This save has invalid buildings.');occupied.add(k);}
+ if(s.builds[0].type!=='pod'||!s.site||typeof s.site.name!=='string'||!Array.isArray(s.rivals)||!Array.isArray(s.orders)||!Array.isArray(s.log)||!Array.isArray(s.journal)||!s.tech||!s.unlocked||!s.seenFacts||!s.answers)throw Error('This save is incomplete.');
+ if(!data.me||typeof data.me.name!=='string'||data.me.name.length>100||!/^#[0-9a-f]{6}$/i.test(data.me.css)||!Number.isInteger(data.me.color)||!Number.isInteger(data.diff)||!DIFFS[data.diff])throw Error('This save has invalid mission settings.');
+ if(data.rngState!==undefined&&!Number.isFinite(data.rngState))throw Error('This save has invalid random state.');
+ if(s.junior){if(!Number.isFinite(s.water))s.water=64;Junior.validateCapture({version:1,state:s,rngState:data.rngState});if(s.junior.checkpoint)Junior.validateCapture({version:1,state:s.junior.checkpoint,rngState:s.junior.checkpoint._rngState});}
+ else if(s.blackout)throw Error('A blackout mission requires Junior rules.');
+ return data;
+}
+function saveMission(){
+ try{
+  const data=validateMission(captureMission()),encoded=JSON.stringify(data),previous=localStorage.getItem(SAVE_KEY);
+  // Keep the last readable save before replacing it; a quota/storage failure
+  // leaves the previous main save intact and is explained to the player.
+  if(previous){try{validateMission(JSON.parse(previous));localStorage.setItem(SAVE_KEY+'-backup',previous);}catch(e){if(e.name==='QuotaExceededError'||e.name==='SecurityError')throw e;}}
+  localStorage.setItem(SAVE_KEY,encoded);notice('Mission saved on this device.');document.dispatchEvent(new CustomEvent('strategy:saved'));return true;
+ }catch(e){notice('Save failed. '+(/quota|storage|denied/i.test(e.message||'')?'Device storage is unavailable or full. Keep this tab open and export your mission evidence.':e.message));return false;}
+}
+function applyMission(data){
+ if(R3?.fp)toggleWalk();
+ ME={...data.me};DF=DIFFS[data.diff];
+ if(data.state.junior){const checkpoint=data.state.junior.checkpoint;Junior.restore({version:1,state:data.state,rngState:data.rngState},{render:false,checkpoint:false});if(checkpoint)S.junior.checkpoint=checkpoint;else Junior.checkpoint();}
+ else{S=JSON.parse(JSON.stringify(data.state));rng=mulberry(data.rngState??S.seed);S.tiles.forEach(t=>delete t.build);S.builds.forEach(b=>{tileAt(b.c,b.r).build=b;});}
+ DEF.reactor.cost=S.tech.reactor?14:24;strategy.history=Array.isArray(data.history)?data.history.slice(-200):[];
+ S.speed=0;buildSel=null;modalQ=[];modalOpen=false;$('overlay').style.display='none';S.eco=compute();
+ if(R3)buildWorld();buildMenu();render();setLens(strategy.lens);document.dispatchEvent(new CustomEvent('blackout:update'));document.dispatchEvent(new CustomEvent('strategy:loaded'));
+}
+function loadMission(){
+ let previous=null,mutating=false;
+ try{
+  const raw=localStorage.getItem(SAVE_KEY);if(!raw)throw Error('No saved mission on this device yet.');
+  const data=validateMission(JSON.parse(raw));previous=captureMission();
+  if(data.version===1)localStorage.setItem(SAVE_KEY+'-backup',raw);
+  mutating=true;applyMission(data);notice('Saved mission restored, paused.');return true;
+ }catch(e){if(mutating&&previous){try{applyMission(previous);}catch{}}notice('Could not load mission. '+(e instanceof SyntaxError?'The save is damaged; your current mission is unchanged.':e.message));return false;}
+}
 panels.settings.innerHTML='<h2>Mission settings</h2><div class="actionlist"><button id="saveMission">Save on this device</button><button id="loadMission">Continue saved mission</button><label><input type="checkbox" id="soundSetting"> Sound</label><label>Volume <input type="range" id="volumeSetting" min="0" max="30" value="15"></label><label><input type="checkbox" id="motionSetting"> Reduce motion</label><label><input type="checkbox" id="contrastSetting"> High contrast</label><label>Text size <select id="textSetting"><option value="16">Standard</option><option value="18">Large</option><option value="20">Largest</option></select></label></div><h3>Game rules</h3><p id="ruleSummary"></p><p>No accounts, uploads or tracking. A saved mission stays in this browser on this device.</p>';
+const teacherButton=document.createElement('button');teacherButton.id='teacherKit';teacherButton.textContent='Teacher & playtest kit';teacherButton.onclick=()=>{const src=window.INLINE?.['teacher-kit.html']||'teacher-kit.html';modal({title:'Teacher & playtest kit',keepOpen:true,html:'<iframe title="Teacher and playtest kit" src="'+src+'" style="width:100%;height:min(65vh,650px);border:0;background:#fff"></iframe>',buttons:[{label:'Back to my colony',primary:true,fn:()=>{}}]});};panels.settings.append(teacherButton);
 $('saveMission').onclick=saveMission;$('loadMission').onclick=loadMission;$('soundSetting').onchange=e=>strategy.sound=e.target.checked;$('volumeSetting').oninput=e=>strategy.volume=+e.target.value/100;$('motionSetting').onchange=e=>document.body.classList.toggle('reduce-motion',e.target.checked);$('contrastSetting').onchange=e=>document.body.classList.toggle('high-contrast',e.target.checked);$('textSetting').onchange=e=>document.documentElement.style.setProperty('--game-text',e.target.value+'px');
 const originalOpen=openTab;openTab=function(t){originalOpen(t);if(t==='settings')$('ruleSummary').textContent=(window.Junior?.isActive()?'Junior · one goal at a time, automatic jobs, Parts costs, checkpoint retries':DF.key)+' · '+S.site.name+' · Seed '+S.seed+' · all quantities are simplified game units.';};
 const camera=document.createElement('button');camera.className='btn';camera.id='takePhoto';camera.textContent='Take photo · P';$('camctl').append(camera);
-function takePhoto(){if(!R3?.fp){notice('Enter Walk on Mars first.');return;}try{if(window.AresRender)AresRender.render();else R3.renderer.render(R3.scene,R3.cam);const c=document.createElement('canvas');c.width=960;c.height=540;const ctx=c.getContext('2d');ctx.drawImage(R3.renderer.domElement,0,0,960,540);ctx.fillStyle='#101d29';ctx.fillRect(0,492,960,48);ctx.fillStyle='#fff';ctx.font='15px sans-serif';const t=tileNear(R3.fp.x,R3.fp.z);ctx.fillText(ME.name+' · Sol '+S.sol+' · '+S.site.name+' · '+(t?coord(t):''),14,512);ctx.fillText('Game image, not a real photo of Mars',14,532);const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='Mars-Colony-sol-'+S.sol+'.png';a.click();sound();notice('Photo prepared as a PNG.');}catch{notice('This browser could not save the picture.');}}camera.onclick=takePhoto;
+function takePhoto(){if(!R3?.fp){notice('Enter Walk on Mars first.');return;}try{if(window.AresRender)AresRender.render();else R3.renderer.render(R3.scene,R3.cam);const c=document.createElement('canvas');c.width=960;c.height=540;const ctx=c.getContext('2d');ctx.drawImage(R3.renderer.domElement,0,0,960,540);ctx.fillStyle='#101d29';ctx.fillRect(0,492,960,48);ctx.fillStyle='#fff';ctx.font='15px sans-serif';const t=tileNear(R3.fp.x,R3.fp.z);ctx.fillText(ME.name+' · Sol '+S.sol+' · '+S.site.name+' · '+(t?coord(t):''),14,512);ctx.fillText('Game render · includes AI-generated textures · not a NASA photograph',14,532);const a=document.createElement('a');a.href=c.toDataURL('image/png');a.download='Mars-Colony-sol-'+S.sol+'.png';a.click();sound();notice('Photo prepared as a PNG.');}catch{notice('This browser could not save the picture.');}}camera.onclick=takePhoto;
 document.addEventListener('keydown',e=>{if(/input|textarea|select/i.test(e.target.tagName))return;if(e.key.toLowerCase()==='p'&&R3?.fp)takePhoto();});
 const baseWalkStep=walkStep;walkStep=function(dt){if(modalOpen)return;baseWalkStep(dt);R3.overlay.visible=true;const t=tileNear(R3.fp.x,R3.fp.z);if(t?.owner)$('fphud').textContent=S.rivals[t.owner-1].name+' territory · visiting only, no building';};window.G.walkStep=walkStep;
 // Preserve all existing science and facts. Rendering remains separate from the base economy.
-window.Strategy={openTab,setLens,saveMission,loadMission,update:updateStrategy};
+window.Strategy={openTab,setLens,saveMission,loadMission,captureMission,validateMission,update:updateStrategy};
 const closePanel=document.createElement('button');closePanel.id='closePanel';closePanel.textContent='Close panel';closePanel.onclick=()=>shell.hidden=true;shell.prepend(closePanel);
 const continueBtn=document.createElement('button');continueBtn.className='btn';continueBtn.textContent='Continue saved mission';continueBtn.onclick=loadMission;$('modal').querySelector('.btns')?.append(continueBtn);
 openTab('colony');setLens('territory');setSpeed(0);render();resize3D();

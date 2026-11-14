@@ -1,0 +1,51 @@
+{
+  "capturedAt": "2026-11-14T17:09:27.892Z",
+  "commit": "02067acca56cb549af148d51c8d0474bcf04ad3a",
+  "workingTree": "Uncommitted integrated overnight candidate; hashes identify the exact captured runtime.",
+  "runtimeSHA256": {
+    "game/index.html": "c22590c66b9c245d6323dfe3b5b9ad9dc69fc5a2e5918c84830d78d99df204db",
+    "game/blackout.js": "09206c75f6b049eba29b4159cf3562bdcfe7a186d172a1106f8d869a659cf2c9",
+    "game/blackout-ui.js": "9736b3cc11b3ccf17e948b4d91e61fdc51773d0f8ef7fa81e5583484d9ce7fef",
+    "game/blackout-ui.css": "635f30e3eed5bfd86b5e1586ce47a1b8c9230765f19973e3bca78d1e6ba05b3f",
+    "game/ares-render.js": "9fea584e08a3e5eefa857c61f4a04986e6426140b945df6a14d392774abeed38",
+    "game/ares-world.js": "ef9b3300453a18f373638085a5dc5c33202971391464bd00b24a904514d3c181",
+    "game/junior.js": "4b3d8e23631132ccb02c6b977ea2d15863435b6972616931bc7999882b033a0e",
+    "game/mission-systems.js": "b658a81dd4ef419492108a03c8b488205fbdf405f33b1871752304ca93ef78b2",
+    "game/strategy.js": "380f023555ae156ef9e15cc19afc120c234f411ed451c147bdf4d6db2900d211"
+  },
+  "runtimeChangedDuringCapture": [],
+  "method": "Visible mouse controls, real deterministic mission, browser video. Read-only state assertions. Editorial captions and trimmed holds; no fabricated UI, resource values or outcomes.",
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "25/1"
+      }
+    ],
+    "format": {
+      "duration": "28.960000",
+      "size": "2558489"
+    }
+  },
+  "title": "DEAD RECKONING: BLACKOUT",
+  "durationSeconds": 28.96,
+  "disclosure": "Actual browser gameplay, edited with AI assistance. Includes visibly labelled AI-generated artwork. No narration, music, real children or added NASA logos.",
+  "postCaptureReview": {
+    "reviewedAt": "2026-11-14T18:10:27.835443+00:00",
+    "captureTimePreserved": "2026-11-14T17:09:27.892Z",
+    "capturedHashesPreserved": true,
+    "conclusion": "The captured candidate remains representative of the final integrated gameplay. No post-capture changes to mission rules, resource rates, events, replay behaviour or displayed numerical outcomes.",
+    "laterChanges": [
+      "Malformed-history validation/filtering with a warning",
+      "Horizons source wording clarifies that the compressed queue advances only while the radio link is usable; light itself is not stopped",
+      "Teacher-kit button and load-event integration",
+      "Loading/fallback status and recovery-audio refinements"
+    ],
+    "evidence": "The owning systems agent reproduced the exact captured blackout.js SHA-256 by undoing only history-validation and source-wording changes in memory. Junior and MissionSystems retain their captured hashes. Captured canonical battery outcomes match the final systems matrix. Causal-answer acceptance and failed-storage first-attempt protection were already captured.",
+    "scope": "This is capture provenance, not a complete release-file manifest. Source-panel wording in the video predates its clarification."
+  }
+}

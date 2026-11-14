@@ -1,3 +1,9 @@
+# Current teacher resources
+
+The current short-mission facilitator protocol and anonymous observation form are in [teacher-pilot-kit.md](teacher-pilot-kit.md); the printable browser version is [teacher-kit.html](../game/teacher-kit.html). Child pilot not yet conducted.
+
+---
+
 # Watch a decision change the colony
 For ages 7–12, with an adult available to explain unfamiliar words.
 

@@ -3,7 +3,7 @@
 'use strict';
 const COSTS={solar:6,moxie:10,green:8,ice:10,shield:4,habitat:9,battery:8,rover:1,mine:6,dome:10,reactor:30};
 const WORK={solar:8,moxie:8,green:8,ice:8,shield:8,habitat:12,battery:8,mine:10,dome:12,reactor:24};
-const base={newGame,compute,tickSol,tryBuild,cancel,upgrade,upCost,buildMenu,render,setSpeed,buildingPanel,cleanPanels,startRover,orderCrate};
+const base={newGame,compute,tickSol,tryBuild,cancel,upgrade,upCost,buildMenu,render,setSpeed,buildingPanel,cleanPanels,startRover,orderCrate,toggle};
 let nextMode=(window.__MARS_MODE__==='commander'||new URLSearchParams(location.search).get('mode')==='commander')?'commander':'junior';
 const active=()=>!!S?.junior;
 const cost=type=>COSTS[type]??DEF[type]?.cost??0;
@@ -22,14 +22,44 @@ function unlocked(){
  if(p>=4)S.unlocked.shield=true;
  if(p>=6)Object.assign(S.unlocked,{mine:true,dome:true,reactor:true});
 }
-function snapshot(){
+function snapshot(options={}){
  const omit=new Set(['mesh','astro','decor','solid','build','checkpoint']);
  // Remove scene references before JSON serialization: Three.js toJSON runs
  // before a replacer and may follow userData back into a building record.
  const clean=o=>Object.fromEntries(Object.entries(o).filter(([key])=>!omit.has(key)));
- return JSON.parse(JSON.stringify({...S,junior:clean(S.junior),builds:S.builds.map(clean),tiles:S.tiles.map(clean)}));
+ const state={...S,junior:S.junior?clean(S.junior):S.junior,builds:S.builds.map(clean),tiles:S.tiles.map(clean),_rngState:rng.state};
+ if(options.omitBlackout)delete state.blackout;
+ return JSON.parse(JSON.stringify(state));
 }
 function checkpoint(){S.junior.checkpoint=snapshot();}
+function capture(options={}){return {version:1,rngState:rng.state,state:snapshot(options)};}
+function validateCapture(envelope){
+ const data=envelope?.state||envelope,storedRng=envelope?.rngState??data?._rngState;
+ if(envelope?.state&&envelope.version!==undefined&&envelope.version!==1)throw Error('Unsupported checkpoint version.');
+ if(!data||!Array.isArray(data.tiles)||data.tiles.length!==COLS*ROWS||!Array.isArray(data.builds)||!data.junior)throw Error('This Junior checkpoint is not readable.');
+ for(const key of ['seed','sol','pop','o2','food','parts','water','battery'])if(!(key==='water'&&!Object.prototype.hasOwnProperty.call(data,'water'))&&!Number.isFinite(data[key]))throw Error('Invalid checkpoint '+key+'.');
+ if(storedRng!==undefined&&(!Number.isInteger(storedRng)||storedRng< -2147483648||storedRng>4294967295))throw Error('Invalid checkpoint random state.');
+ if(data.junior.version>2||!Number.isInteger(data.junior.phase)||data.junior.phase<0||data.junior.phase>7||data.pop<0||data.sol<1)throw Error('Unsupported Junior checkpoint rules.');
+ const occupied=new Set();
+ for(const b of data.builds){const key=b.c+','+b.r;if(!DEF[b.type]||!Number.isInteger(b.c)||!Number.isInteger(b.r)||b.c<0||b.c>=COLS||b.r<0||b.r>=ROWS||occupied.has(key))throw Error('Invalid checkpoint buildings.');occupied.add(key);}
+ for(let i=0;i<data.tiles.length;i++){const t=data.tiles[i];if(!t||t.c!==i%COLS||t.r!==Math.floor(i/COLS)||!Number.isFinite(t.sun)||!Number.isFinite(t.air)||!Number.isFinite(t.elev))throw Error('Invalid checkpoint terrain.');}
+ if(data.blackout)window.Blackout?.validateState(data.blackout);
+ return true;
+}
+function restore(envelope,options={}){
+ validateCapture(envelope);
+ const data=envelope?.state||envelope,storedRng=envelope?.rngState??data?._rngState;
+ const next=JSON.parse(JSON.stringify(data));
+ if(!Object.prototype.hasOwnProperty.call(next,'water'))next.water=64; // pre-water Junior saves
+ S=next;rng=mulberry(storedRng??S.seed);delete S._rngState;
+ S.tiles.forEach(t=>delete t.build);S.builds.forEach(b=>{tileAt(b.c,b.r).build=b;});
+ S.speed=0;buildSel=null;modalQ=[];modalOpen=false;$('overlay').style.display='none';
+ if(options.checkpoint!==false)S.junior.checkpoint=S.blackout?.initial?.state?JSON.parse(JSON.stringify(S.blackout.initial.state)):snapshot();
+ if(options.render!==false){if(R3){if(R3.fp)toggleWalk();buildWorld();}buildMenu();render();}
+ return true;
+}
+const shortMission=()=>!!window.Blackout?.isActive();
+const scenarioLocked=()=>shortMission()&&!window.Blackout.allowsAction();
 function init(){
  S.junior={version:2,phase:0,failures:0,recovery:null,invited:false,totalArrivals:0,arrival:null,dustDone:false,radiationDone:false,discovered:false,nextSupply:9,completed:false};
  S.o2=96;S.food=144;S.water=64;S.parts=68;S.metal=0;S.speed=0;S.nextStorm=S.nextDust=S.nextFestival=S.nextLab=S.nextQ=1e9;
@@ -119,6 +149,7 @@ function juniorCompute(){
 compute=function(){return active()?juniorCompute():base.compute();};
 function canInvite(){
  if(!active())return {ok:false,reason:'Available in Junior missions.'};
+ if(shortMission())return {ok:false,reason:'This short training mission has a fixed six-person crew. Continue the longer Junior campaign to welcome explorers.'};
  const j=S.junior,e=compute(),n=S.pop+2,pending=!!j.arrival;
  const blocked=reason=>({ok:false,pending,blocked:pending,reason:pending?'Shuttle waiting in orbit: '+reason:reason});
  if(j.recovery)return {ok:false,reason:'Retry this checkpoint first.'};
@@ -138,6 +169,7 @@ function invite(){if(!canInvite().ok)return false;S.junior.arrival=S.sol+1;log('
 function objective(){
  if(!active())return {title:GOALS[S.goal].text,detail:S.say||'',action:'build',phase:S.goal};
  const j=S.junior,e=S.eco||compute();
+ if(shortMission())return window.Blackout.objective();
  if(j.recovery)return {title:'Try this part again',detail:j.recovery+' Retry the checkpoint and change your plan. Your earlier discoveries stay complete.',action:'recover',phase:j.phase};
  const goals=[
  ['Build a solar panel','Choose a sunny tile. It takes two days to build.','build'],
@@ -157,6 +189,7 @@ function objective(){
  return {title:row[0],detail:row[1],action:row[2],phase:j.phase};
 }
 function progress(){
+ if(shortMission())return;
  const j=S.junior,e=S.eco=compute();let done=false;
  switch(j.phase){
   case 0:done=count('solar')>0;break;
@@ -178,18 +211,20 @@ function shortage(reason){S.junior.recovery=reason;S.speed=0;log(reason+' Day ad
 function recover(){
  if(!active()||!S.junior.checkpoint)return false;
  const old=S.junior,stored=old.checkpoint,failures=old.failures+1;
- S=JSON.parse(JSON.stringify(stored));S.junior.failures=failures;S.junior.recovery=null;S.junior.checkpoint=stored;
- S.builds.forEach(b=>{tileAt(b.c,b.r).build=b;});S.speed=0;buildSel=null;modalQ=[];modalOpen=false;$('overlay').style.display='none';
- rng=mulberry(S.seed);if(R3)buildWorld();log('Checkpoint restored. Progress since this checkpoint was undone; try a different plan.','info');buildMenu();render();return true;
+ if(shortMission())return window.Blackout.action('retry').ok;
+ restore({state:stored,rngState:stored._rngState},{render:false,checkpoint:false});S.junior.failures=failures;S.junior.recovery=null;S.junior.checkpoint=stored;
+ if(R3)buildWorld();log('Checkpoint restored. Progress since this checkpoint was undone; try a different plan.','info');buildMenu();render();return true;
 }
 function nextDay(){
  if(!active())return false;
+ if(shortMission())return window.Blackout.action('next').ok;
  if(S.junior.recovery||modalOpen)return false;
  tickSol();S.speed=0;window.Junior.animationUntil=performance.now()+1800;render();return true;
 }
 tickSol=function(){
  if(!active())return base.tickSol();
  const j=S.junior;if(S.over||j.recovery)return;
+ if(shortMission()&&!window.Blackout.beforeDay())return;
  S.sol++;S.speed=0;
  if(S.sol>=j.nextSupply){S.parts+=8;S.water=Math.min(Math.max(160,S.pop*10),S.water+12);j.nextSupply+=8;log('Supply shuttle: +8 parts and +12 water. Next delivery in eight days.','info');}
  if(j.arrival&&S.sol>=j.arrival){
@@ -219,13 +254,15 @@ tickSol=function(){
  else if(S.food<=0)shortage('The food reserve ran out. Start and power your greenhouses earlier.');
  else if(S.water<=0)shortage('The water reserve ran out. Power a Water Processor to recover more water, or build one on likely ice for new water.');
  S.appeal=appealFor(e).score;S.peak=Math.max(S.peak,S.pop);
- if(!j.recovery)progress();
+ if(shortMission())window.Blackout.afterDay(e);
+ else if(!j.recovery)progress();
  S.say=objective().detail;
 };
 newGame=function(seed,site){base.newGame(seed,site);if(nextMode==='junior')init();};
 setSpeed=function(speed){return base.setSpeed(active()?0:speed);};
 tryBuild=function(type,t){
  if(!active())return base.tryBuild(type,t);
+ if(scenarioLocked())return 'Use the mission preparation choices during this short training mission.';
  if(S.junior.recovery)return 'Retry the checkpoint before building.';
  if(!t||!S.unlocked[type])return 'Finish the current mission to unlock this choice.';
  if(type==='rover')return startRover(t);
@@ -238,11 +275,12 @@ tryBuild=function(type,t){
  if(S.parts<cost(type))return 'This needs '+cost(type)+' parts. The next supply shuttle arrives in '+(S.junior.nextSupply-S.sol)+' days.';
  S.parts-=cost(type);const b={type,c:t.c,r:t.r,done:false,on:true,progress:0,juniorCost:cost(type)};S.builds.push(b);t.build=b;log('Building '+info(type).name+'. '+cost(type)+' parts spent.','info');render();return null;
 };
-cancel=function(b){if(!active())return base.cancel(b);if(b.done||!S.builds.includes(b))return;S.parts+=b.juniorCost??cost(b.type);S.builds.splice(S.builds.indexOf(b),1);tileAt(b.c,b.r).build=null;render();};
+cancel=function(b){if(!active())return base.cancel(b);if(scenarioLocked())return false;if(b.done||!S.builds.includes(b))return;S.parts+=b.juniorCost??cost(b.type);S.builds.splice(S.builds.indexOf(b),1);tileAt(b.c,b.r).build=null;render();};
 upCost=function(b){return active()?{parts:Math.ceil(cost(b.type)/2)+2,metal:0}:base.upCost(b);};
-upgrade=function(b){if(!active())return base.upgrade(b);if(!S.builds.includes(b)||!b.done||!UPG[b.type]||(b.lvl||1)>1)return 'This building cannot be upgraded.';const c=upCost(b);if(S.parts<c.parts)return 'You need '+c.parts+' parts.';S.parts-=c.parts;b.lvl=2;b.offUntil=S.sol+2;b.solid=null;render();return null;};
+upgrade=function(b){if(!active())return base.upgrade(b);if(scenarioLocked())return 'Use the mission preparation choices during this short training mission.';if(!S.builds.includes(b)||!b.done||!UPG[b.type]||(b.lvl||1)>1)return 'This building cannot be upgraded.';const c=upCost(b);if(S.parts<c.parts)return 'You need '+c.parts+' parts.';S.parts-=c.parts;b.lvl=2;b.offUntil=S.sol+2;b.solid=null;render();return null;};
 startRover=function(t){
  if(!active())return base.startRover(t);
+ if(scenarioLocked())return 'Complete this short mission before a rover expedition.';
  if(!t||t.owner)return 'Choose unclaimed ground.';
  if(S.rover)return 'Your explorers are already travelling.';
  const d=hdist(t,S.builds[0]);if(d<3||d>10)return 'Choose ground 3 to 10 tiles from the landing pod.';
@@ -251,11 +289,13 @@ startRover=function(t){
  const e=compute();if(e.crew.resting+e.crew.builders+e.crew.cleaners<2)return 'Keep the machine operators at home. Switch off optional machines or welcome more crew before sending two explorers.';
  S.parts--;S.trips++;S.rover={c:t.c,r:t.r,crew:2,start:S.sol,arrive:S.sol+2,back:S.sol+4,done:false};log('Two explorers leave. They survey the site in two days and return in four.','info');render();return null;
 };
-cleanPanels=function(){if(!active())return base.cleanPanels();if(S.cleaning||!count('solar')||S.junior.recovery)return;S.cleaning=1;log('The crew will clean the panels next day. Construction waits for one day.','info');render();};
+toggle=function(b){if(scenarioLocked())return false;return base.toggle(b);};
+cleanPanels=function(){if(!active())return base.cleanPanels();if(scenarioLocked())return false;if(S.cleaning||!count('solar')||S.junior.recovery)return;S.cleaning=1;log('The crew will clean the panels next day. Construction waits for one day.','info');render();};
 orderCrate=function(type){if(!active())return base.orderCrate(type);log('Junior supplies bring 8 parts and 12 water every eight days. Retry a checkpoint if a reserve runs out.','info');render();};
 buildMenu=function(){base.buildMenu();if(!active())return;document.querySelectorAll('#build .bbtn').forEach(b=>{const d=info(b.dataset.t);b.querySelector('b').textContent=d.name;b.querySelector('small').textContent=d.benefit;b.querySelector('.cost').textContent=d.cost+' parts · from '+d.days+' days';});};
 buildingPanel=function(b){
  if(!active())return base.buildingPanel(b);
+ if(shortMission()){document.dispatchEvent(new CustomEvent('blackout:systems',{detail:{type:b.type,c:b.c,r:b.r}}));return;}
  Strategy.openTab('buildings');let panel=$('selection');if(!panel){panel=document.createElement('section');panel.id='selection';document.querySelector('[data-panel="buildings"]').prepend(panel);}
  const d=info(b.type),f=FACTS[b.type];
  panel.innerHTML='<h2>'+esc(d.name)+'</h2><p>'+esc(d.benefit)+'</p><p>'+(b.done?b.on?'Automatic crew assignment.':'Switched off.':'Building: '+Math.floor(b.progress)+' / '+(WORK[b.type]||8)+' work.')+'</p>'+(f?'<details><summary>Why does this matter?</summary><p>'+esc(d.why)+'</p>'+link(d.source||f.s,d.url||f.u)+'</details>':'')+'<div class="actionlist">'+(!b.done?'<button id="juniorCancel">Cancel and refund '+(b.juniorCost??cost(b.type))+' parts</button>':DEF[b.type].use?'<button id="juniorToggle">'+(b.on?'Switch off':'Switch on')+'</button>':'')+'</div>';
@@ -280,7 +320,7 @@ tryBuild=function(type,t){
  if(active()&&error){const notice=$('notice');if(notice){notice.textContent=error;notice.classList.add('visible');clearTimeout(noticeTimer);noticeTimer=setTimeout(()=>notice.classList.remove('visible'),5500);}}
  return error;
 };
-window.Junior={isActive:active,work:type=>WORK[type]||8,crewRoles,appealInfo:()=>active()?compute().appeal:null,start,nextDay,objective,mission:objective,cost,info,invite,canInvite,recover,retryCheckpoint:recover,clean:cleanPanels,growthDays:4,animationUntil:0,setModeForNewGame:mode=>{nextMode=mode==='commander'?'commander':'junior';},summary:()=>active()?{...S.junior,checkpoint:undefined,objective:objective(),economy:compute(),nextSupply:S.junior.nextSupply-S.sol}:null};
+window.Junior={isActive:active,capture,restore,validateCapture,checkpoint,work:type=>WORK[type]||8,crewRoles,appealInfo:()=>active()?compute().appeal:null,start,nextDay,objective,mission:objective,cost,info,invite,canInvite,recover,retryCheckpoint:recover,clean:cleanPanels,growthDays:4,animationUntil:0,setModeForNewGame:mode=>{nextMode=mode==='commander'?'commander':'junior';},summary:()=>active()?{...S.junior,checkpoint:undefined,objective:objective(),economy:compute(),nextSupply:S.junior.nextSupply-S.sol}:null};
 Object.assign(G,{newGame,compute,tickSol,tryBuild,upgrade,startRover,cleanPanels,orderCrate});
 if(nextMode==='junior')init();buildMenu();render();
 })();

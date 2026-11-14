@@ -15,7 +15,8 @@ for directory in ('ares', 'ares-ui'):
     for p in (game/'assets'/directory).rglob('*'):
         if p.is_file() and p.suffix.lower() in ('.glb','.jpg','.jpeg','.png','.webp','.svg'):
             images[str(p.relative_to(game))]=data(p)
-images['mission-guide.html']=data(game/'mission-guide.html')
+for document in ('mission-guide.html','teacher-kit.html'):
+    images[document]=data(game/document)
 import json
 embedded='<script>window.INLINE='+json.dumps(images)+';</script>\n'
 embedded+='<script id="dracosrc" type="text/plain">'+(game/'assets/draco/draco_decoder.js').read_text().replace('</script','<\\/script')+'</script>\n'

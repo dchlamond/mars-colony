@@ -13,6 +13,7 @@ const path=require('node:path');
   await page.goto(process.env.GAME_URL||'http://127.0.0.1:8765',{waitUntil:'domcontentloaded',timeout:90000});
   await page.getByRole('button',{name:'Begin mission',exact:true}).waitFor();
   await page.locator('#aresColonyName').fill('Ares Academy');
+  await page.locator('[data-ares-mode=junior]').click();
   await page.getByRole('button',{name:'Begin mission',exact:true}).click();
   await page.waitForFunction(()=>Junior.isActive()&&!modalOpen&&AresWorld.pending===0,null,{timeout:90000});
   assert.equal(await page.evaluate(()=>S.speed),0,'Junior waits for a deliberate next-day action');

@@ -2,8 +2,7 @@
 
 The NASA Space Apps Challenge calls AI tools "Super Intelligence (SI)" and asks teams to say how they were used.
 
-**The idea and the design of this game are the team's own.** The team chose the challenge, the concept, the audience,
-the rules of the game and what it should teach. AI tools were used to speed up the building.
+The team chose the challenge, Mars-colony concept, audience, visual references and intended learning goals, and directed revisions. AI tools helped propose refinements as well as implement code, art, tests and documentation. The team reviews the resulting product and submission; the project does not represent all implementation or wording as exclusively human-authored.
 
 ## What was generated, and with which tool
 
@@ -60,3 +59,11 @@ Codex assisted with the Blender surface kit, articulated suit and lighter models
 ## DEAD RECKONING: BLACKOUT revision
 
 The team renamed the game and requested five interface alternatives without gold, a human astronaut adviser, useful first-person field work, generator boosts and Fame. Codex assisted with the code, testing and original design. Grok Imagine generated the new human adviser; provenance is recorded in NOTICE. NASA source facts are separated from teaching values and simulated radiation readings.
+
+## Overnight Blackout mission and automated playtesting
+
+OpenAI Codex, directed by the team's approved build plan, implemented the short mission, exact-state replay, evidence/competition records, save validation, systems inspector, local synthesized audio, accessibility work, automated policy/browser players and documentation. Codex also proposed refinements and reviewed their educational/causal limits. The team approved the plan before execution.
+
+Four original Blender service props and improved procedural crew/world presentation were authored using AI-assisted Python and the installed Blender background process. Existing Grok-generated terrain colour and fictional adult adviser imagery are reused. A visible in-game label identifies generated artwork; exported game photos and the demonstration preserve a visible disclosure. No new synthetic child imagery or voice is used.
+
+The demonstration records the actual game and uses editorial captions; it is not a generated simulation of a finished product. Locally synthesized WebAudio uses original oscillator/noise code, not a recording of a person. NASA input records remain sourced observations/calculations, not AI-generated data. Automated tests do not establish human learning outcomes.

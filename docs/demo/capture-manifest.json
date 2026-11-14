@@ -1,0 +1,2848 @@
+{
+  "capturedAt": "2026-11-14T17:09:27.892Z",
+  "url": "http://127.0.0.1:8765/",
+  "commit": "02067acca56cb549af148d51c8d0474bcf04ad3a",
+  "workingTree": "Uncommitted integrated overnight candidate; hashes identify the exact captured runtime.",
+  "runtimeSHA256": {
+    "game/index.html": "c22590c66b9c245d6323dfe3b5b9ad9dc69fc5a2e5918c84830d78d99df204db",
+    "game/blackout.js": "09206c75f6b049eba29b4159cf3562bdcfe7a186d172a1106f8d869a659cf2c9",
+    "game/blackout-ui.js": "9736b3cc11b3ccf17e948b4d91e61fdc51773d0f8ef7fa81e5583484d9ce7fef",
+    "game/blackout-ui.css": "635f30e3eed5bfd86b5e1586ce47a1b8c9230765f19973e3bca78d1e6ba05b3f",
+    "game/ares-render.js": "9fea584e08a3e5eefa857c61f4a04986e6426140b945df6a14d392774abeed38",
+    "game/ares-world.js": "ef9b3300453a18f373638085a5dc5c33202971391464bd00b24a904514d3c181",
+    "game/junior.js": "4b3d8e23631132ccb02c6b977ea2d15863435b6972616931bc7999882b033a0e",
+    "game/mission-systems.js": "b658a81dd4ef419492108a03c8b488205fbdf405f33b1871752304ca93ef78b2",
+    "game/strategy.js": "380f023555ae156ef9e15cc19afc120c234f411ed451c147bdf4d6db2900d211"
+  },
+  "method": "Visible mouse controls, real deterministic mission, browser video. Read-only state assertions. Editorial captions and trimmed holds; no fabricated UI, resource values or outcomes.",
+  "shots": [
+    {
+      "id": "01-predict",
+      "start": 16.42,
+      "duration": 3,
+      "title": "DEAD RECKONING: BLACKOUT",
+      "caption": "A playable Mars mission: predict what will keep six crew safe.",
+      "state": {
+        "stage": "prediction",
+        "day": 1,
+        "preparation": null,
+        "comms": {
+          "requested": false,
+          "elapsed": 0,
+          "delivered": false,
+          "oneWayMinutes": 20.98606,
+          "roundTripMinutes": 41.97212,
+          "sourceDate": "2023-11-20",
+          "status": "not requested",
+          "label": "Ready to send",
+          "detail": "One training day advances the radio clock by 20 minutes. This is a teaching conversion.",
+          "trainingRemaining": 3,
+          "clockLabel": "20 radio minutes per training day"
+        },
+        "firstOutcome": null,
+        "alternateOutcome": null,
+        "comparison": null
+      }
+    },
+    {
+      "id": "02-prepare",
+      "start": 25.272,
+      "duration": 4,
+      "title": "A FINITE BUDGET. A REAL CHOICE.",
+      "caption": "Store spare energy in a battery, align solar arrays, or save the Parts.",
+      "state": {
+        "stage": "preparation",
+        "day": 1,
+        "preparation": null,
+        "comms": {
+          "requested": false,
+          "elapsed": 0,
+          "delivered": false,
+          "oneWayMinutes": 20.98606,
+          "roundTripMinutes": 41.97212,
+          "sourceDate": "2023-11-20",
+          "status": "not requested",
+          "label": "Ready to send",
+          "detail": "One training day advances the radio clock by 20 minutes. This is a teaching conversion.",
+          "trainingRemaining": 3,
+          "clockLabel": "20 radio minutes per training day"
+        },
+        "firstOutcome": null,
+        "alternateOutcome": null,
+        "comparison": null
+      }
+    },
+    {
+      "id": "03-blackout",
+      "start": 44.393,
+      "duration": 4,
+      "title": "EARTH IS QUIET. YOUR COLONY KEEPS WORKING.",
+      "caption": "Radio delay and dust affect different systems. Compressed training time.",
+      "state": {
+        "stage": "running",
+        "day": 4,
+        "preparation": "battery",
+        "comms": {
+          "requested": true,
+          "elapsed": 20,
+          "delivered": false,
+          "oneWayMinutes": 20.98606,
+          "roundTripMinutes": 41.97212,
+          "sourceDate": "2023-11-20",
+          "requestDay": 1,
+          "status": "blackout",
+          "label": "Radio quiet period",
+          "detail": "Commands and replies are paused. Life support continues under its own rules.",
+          "trainingRemaining": 2,
+          "clockLabel": "20 radio minutes per training day"
+        },
+        "firstOutcome": null,
+        "alternateOutcome": null,
+        "comparison": null
+      }
+    },
+    {
+      "id": "04-outcome",
+      "start": 61.081,
+      "duration": 4,
+      "title": "YOUR FIRST RESULT IS PRESERVED.",
+      "caption": "Actual mission reserves show what the battery preparation changed.",
+      "state": {
+        "stage": "outcome",
+        "day": 9,
+        "preparation": "battery",
+        "comms": {
+          "requested": true,
+          "elapsed": 60,
+          "delivered": true,
+          "oneWayMinutes": 20.98606,
+          "roundTripMinutes": 41.97212,
+          "sourceDate": "2023-11-20",
+          "requestDay": 1,
+          "deliveredDay": 7,
+          "status": "received",
+          "label": "Earth reply received",
+          "detail": "Advice arrived after you made local decisions.",
+          "trainingRemaining": 0,
+          "clockLabel": "20 radio minutes per training day"
+        },
+        "firstOutcome": {
+          "day": 9,
+          "air": 62.45656795923139,
+          "food": 12,
+          "water": 24.999999999999993,
+          "parts": 4,
+          "battery": 11.349078026734908,
+          "pop": 6,
+          "fame": 0,
+          "evaluationDay": 9,
+          "stoppedEarly": false,
+          "safe": true,
+          "completed": true,
+          "preparation": "battery",
+          "shelter": "shelter",
+          "stoppedDays": 3,
+          "recovery": null,
+          "score": {
+            "safe": true,
+            "completed": true,
+            "crew": 6,
+            "reserves": 20,
+            "partsRemaining": 4,
+            "discoveries": 2,
+            "rank": [
+              1,
+              20,
+              4,
+              2
+            ],
+            "label": "Crew safe \u00b7 mission complete"
+          },
+          "timeline": [
+            {
+              "day": 2,
+              "air": 41.45114448275279,
+              "food": 36,
+              "water": 29.65,
+              "parts": 4,
+              "battery": 0,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 2,
+                "sheltered": 0,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 3,
+              "air": 46.902288965505576,
+              "food": 36,
+              "water": 29.299999999999997,
+              "parts": 4,
+              "battery": 3.287755467171422,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 4,
+              "air": 52.353433448258365,
+              "food": 30,
+              "water": 28.999999999999996,
+              "parts": 4,
+              "battery": 0.4809520203436719,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 7.193196553172249,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 5,
+              "air": 52.103134510973035,
+              "food": 24,
+              "water": 27.499999999999996,
+              "parts": 4,
+              "battery": 3.56663071317817,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 7.085678692834498,
+                "demand": 4,
+                "airProduced": 5.749701062714668,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 3,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 6,
+              "air": 57.55427899372582,
+              "food": 18,
+              "water": 27.199999999999996,
+              "parts": 4,
+              "battery": 0.5447915456749186,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 6.978160832496748,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 7,
+              "air": 51.55427899372582,
+              "food": 12,
+              "water": 25.699999999999996,
+              "parts": 4,
+              "battery": 12.146220372694915,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 0,
+                "airProduced": 0,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 0,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 6,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": true
+            },
+            {
+              "day": 8,
+              "air": 57.00542347647861,
+              "food": 12,
+              "water": 25.349999999999994,
+              "parts": 4,
+              "battery": 11.74764919971491,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 9,
+              "air": 62.45656795923139,
+              "food": 12,
+              "water": 24.999999999999993,
+              "parts": 4,
+              "battery": 11.349078026734908,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            }
+          ],
+          "actions": [
+            {
+              "type": "predict",
+              "value": "store",
+              "day": 1
+            },
+            {
+              "type": "prepare",
+              "value": "battery",
+              "day": 1
+            },
+            {
+              "type": "predictField",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "open",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "shelter",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "request",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 2
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 3
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 4
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 5
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 6
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 7
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 8
+            }
+          ],
+          "sourceDate": "2023-11-20",
+          "rules": "blackout-1",
+          "data": "mola-horizons-20261114",
+          "code": "DRB1-20261114-0"
+        },
+        "alternateOutcome": null,
+        "comparison": null
+      }
+    },
+    {
+      "id": "05-two-futures",
+      "start": 83.486,
+      "duration": 6,
+      "title": "ONE MISSION. TWO FUTURES.",
+      "caption": "Replay the same colony and events with solar alignment. Compare the evidence.",
+      "state": {
+        "stage": "explain",
+        "day": 9,
+        "preparation": "battery",
+        "comms": {
+          "requested": true,
+          "elapsed": 60,
+          "delivered": true,
+          "oneWayMinutes": 20.98606,
+          "roundTripMinutes": 41.97212,
+          "sourceDate": "2023-11-20",
+          "requestDay": 1,
+          "deliveredDay": 7,
+          "status": "received",
+          "label": "Earth reply received",
+          "detail": "Advice arrived after you made local decisions.",
+          "trainingRemaining": 0,
+          "clockLabel": "20 radio minutes per training day"
+        },
+        "firstOutcome": {
+          "day": 9,
+          "air": 62.45656795923139,
+          "food": 12,
+          "water": 24.999999999999993,
+          "parts": 4,
+          "battery": 11.349078026734908,
+          "pop": 6,
+          "fame": 0,
+          "evaluationDay": 9,
+          "stoppedEarly": false,
+          "safe": true,
+          "completed": true,
+          "preparation": "battery",
+          "shelter": "shelter",
+          "stoppedDays": 3,
+          "recovery": null,
+          "score": {
+            "safe": true,
+            "completed": true,
+            "crew": 6,
+            "reserves": 20,
+            "partsRemaining": 4,
+            "discoveries": 2,
+            "rank": [
+              1,
+              20,
+              4,
+              2
+            ],
+            "label": "Crew safe \u00b7 mission complete"
+          },
+          "timeline": [
+            {
+              "day": 2,
+              "air": 41.45114448275279,
+              "food": 36,
+              "water": 29.65,
+              "parts": 4,
+              "battery": 0,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 2,
+                "sheltered": 0,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 3,
+              "air": 46.902288965505576,
+              "food": 36,
+              "water": 29.299999999999997,
+              "parts": 4,
+              "battery": 3.287755467171422,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 4,
+              "air": 52.353433448258365,
+              "food": 30,
+              "water": 28.999999999999996,
+              "parts": 4,
+              "battery": 0.4809520203436719,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 7.193196553172249,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 5,
+              "air": 52.103134510973035,
+              "food": 24,
+              "water": 27.499999999999996,
+              "parts": 4,
+              "battery": 3.56663071317817,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 7.085678692834498,
+                "demand": 4,
+                "airProduced": 5.749701062714668,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 3,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 6,
+              "air": 57.55427899372582,
+              "food": 18,
+              "water": 27.199999999999996,
+              "parts": 4,
+              "battery": 0.5447915456749186,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 6.978160832496748,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 7,
+              "air": 51.55427899372582,
+              "food": 12,
+              "water": 25.699999999999996,
+              "parts": 4,
+              "battery": 12.146220372694915,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 0,
+                "airProduced": 0,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 0,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 6,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": true
+            },
+            {
+              "day": 8,
+              "air": 57.00542347647861,
+              "food": 12,
+              "water": 25.349999999999994,
+              "parts": 4,
+              "battery": 11.74764919971491,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 9,
+              "air": 62.45656795923139,
+              "food": 12,
+              "water": 24.999999999999993,
+              "parts": 4,
+              "battery": 11.349078026734908,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            }
+          ],
+          "actions": [
+            {
+              "type": "predict",
+              "value": "store",
+              "day": 1
+            },
+            {
+              "type": "prepare",
+              "value": "battery",
+              "day": 1
+            },
+            {
+              "type": "predictField",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "open",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "shelter",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "request",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 2
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 3
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 4
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 5
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 6
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 7
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 8
+            }
+          ],
+          "sourceDate": "2023-11-20",
+          "rules": "blackout-1",
+          "data": "mola-horizons-20261114",
+          "code": "DRB1-20261114-0"
+        },
+        "alternateOutcome": {
+          "day": 9,
+          "air": 56.75512453919328,
+          "food": 0,
+          "water": 22.699999999999996,
+          "parts": 10,
+          "battery": 0,
+          "pop": 6,
+          "fame": 4,
+          "evaluationDay": 9,
+          "stoppedEarly": false,
+          "safe": false,
+          "completed": false,
+          "preparation": "align",
+          "shelter": "shelter",
+          "stoppedDays": 5,
+          "recovery": "The food reserve ran out. Start and power your greenhouses earlier.",
+          "score": {
+            "safe": false,
+            "completed": false,
+            "crew": 6,
+            "reserves": 0,
+            "partsRemaining": 10,
+            "discoveries": 2,
+            "rank": [
+              0,
+              0,
+              10,
+              2
+            ],
+            "label": "Setback \u00b7 checkpoint recovery available"
+          },
+          "timeline": [
+            {
+              "day": 2,
+              "air": 41.45114448275279,
+              "food": 36,
+              "water": 29.65,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 1,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 1
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 3,
+              "air": 46.902288965505576,
+              "food": 36,
+              "water": 29.299999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 17.74530656060571,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 4,
+              "air": 52.353433448258365,
+              "food": 30,
+              "water": 27.799999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 8.031835863806696,
+                "demand": 8,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 2,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 5,
+              "air": 52.103134510973035,
+              "food": 24,
+              "water": 26.299999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 7.902814431401398,
+                "demand": 4,
+                "airProduced": 5.749701062714668,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 3,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 6,
+              "air": 51.852835573687706,
+              "food": 18,
+              "water": 24.799999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 6.978160832496748,
+                "demand": 4,
+                "airProduced": 5.749701062714668,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 3,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 7,
+              "air": 45.852835573687706,
+              "food": 12,
+              "water": 23.299999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 0,
+                "airProduced": 0,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 0,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 6,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": true
+            },
+            {
+              "day": 8,
+              "air": 51.303980056440494,
+              "food": 6,
+              "water": 22.999999999999996,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 9,
+              "air": 56.75512453919328,
+              "food": 0,
+              "water": 22.699999999999996,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            }
+          ],
+          "actions": [
+            {
+              "type": "prepare",
+              "value": "align",
+              "day": 1
+            },
+            {
+              "type": "predictField",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "open",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "shelter",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "request",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 2
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 3
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 4
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 5
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 6
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 7
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 8
+            }
+          ],
+          "sourceDate": "2023-11-20",
+          "rules": "blackout-1",
+          "data": "mola-horizons-20261114",
+          "code": "DRB1-20261114-0"
+        },
+        "comparison": {
+          "changedDecision": {
+            "from": "battery",
+            "to": "align"
+          },
+          "sameStart": true,
+          "sameEvents": true,
+          "sameHorizon": true,
+          "horizon": 9,
+          "firstDay": 9,
+          "alternateDay": 9,
+          "delta": {
+            "air": -5.70144342003811,
+            "food": -12,
+            "water": -2.299999999999997,
+            "parts": 6,
+            "battery": -11.349078026734908,
+            "stoppedDays": 2
+          },
+          "rejections": [],
+          "title": "One changed preparation, the same external events",
+          "explanation": "A battery keeps surplus energy for later. Alignment changes generation for only three production days. The alternate result has 5.7 less air, 12 less food and 6 more Parts than your original result.",
+          "reasons": [
+            "The original plan had 3 days with power-limited machines; the alternate had 5.",
+            "Recorded food production: 24 units originally and 12 in the alternative."
+          ],
+          "caveat": "Both outcomes use the same ending day. Later requested actions were held constant.",
+          "correctReason": "stored-energy",
+          "correctReasons": [
+            "stored-energy",
+            "more-sunlight"
+          ]
+        }
+      }
+    },
+    {
+      "id": "06-nasa-evidence",
+      "start": 96.24,
+      "duration": 4,
+      "title": "NASA EVIDENCE. CLEAR MODEL LIMITS.",
+      "caption": "Historical records inform the mission; the game labels its simplified rules.",
+      "state": {
+        "stage": "explain",
+        "day": 9,
+        "preparation": "battery",
+        "comms": {
+          "requested": true,
+          "elapsed": 60,
+          "delivered": true,
+          "oneWayMinutes": 20.98606,
+          "roundTripMinutes": 41.97212,
+          "sourceDate": "2023-11-20",
+          "requestDay": 1,
+          "deliveredDay": 7,
+          "status": "received",
+          "label": "Earth reply received",
+          "detail": "Advice arrived after you made local decisions.",
+          "trainingRemaining": 0,
+          "clockLabel": "20 radio minutes per training day"
+        },
+        "firstOutcome": {
+          "day": 9,
+          "air": 62.45656795923139,
+          "food": 12,
+          "water": 24.999999999999993,
+          "parts": 4,
+          "battery": 11.349078026734908,
+          "pop": 6,
+          "fame": 0,
+          "evaluationDay": 9,
+          "stoppedEarly": false,
+          "safe": true,
+          "completed": true,
+          "preparation": "battery",
+          "shelter": "shelter",
+          "stoppedDays": 3,
+          "recovery": null,
+          "score": {
+            "safe": true,
+            "completed": true,
+            "crew": 6,
+            "reserves": 20,
+            "partsRemaining": 4,
+            "discoveries": 2,
+            "rank": [
+              1,
+              20,
+              4,
+              2
+            ],
+            "label": "Crew safe \u00b7 mission complete"
+          },
+          "timeline": [
+            {
+              "day": 2,
+              "air": 41.45114448275279,
+              "food": 36,
+              "water": 29.65,
+              "parts": 4,
+              "battery": 0,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 2,
+                "sheltered": 0,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 3,
+              "air": 46.902288965505576,
+              "food": 36,
+              "water": 29.299999999999997,
+              "parts": 4,
+              "battery": 3.287755467171422,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 4,
+              "air": 52.353433448258365,
+              "food": 30,
+              "water": 28.999999999999996,
+              "parts": 4,
+              "battery": 0.4809520203436719,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 7.193196553172249,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 5,
+              "air": 52.103134510973035,
+              "food": 24,
+              "water": 27.499999999999996,
+              "parts": 4,
+              "battery": 3.56663071317817,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 7.085678692834498,
+                "demand": 4,
+                "airProduced": 5.749701062714668,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 3,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 6,
+              "air": 57.55427899372582,
+              "food": 18,
+              "water": 27.199999999999996,
+              "parts": 4,
+              "battery": 0.5447915456749186,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 6.978160832496748,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 7,
+              "air": 51.55427899372582,
+              "food": 12,
+              "water": 25.699999999999996,
+              "parts": 4,
+              "battery": 12.146220372694915,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 0,
+                "airProduced": 0,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 0,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 6,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": true
+            },
+            {
+              "day": 8,
+              "air": 57.00542347647861,
+              "food": 12,
+              "water": 25.349999999999994,
+              "parts": 4,
+              "battery": 11.74764919971491,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 9,
+              "air": 62.45656795923139,
+              "food": 12,
+              "water": 24.999999999999993,
+              "parts": 4,
+              "battery": 11.349078026734908,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            }
+          ],
+          "actions": [
+            {
+              "type": "predict",
+              "value": "store",
+              "day": 1
+            },
+            {
+              "type": "prepare",
+              "value": "battery",
+              "day": 1
+            },
+            {
+              "type": "predictField",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "open",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "shelter",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "request",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 2
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 3
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 4
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 5
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 6
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 7
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 8
+            }
+          ],
+          "sourceDate": "2023-11-20",
+          "rules": "blackout-1",
+          "data": "mola-horizons-20261114",
+          "code": "DRB1-20261114-0"
+        },
+        "alternateOutcome": {
+          "day": 9,
+          "air": 56.75512453919328,
+          "food": 0,
+          "water": 22.699999999999996,
+          "parts": 10,
+          "battery": 0,
+          "pop": 6,
+          "fame": 4,
+          "evaluationDay": 9,
+          "stoppedEarly": false,
+          "safe": false,
+          "completed": false,
+          "preparation": "align",
+          "shelter": "shelter",
+          "stoppedDays": 5,
+          "recovery": "The food reserve ran out. Start and power your greenhouses earlier.",
+          "score": {
+            "safe": false,
+            "completed": false,
+            "crew": 6,
+            "reserves": 0,
+            "partsRemaining": 10,
+            "discoveries": 2,
+            "rank": [
+              0,
+              0,
+              10,
+              2
+            ],
+            "label": "Setback \u00b7 checkpoint recovery available"
+          },
+          "timeline": [
+            {
+              "day": 2,
+              "air": 41.45114448275279,
+              "food": 36,
+              "water": 29.65,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 1,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 1
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 3,
+              "air": 46.902288965505576,
+              "food": 36,
+              "water": 29.299999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 17.74530656060571,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 4,
+              "air": 52.353433448258365,
+              "food": 30,
+              "water": 27.799999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 8.031835863806696,
+                "demand": 8,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 2,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 5,
+              "air": 52.103134510973035,
+              "food": 24,
+              "water": 26.299999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 7.902814431401398,
+                "demand": 4,
+                "airProduced": 5.749701062714668,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 3,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 6,
+              "air": 51.852835573687706,
+              "food": 18,
+              "water": 24.799999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 6.978160832496748,
+                "demand": 4,
+                "airProduced": 5.749701062714668,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 3,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 7,
+              "air": 45.852835573687706,
+              "food": 12,
+              "water": 23.299999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 0,
+                "airProduced": 0,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 0,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 6,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": true
+            },
+            {
+              "day": 8,
+              "air": 51.303980056440494,
+              "food": 6,
+              "water": 22.999999999999996,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 9,
+              "air": 56.75512453919328,
+              "food": 0,
+              "water": 22.699999999999996,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            }
+          ],
+          "actions": [
+            {
+              "type": "prepare",
+              "value": "align",
+              "day": 1
+            },
+            {
+              "type": "predictField",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "open",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "shelter",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "request",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 2
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 3
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 4
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 5
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 6
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 7
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 8
+            }
+          ],
+          "sourceDate": "2023-11-20",
+          "rules": "blackout-1",
+          "data": "mola-horizons-20261114",
+          "code": "DRB1-20261114-0"
+        },
+        "comparison": {
+          "changedDecision": {
+            "from": "battery",
+            "to": "align"
+          },
+          "sameStart": true,
+          "sameEvents": true,
+          "sameHorizon": true,
+          "horizon": 9,
+          "firstDay": 9,
+          "alternateDay": 9,
+          "delta": {
+            "air": -5.70144342003811,
+            "food": -12,
+            "water": -2.299999999999997,
+            "parts": 6,
+            "battery": -11.349078026734908,
+            "stoppedDays": 2
+          },
+          "rejections": [],
+          "title": "One changed preparation, the same external events",
+          "explanation": "A battery keeps surplus energy for later. Alignment changes generation for only three production days. The alternate result has 5.7 less air, 12 less food and 6 more Parts than your original result.",
+          "reasons": [
+            "The original plan had 3 days with power-limited machines; the alternate had 5.",
+            "Recorded food production: 24 units originally and 12 in the alternative."
+          ],
+          "caveat": "Both outcomes use the same ending day. Later requested actions were held constant.",
+          "correctReason": "stored-energy",
+          "correctReasons": [
+            "stored-energy",
+            "more-sunlight"
+          ]
+        }
+      }
+    },
+    {
+      "id": "07-learning",
+      "start": 108.205,
+      "duration": 4,
+      "title": "PREDICT. OBSERVE. COMPARE. EXPLAIN.",
+      "caption": "An anonymous learning record turns play into a science discussion.",
+      "state": {
+        "stage": "complete",
+        "day": 9,
+        "preparation": "battery",
+        "comms": {
+          "requested": true,
+          "elapsed": 60,
+          "delivered": true,
+          "oneWayMinutes": 20.98606,
+          "roundTripMinutes": 41.97212,
+          "sourceDate": "2023-11-20",
+          "requestDay": 1,
+          "deliveredDay": 7,
+          "status": "received",
+          "label": "Earth reply received",
+          "detail": "Advice arrived after you made local decisions.",
+          "trainingRemaining": 0,
+          "clockLabel": "20 radio minutes per training day"
+        },
+        "firstOutcome": {
+          "day": 9,
+          "air": 62.45656795923139,
+          "food": 12,
+          "water": 24.999999999999993,
+          "parts": 4,
+          "battery": 11.349078026734908,
+          "pop": 6,
+          "fame": 0,
+          "evaluationDay": 9,
+          "stoppedEarly": false,
+          "safe": true,
+          "completed": true,
+          "preparation": "battery",
+          "shelter": "shelter",
+          "stoppedDays": 3,
+          "recovery": null,
+          "score": {
+            "safe": true,
+            "completed": true,
+            "crew": 6,
+            "reserves": 20,
+            "partsRemaining": 4,
+            "discoveries": 2,
+            "rank": [
+              1,
+              20,
+              4,
+              2
+            ],
+            "label": "Crew safe \u00b7 mission complete"
+          },
+          "timeline": [
+            {
+              "day": 2,
+              "air": 41.45114448275279,
+              "food": 36,
+              "water": 29.65,
+              "parts": 4,
+              "battery": 0,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 2,
+                "sheltered": 0,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 3,
+              "air": 46.902288965505576,
+              "food": 36,
+              "water": 29.299999999999997,
+              "parts": 4,
+              "battery": 3.287755467171422,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 4,
+              "air": 52.353433448258365,
+              "food": 30,
+              "water": 28.999999999999996,
+              "parts": 4,
+              "battery": 0.4809520203436719,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 7.193196553172249,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 5,
+              "air": 52.103134510973035,
+              "food": 24,
+              "water": 27.499999999999996,
+              "parts": 4,
+              "battery": 3.56663071317817,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 7.085678692834498,
+                "demand": 4,
+                "airProduced": 5.749701062714668,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 3,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 6,
+              "air": 57.55427899372582,
+              "food": 18,
+              "water": 27.199999999999996,
+              "parts": 4,
+              "battery": 0.5447915456749186,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 6.978160832496748,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 7,
+              "air": 51.55427899372582,
+              "food": 12,
+              "water": 25.699999999999996,
+              "parts": 4,
+              "battery": 12.146220372694915,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 0,
+                "airProduced": 0,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 0,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 6,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": true
+            },
+            {
+              "day": 8,
+              "air": 57.00542347647861,
+              "food": 12,
+              "water": 25.349999999999994,
+              "parts": 4,
+              "battery": 11.74764919971491,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 9,
+              "air": 62.45656795923139,
+              "food": 12,
+              "water": 24.999999999999993,
+              "parts": 4,
+              "battery": 11.349078026734908,
+              "pop": 6,
+              "fame": 0,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            }
+          ],
+          "actions": [
+            {
+              "type": "predict",
+              "value": "store",
+              "day": 1
+            },
+            {
+              "type": "prepare",
+              "value": "battery",
+              "day": 1
+            },
+            {
+              "type": "predictField",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "open",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "shelter",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "request",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 2
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 3
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 4
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 5
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 6
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 7
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 8
+            }
+          ],
+          "sourceDate": "2023-11-20",
+          "rules": "blackout-1",
+          "data": "mola-horizons-20261114",
+          "code": "DRB1-20261114-0"
+        },
+        "alternateOutcome": {
+          "day": 9,
+          "air": 56.75512453919328,
+          "food": 0,
+          "water": 22.699999999999996,
+          "parts": 10,
+          "battery": 0,
+          "pop": 6,
+          "fame": 4,
+          "evaluationDay": 9,
+          "stoppedEarly": false,
+          "safe": false,
+          "completed": false,
+          "preparation": "align",
+          "shelter": "shelter",
+          "stoppedDays": 5,
+          "recovery": "The food reserve ran out. Start and power your greenhouses earlier.",
+          "score": {
+            "safe": false,
+            "completed": false,
+            "crew": 6,
+            "reserves": 0,
+            "partsRemaining": 10,
+            "discoveries": 2,
+            "rank": [
+              0,
+              0,
+              10,
+              2
+            ],
+            "label": "Setback \u00b7 checkpoint recovery available"
+          },
+          "timeline": [
+            {
+              "day": 2,
+              "air": 41.45114448275279,
+              "food": 36,
+              "water": 29.65,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 15.287755467171422,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 1,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 1
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 3,
+              "air": 46.902288965505576,
+              "food": 36,
+              "water": 29.299999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 17.74530656060571,
+                "demand": 12,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 6,
+                "waterNet": -0.35000000000000053,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 4,
+              "air": 52.353433448258365,
+              "food": 30,
+              "water": 27.799999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 8.031835863806696,
+                "demand": 8,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 2,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 5,
+              "air": 52.103134510973035,
+              "food": 24,
+              "water": 26.299999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 7.902814431401398,
+                "demand": 4,
+                "airProduced": 5.749701062714668,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 3,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": true,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 6,
+              "air": 51.852835573687706,
+              "food": 18,
+              "water": 24.799999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 6.978160832496748,
+                "demand": 4,
+                "airProduced": 5.749701062714668,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 3,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": true,
+              "radiation": false
+            },
+            {
+              "day": 7,
+              "air": 45.852835573687706,
+              "food": 12,
+              "water": 23.299999999999997,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 0,
+                "airProduced": 0,
+                "foodProduced": 0,
+                "waterNet": -1.5,
+                "shut": 0,
+                "unstaffed": 0,
+                "operators": 0,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 6,
+                "resting": 0
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": true
+            },
+            {
+              "day": 8,
+              "air": 51.303980056440494,
+              "food": 6,
+              "water": 22.999999999999996,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            },
+            {
+              "day": 9,
+              "air": 56.75512453919328,
+              "food": 0,
+              "water": 22.699999999999996,
+              "parts": 10,
+              "battery": 0,
+              "pop": 6,
+              "fame": 4,
+              "economy": {
+                "generation": 11.601428827019996,
+                "demand": 10,
+                "airProduced": 11.451144482752788,
+                "foodProduced": 0,
+                "waterNet": -0.3000000000000007,
+                "shut": 1,
+                "unstaffed": 0,
+                "operators": 4,
+                "technicians": 0,
+                "builders": 0,
+                "sheltered": 0,
+                "resting": 2
+              },
+              "radioPaused": false,
+              "dust": false,
+              "radiation": false
+            }
+          ],
+          "actions": [
+            {
+              "type": "prepare",
+              "value": "align",
+              "day": 1
+            },
+            {
+              "type": "predictField",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "open",
+              "day": 1
+            },
+            {
+              "type": "observe",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "shelter",
+              "value": "shelter",
+              "day": 1
+            },
+            {
+              "type": "request",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 1
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 2
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 3
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 4
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 5
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 6
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 7
+            },
+            {
+              "type": "next",
+              "value": null,
+              "day": 8
+            }
+          ],
+          "sourceDate": "2023-11-20",
+          "rules": "blackout-1",
+          "data": "mola-horizons-20261114",
+          "code": "DRB1-20261114-0"
+        },
+        "comparison": {
+          "changedDecision": {
+            "from": "battery",
+            "to": "align"
+          },
+          "sameStart": true,
+          "sameEvents": true,
+          "sameHorizon": true,
+          "horizon": 9,
+          "firstDay": 9,
+          "alternateDay": 9,
+          "delta": {
+            "air": -5.70144342003811,
+            "food": -12,
+            "water": -2.299999999999997,
+            "parts": 6,
+            "battery": -11.349078026734908,
+            "stoppedDays": 2
+          },
+          "rejections": [],
+          "title": "One changed preparation, the same external events",
+          "explanation": "A battery keeps surplus energy for later. Alignment changes generation for only three production days. The alternate result has 5.7 less air, 12 less food and 6 more Parts than your original result.",
+          "reasons": [
+            "The original plan had 3 days with power-limited machines; the alternate had 5.",
+            "Recorded food production: 24 units originally and 12 in the alternative."
+          ],
+          "caveat": "Both outcomes use the same ending day. Later requested actions were held constant.",
+          "correctReason": "stored-energy",
+          "correctReasons": [
+            "stored-energy",
+            "more-sunlight"
+          ]
+        }
+      }
+    }
+  ],
+  "actions": [
+    {
+      "type": "predict",
+      "value": "store",
+      "state": {
+        "stage": "preparation",
+        "day": 1
+      }
+    },
+    {
+      "type": "prepare",
+      "value": "battery",
+      "state": {
+        "stage": "field",
+        "day": 1
+      }
+    },
+    {
+      "type": "predictField",
+      "value": "shelter",
+      "state": {
+        "stage": "field",
+        "day": 1
+      }
+    },
+    {
+      "type": "observe",
+      "value": "open",
+      "state": {
+        "stage": "field",
+        "day": 1
+      }
+    },
+    {
+      "type": "observe",
+      "value": "shelter",
+      "state": {
+        "stage": "field",
+        "day": 1
+      }
+    },
+    {
+      "type": "shelter",
+      "value": "shelter",
+      "state": {
+        "stage": "request",
+        "day": 1
+      }
+    },
+    {
+      "type": "request",
+      "state": {
+        "stage": "running",
+        "day": 1
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "running",
+        "day": 2
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "running",
+        "day": 3
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "running",
+        "day": 4
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "running",
+        "day": 5
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "running",
+        "day": 6
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "running",
+        "day": 7
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "running",
+        "day": 8
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "outcome",
+        "day": 9
+      }
+    },
+    {
+      "type": "compare",
+      "value": "align",
+      "state": {
+        "stage": "compare",
+        "day": 1
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "compare",
+        "day": 2
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "compare",
+        "day": 3
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "compare",
+        "day": 4
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "compare",
+        "day": 5
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "compare",
+        "day": 6
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "compare",
+        "day": 7
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "compare",
+        "day": 8
+      }
+    },
+    {
+      "type": "next",
+      "state": {
+        "stage": "explain",
+        "day": 9
+      }
+    },
+    {
+      "type": "explain",
+      "value": "stored-energy",
+      "state": {
+        "stage": "transfer",
+        "day": 9
+      }
+    },
+    {
+      "type": "transfer",
+      "value": "reserve",
+      "state": {
+        "stage": "complete",
+        "day": 9
+      }
+    }
+  ],
+  "errors": [],
+  "failedAssets": [],
+  "completedAt": "2026-11-14T17:11:24.712Z",
+  "video": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "width": 1920,
+        "height": 1080,
+        "r_frame_rate": "25/1"
+      }
+    ],
+    "format": {
+      "duration": "28.960000",
+      "size": "2558489"
+    }
+  },
+  "output": "game/demo/blackout-demo.mp4",
+  "finalRuntimeSHA256": {
+    "game/index.html": "c22590c66b9c245d6323dfe3b5b9ad9dc69fc5a2e5918c84830d78d99df204db",
+    "game/blackout.js": "09206c75f6b049eba29b4159cf3562bdcfe7a186d172a1106f8d869a659cf2c9",
+    "game/blackout-ui.js": "9736b3cc11b3ccf17e948b4d91e61fdc51773d0f8ef7fa81e5583484d9ce7fef",
+    "game/blackout-ui.css": "635f30e3eed5bfd86b5e1586ce47a1b8c9230765f19973e3bca78d1e6ba05b3f",
+    "game/ares-render.js": "9fea584e08a3e5eefa857c61f4a04986e6426140b945df6a14d392774abeed38",
+    "game/ares-world.js": "ef9b3300453a18f373638085a5dc5c33202971391464bd00b24a904514d3c181",
+    "game/junior.js": "4b3d8e23631132ccb02c6b977ea2d15863435b6972616931bc7999882b033a0e",
+    "game/mission-systems.js": "b658a81dd4ef419492108a03c8b488205fbdf405f33b1871752304ca93ef78b2",
+    "game/strategy.js": "380f023555ae156ef9e15cc19afc120c234f411ed451c147bdf4d6db2900d211"
+  },
+  "runtimeChangedDuringCapture": []
+}

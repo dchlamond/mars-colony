@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "source_mesh_objects": 13,
+      "export_meshes": 4,
+      "material_batches": 4,
+      "evaluated_triangles": 1212,
+      "geometry_decimated": false,
+      "notes": "One mesh per material; Blender micro-grain needs production baking.",
+      "asset": "service-controller-b03",
+      "bytes": 64452,
+      "provenance": "Original Blender-authored geometry"
+    },
+    {
+      "source_mesh_objects": 9,
+      "export_meshes": 4,
+      "material_batches": 4,
+      "evaluated_triangles": 876,
+      "geometry_decimated": false,
+      "notes": "One mesh per material; Blender micro-grain needs production baking.",
+      "asset": "water-witness-b03",
+      "bytes": 47188,
+      "provenance": "Original Blender-authored geometry"
+    },
+    {
+      "source_mesh_objects": 8,
+      "export_meshes": 4,
+      "material_batches": 4,
+      "evaluated_triangles": 816,
+      "geometry_decimated": false,
+      "notes": "One mesh per material; Blender micro-grain needs production baking.",
+      "asset": "crew-field-case-b03",
+      "bytes": 46072,
+      "provenance": "Original Blender-authored geometry"
+    },
+    {
+      "source_mesh_objects": 8,
+      "export_meshes": 5,
+      "material_batches": 5,
+      "evaluated_triangles": 864,
+      "geometry_decimated": false,
+      "notes": "One mesh per material; Blender micro-grain needs production baking.",
+      "asset": "crew-tablet-b03",
+      "bytes": 50896,
+      "provenance": "Original Blender-authored geometry"
+    }
+  ],
+  "notes": "Original artistic props. Light and flow indicators are driven by the actual game state; their animation is schematic."
+}

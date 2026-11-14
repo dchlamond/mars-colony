@@ -144,6 +144,7 @@ body.fp #camctl [data-a="in"],body.fp #camctl [data-a="out"],body.fp #camctl [da
 <link rel="stylesheet" href="expedition.css">
 <link rel="stylesheet" href="strategy.css">
 <link rel="stylesheet" href="ares-ui.css">
+<link rel="stylesheet" href="blackout-ui.css">
 <script src="vendor/three.min.js"></script>
 <script src="vendor/GLTFLoader.js"></script>
 <script src="vendor/DRACOLoader.js"></script>
@@ -1547,7 +1548,7 @@ window.addEventListener('blur',clearWalkInput);
 document.addEventListener('mousemove',e=>{ if(!R3||!R3.fp||document.pointerLockElement!==R3.renderer.domElement) return; R3.fp.yaw-=e.movementX*0.0025; R3.fp.pitch=Math.max(-0.7,Math.min(0.9,R3.fp.pitch-e.movementY*0.0022)); });
 document.addEventListener('pointerlockchange',()=>{if(!R3)return;R3.fpLocked=document.pointerLockElement===R3.renderer.domElement;if(!R3.fpLocked)clearWalkInput();});
 document.addEventListener('keydown',e=>{ if(!R3||modalOpen) return; const k=e.key.toLowerCase(), s=R3.dist*0.06;
-  if(R3.fp){if(/^(input|textarea|select)$/i.test(e.target.tagName||''))return;if(k==='escape'){clearWalkInput();if(document.pointerLockElement&&document.exitPointerLock)document.exitPointerLock();return;}if(k==='e'){if(!e.repeat)window.SurfaceSurvey?.record();e.preventDefault();return;}if(/^(w|a|s|d|q|shift|arrowup|arrowdown|arrowleft|arrowright)$/.test(k)){keys[k]=true;e.preventDefault();}return;}
+  if(R3.fp){if(/^(input|textarea|select)$/i.test(e.target.tagName||''))return;if(k==='escape'){e.preventDefault();toggleWalk();return;}if(k==='e'){if(!e.repeat)window.SurfaceSurvey?.record();e.preventDefault();return;}if(/^(w|a|s|d|q|shift|arrowup|arrowdown|arrowleft|arrowright)$/.test(k)){keys[k]=true;e.preventDefault();}return;}
   if(e.target!==document.body) return;
   if(k==='arrowleft'||k==='a')panBy(-s,0); else if(k==='arrowright'||k==='d')panBy(s,0); else if(k==='arrowup'||k==='w')panBy(0,-s); else if(k==='arrowdown'||k==='s')panBy(0,s); else return; e.preventDefault(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){buildSel=null;render();} if(e.key===' '&&!modalOpen&&e.target===document.body){e.preventDefault();setSpeed(S.speed?0:1);render();} });
@@ -1592,6 +1593,7 @@ window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBL
 <script src="colony-systems.js"></script>
 <script src="junior.js"></script>
 <script src="mission-systems.js"></script>
+<script src="blackout.js"></script>
 <script src="ares-world.js"></script>
 <script src="vendor/Pass.js"></script>
 <script src="vendor/CopyShader.js"></script>
@@ -1601,5 +1603,7 @@ window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBL
 <script src="ares-render.js"></script>
 <script src="surface-survey.js"></script>
 <script src="ares-ui.js"></script>
+<script src="blackout-ui.js"></script>
+<script src="blackout-audio.js"></script>
 </body>
 </html>

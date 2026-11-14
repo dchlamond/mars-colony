@@ -16,7 +16,12 @@
     "test:ares-offline": "node tests/ares-offline.cjs",
     "test:mission-systems": "node tests/mission-systems.cjs",
     "test:walk-surface": "node tests/walk-surface.cjs",
-    "test:survey-evidence": "node tests/survey-evidence.cjs"
+    "test:survey-evidence": "node tests/survey-evidence.cjs",
+    "test:blackout-systems": "node tests/blackout-systems.cjs",
+    "test:blackout-ui": "node tests/blackout-ui.cjs",
+    "test:persistence": "node tests/persistence.cjs",
+    "test:living-world": "node tests/ares-living-world.cjs",
+    "test:blackout-boundaries": "node tests/blackout-boundaries.cjs"
   },
   "devDependencies": {
     "playwright": "1.65.1"

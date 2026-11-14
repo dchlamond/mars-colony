@@ -1,3 +1,9 @@
+# Historical prototype handoff
+
+This document describes the initial prototype and is retained as history. Its asset, balance, dependency and deployment statements are superseded by the current README, research/BLACKOUT-RULES.md and release report. Use the current repository and release evidence.
+
+---
+
 # Mars Colony: Junior Mission Trainer — build handoff
 
 *NASA Space Apps Challenge 2026 · challenge "Build a Junior Astronaut Mission Trainer" · snapshot of Sat 14 Nov 2026, about 11:20 Kuwait time*

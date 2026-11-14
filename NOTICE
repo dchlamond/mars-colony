@@ -38,10 +38,19 @@ Grok Imagine surface artwork, 14 November 2026
 game/assets/ares/grok-regolith.jpg is original generated artistic regolith, not a NASA photograph or measured terrain. Generation: https://grok.com/imagine/post/8a17d34f-333c-44f5-b633-1a79f2ad3dc0 . The original downloaded image is retained unaltered. Interface/credits disclose AI artwork.
 
 Grok Imagine human adviser, 14 November 2026
-game/assets/ares-ui/mission-adviser.jpg is an original fictional human astronaut portrait generated for DEAD RECKONING: BLACKOUT. It is not a photograph of a NASA employee or evidence of agency endorsement. Generation: https://grok.com/imagine/post/fb3b487c-05ce-41b7-a8ec-346435ba61a9 . The downloaded image is used unaltered; the UI labels the character as fictional.
+game/assets/ares-ui/mission-adviser.jpg is an original fictional human astronaut portrait generated for DEAD RECKONING: BLACKOUT. It is not a photograph of a NASA employee or evidence of agency endorsement. Generation: https://grok.com/imagine/post/fb3b487c-05ce-41b7-a8ec-346435ba61a9 . The downloaded image is used unaltered; the UI labels the character as fictional AI-generated artwork.
 
 BLACKOUT interface fonts
 Space Grotesk, Manrope, Barlow Condensed and Rajdhani are distributed under the SIL Open Font Licence 1.1 from the official google/fonts repository. Font-specific copyright notices and full licence text accompany each family in game/assets/fonts/LICENSE-spacegrotesk.txt, LICENSE-manrope.txt, LICENSE-barlowcondensed.txt and LICENSE-rajdhani.txt. Atkinson Hyperlegible is credited above. These fonts are bundled locally.
 
 BLACKOUT field instrument
 The Blender-authored glove and dosimeter in game/assets/ares/surface-dosimeter.glb are original fictional game equipment. Its displayed index and the authored rock teaching-site placement are simulation choices, not NASA measurements or hardware certification. The source script and editable Blender scene are retained in art/blender/.
+
+BLACKOUT original service kit and overnight implementation
+Four AI-assisted Blender props (service-controller-b03.glb, water-witness-b03.glb,
+crew-field-case-b03.glb and crew-tablet-b03.glb), their source builder and editable
+blackout-service-kit.blend are original project work under the project licence.
+The systems inspector is a schematic of simulated values, not a NASA engineering
+schematic. Original locally synthesized ambience/cues use no third-party audio.
+Short mission, comparison, interface, tests and documentation were AI-assisted;
+see AI_USE.md. NASA data provenance is retained in research/BLACKOUT-RULES.md.

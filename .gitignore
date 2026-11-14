@@ -13,3 +13,6 @@ research/NOTES.md
 /art/blender/start_mcp_workshop.py
 /art/blender/mcp_client.py
 /art/blender/exports/*.glb
+
+# Generated Python bytecode
+__pycache__/

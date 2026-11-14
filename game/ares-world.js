@@ -229,7 +229,9 @@
         vec3 aresDX=dFdx(-vViewPosition),aresDY=dFdy(-vViewPosition);
         vec3 aresR1=cross(aresDY,normal),aresR2=cross(normal,aresDX);
         float aresDet=dot(aresDX,aresR1);
-        vec3 aresGrad=sign(aresDet)*(dFdx(aresH)*aresR1+dFdy(aresH)*aresR2)*.035*aresClose;
+        // The grain is a surface finish, not ankle-high geometry. A restrained
+        // amplitude prevents 8-bit height texels becoming square-looking crags.
+        vec3 aresGrad=sign(aresDet)*(dFdx(aresH)*aresR1+dFdy(aresH)*aresR2)*.008*aresClose;
         normal=normalize(abs(aresDet)*normal-aresGrad);
       `);
     };R3.map.material.needsUpdate=true;

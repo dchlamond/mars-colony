@@ -14,6 +14,7 @@ the terrain, suits, vehicles, rocks and real-time lighting.
 | `build_ares_greenhouse.py` | G-01 sealed greenhouse with internal crops, irrigation and climate equipment: 9,690 triangles, seven batches. |
 | `build_ares_surface_kit.py` | Eight further building types, articulated A-02 suit, science rover, crew lander and layered weathered crags. Static assets are batched by material; the suit preserves named joints. |
 | `build_surface_dosimeter.py` | Original handheld dosimeter, pressure glove and sleeve: 8,592 triangles and five material batches. The display plane is filled by the runtime simulation, with no claim to measured instrument calibration. |
+| `build_blackout_service_kit.py` | Four original service/work props: 1,212-triangle controller, 876-triangle water witness, 816-triangle field case and 864-triangle inspection tablet. Small material batches support both High and Low. |
 | `export_ares_lods.py` | Blender-derived Low models: habitat 8,063 triangles; suit 6,580; crag 1,746. These replace the former runtime-only Low habitat silhouette. |
 | `build_mola_terrain.py` | Exports the existing 360×180 MOLA height sample as High and Low GLBs with UVs and normals. It preserves the simulation's elevation formula and exaggerated vertical scale. |
 | `create_ares_regolith.py` | Original seamless 512px colour, height and normal textures. These are illustrative mineral detail, not measured NASA microtopography. |
@@ -32,6 +33,7 @@ Editable source scenes are in `exports/`:
 - `ares-outcrop-s02.blend` — the revised layered formations supersede the earlier
   rock shapes in the original surface-kit scene.
 - `surface-dosimeter.blend` — editable first-person glove and instrument.
+- `blackout-service-kit.blend` — editable controller, water witness, field case and tablet scenes.
 
 Building models are resized to consistent strategy-map footprints at runtime.
 The authored suit is 1.895 units tall, Y-up and +Z-forward after glTF export. Its
@@ -91,6 +93,20 @@ High and Low select authored meshes with different geometry and lighting budgets
 The LOD exporter welds coincident glTF vertices and recalculates normals before
 decimation; this preserves continuous surfaces instead of deleting disconnected
 flat-shaded triangles. The single close-up survey outcrop uses the full mesh.
+
+The BLACKOUT service kit is integrated in `game/ares-render.js`. Water/controller
+indicator lights and occupied building emissions follow the actual `done`, `on`,
+`staffed`, `powered` and maintenance states. Their light animation is schematic,
+not a flow or electrical measurement. Solar-panel material dust follows the
+existing cleanliness and storm state. Service tracks follow the rendered terrain
+and do not add colliders. Crew paths avoid physical buildings and solar fields;
+tablet/case props follow the authored elbow pivots. Quiet breathing and inspection
+detail is cosmetic and does not advance paused work or change resource totals.
+
+Run `node tests/ares-living-world.cjs` and repeat with `ARES_LOW=1` against the
+local game server. The test uses an explicitly prepared visual-state fixture;
+it is not reported as an actual-control mission completion. Its evidence is
+written outside the public repository to `../overnight/evidence/art/`.
 
 Blender Cycles uses path tracing for previews. The browser uses Three.js PBR,
 shadow maps and High-mode screen-space ambient occlusion; importing a GLB does not

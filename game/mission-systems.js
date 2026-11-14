@@ -39,6 +39,7 @@ function boostInfo(){
  return {...info,available:true,status:'ready',reason:'Spend 2 Parts and one technician day. Then solar output rises 20% for three days. Construction may slow; this does not replace cleaning or batteries.'};
 }
 function activateBoost(){
+ if(window.Blackout?.isActive()&&!Blackout.allowsAction())return {ok:false,message:'Use the mission preparation choices during this short training mission.'};
  const info=boostInfo();if(!info.available)return {ok:false,message:info.reason};
  S.parts-=BOOST.cost;state().boost={working:true,remaining:0,started:S.sol,cooldownUntil:S.sol+BOOST.cooldown};
  log('Solar alignment booked: 2 Parts spent. One free crew member will work on the arrays.','info');
@@ -68,6 +69,7 @@ function recordSurvey(data){
  const condition=data?.condition,t=Number.isInteger(data?.c)&&Number.isInteger(data?.r)?tileAt(data.c,data.r):null;
  if(S.over||S.junior?.recovery)return {ok:false,recorded:false,reward:0,message:'Return to an active mission before recording evidence.'};
  if(!t||!['open','rock','shelter'].includes(condition)||data.kind!=='radiation'||data.source!=='simulation'||!Number.isFinite(data.exposureIndex)||data.exposureIndex<0)return {ok:false,recorded:false,reward:0,message:'A valid simulated surface reading is needed.'};
+ if(window.Blackout?.isActive())return Blackout.recordFieldReading(data);
  const records=state().surveys;
  if(records[condition])return {ok:true,recorded:false,reward:0,message:'You already recorded '+condition+' ground. Compare a different condition; repeated readings do not add Fame.'};
  records[condition]={kind:'radiation',condition,c:data.c,r:data.r,sol:S.sol,exposureIndex:data.exposureIndex,source:'simulation'};
