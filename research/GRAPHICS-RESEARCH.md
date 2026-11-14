@@ -1,9 +1,11 @@
 # Ares rendering decisions and evidence
 
-14 November 2026. The selected concept establishes ivory pressure shells, dark
-navy photovoltaics and interface enamel, brass trim, warm windows, rust ground,
-turquoise map edges and appealing working astronauts. A generated still is an
-art target; it does not establish achievable frame rate or completed game art.
+14 November 2026. The original Ares concept establishes ivory pressure shells,
+dark navy photovoltaics, brass building fittings, warm windows, rust ground,
+turquoise map edges and appealing working astronauts. The later BLACKOUT brief
+replaces the gold interface with five selectable styles and distinct fonts;
+the physical architecture retains the earlier direction. A generated still is
+an art target; it does not establish frame rate or completed game art.
 
 ## Implemented pipeline
 
@@ -13,8 +15,9 @@ art target; it does not establish achievable frame rate or completed game art.
   builders remain solely for loading/error recovery, not the normal loaded view.
 - **Blender previews:** build-menu illustrations are Cycles renders of the same
   models used in play. Editable scenes and reproducible scripts are included.
-- **Grok Imagine:** original regolith colour material and the fictional Martian
-  guide. The regolith is artistic detail, not NASA ground photography. Its
+- **Grok Imagine:** original regolith colour material and the fictional human
+  astronaut adviser, replacing the earlier Martian portrait. The regolith is
+  artistic detail, not NASA ground photography. Its
   generation record is in NOTICE and its unaltered source is packaged locally.
 - **NASA map:** the existing 360 by 180 MOLA height samples are rebuilt in Blender
   with the same coordinates and exaggerated height scale. Its UVs retain the
