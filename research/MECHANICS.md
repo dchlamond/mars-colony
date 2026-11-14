@@ -22,3 +22,16 @@ Developer judgments only, on the same 1–5 scale (fun / interaction / variety /
 | Rival comparison | 2/3/2/2 | 3/3/3/3 | Missing a promise grants an expiring recruitment modifier that affects real passenger allocation. No diplomacy or autonomous building economy yet. |
 
 Next priority is scarce maintenance parts competing with growth and rover trips. Full-game balance remains unvalidated; do not add several new burdens at once.
+
+
+## Crew, operation and rival-development slice
+Developer judgments, not measured child learning or enjoyment.
+
+| Mechanic | Current (fun / interaction / variety / education) | Implemented change |
+|---|---|---|
+| Production | 3/4/4/4 | Three methods trade output, power and wear. Forecast shows effect on the full grid. |
+| People | 3/4/4/4 | Six named founders, skills and training. Specialists compete with machine operation and construction. |
+| Maintenance | 3/4/4/4 | Condition changes output; repairs use parts/metal and crew, interrupt machines and depend on terrain. |
+| Rivals | 3/4/3/3 | Finite development budgets and facilities affect recruitment. Trade moves real resources between colonies. |
+
+Full campaign difficulty remains an open issue. Existing policies ignored new repairs and produced 0/60 wins within 650 sols (prior slice 2/60). A paired 1,000-sol sweep produced 1/12 wins for the repair-aware policy and 0/12 for the matching unmaintained policy, at one seed across four sites and three difficulties. Explorer/Arcadia repair-aware won at sol 614. These bots are not validated player models. The 12 shelter-project scenarios retained their previous outcomes: Explorer 4/4, Commander 4/4, Veteran 0/4. Do not present this as proof of balanced difficulty or learning.

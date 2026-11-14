@@ -76,3 +76,7 @@ This is a tested first interface slice, not the full upgrade brief. See `researc
 Compare three building sites in **Science**, using NASA-sourced terrain and clearly labeled production models. **Council** offers three optional projects with a bond, an operating test, a deadline and consequences. In **Earth**, 833 saved NASA/JPL Horizons calculations determine the evidence-message delay. Project confirmations, rewards and failures appear in **Chronicle**. All grants, penalties and time compression are fictional game rules.
 
 See [Data and decisions](research/DATA-AND-DECISIONS.md) for provenance, assumptions and remaining work. Run `npm run test:operations` against the local server to verify these systems; `python3 tools/prepare_horizons.py` rebuilds the cached ephemeris from the saved response without network access.
+
+## Operating the colony
+
+**People** now assigns a finite crew to repairs, crops, power tuning or training. **Buildings** previews three production methods and queues repairs that consume parts and interrupt output. **Science** compares terrain-dependent service work. **Rivals** shows finite construction budgets, facilities, recruitment effects and trades. Saves preserve these systems; older missions initialize them safely. The models and numerical changes are documented in [Management rules](research/MANAGEMENT.md). Run `npm run test:management` with the local game server running.

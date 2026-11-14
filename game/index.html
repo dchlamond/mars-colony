@@ -428,20 +428,22 @@ function compute(){
   const sheltering = S.storm&&S.storm.active&&S.storm.choice==='shelter';
   const dust = S.dust&&S.dust.active?0.35:1;
   const away=S.rover?S.rover.crew:0;
-  let hands = sheltering?0:Math.max(0,S.pop-away), gen=0, store=0, shelter=0, staffed=0, beds=0;
+  const team=window.ColonySystems?.allocation()||{reserved:0,power:1,food:1};
+  const output=b=>window.ColonySystems?.output(b)??1;
+  let hands = sheltering?0:Math.max(0,S.pop-away-team.reserved), gen=0, store=0, shelter=0, staffed=0, beds=0;
   const cons=[], homes=[], loud=[];
-  const useOf=b=>DEF[b.type].use+((b.lvl||1)>1&&UPG[b.type]?(UPG[b.type].use||0):0);
+  const useOf=b=>(DEF[b.type].use+((b.lvl||1)>1&&UPG[b.type]?(UPG[b.type].use||0):0))*(window.ColonySystems?.input(b)??1)*team.power;
   for(const b of S.builds){
-    b.staffed=false; b.powered=false; if(!b.done||S.sol<(b.offUntil||0)) continue;
+    b.staffed=false; b.powered=false; if(!b.done||S.sol<(b.offUntil||0)||window.ColonySystems?.offline(b)) continue;
     const d=DEF[b.type], L=(b.lvl||1)>1, t=tileAt(b.c,b.r);
     if(b.type==='pod'){gen+=3;shelter+=3;beds+=8;homes.push(b);}
     if(b.type==='habitat'){beds+=L?12:8;homes.push(b);}
     if(b.type==='mine'||b.type==='reactor') loud.push(b);
     if(d.shelter) shelter += (t.type==='lava'?14:d.shelter)+(L?4:0)+(S.tech.water?3:0);
-    if(d.store) store+=d.store*(L?2:1);
-    if(b.type==='solar') gen+=d.power*(L?1.5:1)*dust*t.sun*S.panelClean;
+    if(d.store) store+=d.store*(L?2:1)*output(b);
+    if(b.type==='solar') gen+=d.power*(L?1.5:1)*dust*t.sun*S.panelClean*output(b);
     if(d.worker){ if(b.on&&hands>0){b.staffed=true;hands--;staffed++;} }
-    if(b.type==='reactor'&&b.staffed){gen+=d.power;b.powered=true;}
+    if(b.type==='reactor'&&b.staffed){gen+=d.power*output(b);b.powered=true;}
     if(d.use&&b.on&&b.staffed) cons.push(b);
   }
   let demand=cons.reduce((a,b)=>a+useOf(b),0);
@@ -452,13 +454,13 @@ function compute(){
   }
   cons.forEach(b=>b.powered=!b.cut);
   const on=t=>cons.filter(b=>b.type===t&&b.powered), L2=b=>(b.lvl||1)>1;
-  const water=on('ice').reduce((a,b)=>a+(L2(b)?3:2),0), greensAll=on('green').length, ripe=on('green').filter(b=>(b.age||0)>=growT()), greens=ripe.length;
+  const water=on('ice').reduce((a,b)=>a+(L2(b)?3:2)*output(b),0), greensAll=on('green').length, ripe=on('green').filter(b=>(b.age||0)>=growT()), greens=ripe.length;
   const wet=Math.min(greens,water);
-  const o2p=on('moxie').reduce((a,b)=>a+DEF.moxie.o2*tileAt(b.c,b.r).air*(L2(b)?1.5:1)*(S.tech.moxie?1.3:1),0)+on('ice').reduce((a,b)=>a+DEF.ice.o2*(L2(b)?1.5:1),0);
-  let foodp=wet*5+(greens-wet)*3+ripe.filter(L2).length*2; if(S.sol<S.blight) foodp*=0.5;
-  const metalp=on('mine').reduce((a,b)=>a+(L2(b)?2:1),0), cover=on('dome').reduce((a,b)=>a+(L2(b)?12:8),0);
+  const o2p=on('moxie').reduce((a,b)=>a+DEF.moxie.o2*tileAt(b.c,b.r).air*(L2(b)?1.5:1)*(S.tech.moxie?1.3:1)*output(b),0)+on('ice').reduce((a,b)=>a+DEF.ice.o2*(L2(b)?1.5:1)*output(b),0);
+  let foodp=ripe.reduce((a,b,i)=>a+(3+2*Math.max(0,Math.min(1,water-i))+(L2(b)?2:0))*output(b),0)*team.food; if(S.sol<S.blight) foodp*=0.5;
+  const metalp=on('mine').reduce((a,b)=>a+(L2(b)?2:1)*output(b),0), cover=on('dome').reduce((a,b)=>a+(L2(b)?12:8),0);
   const noise=loud.filter(b=>homes.some(h=>hdist(h,b)<=2)).length;
-  return { away, gen, demand, store, shelter, staffed, idle:hands, shut, o2p, foodp, metalp, beds, cover, noise, domes:on('dome').length, greens, seedlings:greensAll-greens, dry:greens-wet, sheltering, dust };
+  return { away, reserved:team.reserved, gen, demand, store, shelter, staffed, idle:hands, shut, o2p, foodp, metalp, beds, cover, noise, domes:on('dome').length, greens, seedlings:greensAll-greens, dry:greens-wet, sheltering, dust };
 }
 
 function log(msg,kind){ S.log.unshift({sol:S.sol,msg,kind}); if(S.log.length>60)S.log.pop(); }
@@ -471,6 +473,7 @@ const medalCount=()=>MEDALS.filter(m=>S.fame>=m.at).length;
 function tickSol(){
   if(S.over) return;
   S.sol++;
+  window.ColonySystems?.beginSol();
   const c=cyclePos();
   if(S.sol===40){ ['solar','moxie','shield','green','ice','mine','habitat'].forEach(u=>S.unlocked[u]=true); }
 
@@ -547,6 +550,7 @@ function tickSol(){
 
   // --- end of game
   S.rival=S.rivals.reduce((a,r)=>a+r.pop,0);
+  window.ColonySystems?.endSol();
   if(S.pop<=0){ S.pop=0; endGame('lose'); }
   else if(S.indep>=100&&S.conjSurvived>=1){ endGame('win'); }
 }
@@ -581,7 +585,7 @@ function shipDay(){
   const retire=(supplyDay&&S.pop>3&&(S.sol>=90||!S.padOpen))?Math.max(1,Math.round(S.pop*0.08)):0;
   S.pop-=retire;
   const rtxt=retire?' '+retire+' colonist'+(retire>1?'s':'')+' retired and flew home.':'';
-  S.rivals.forEach((r,i)=>{ r.appeal=Math.max(35,Math.min(88,DF.rival+16*Math.sin(S.sol/47+i*2.1)+ri(-6,6))); if(supplyDay&&r.pop>8&&rng()<0.6) r.pop-=Math.max(1,Math.round(r.pop*0.06)); });
+  S.rivals.forEach((r,i)=>{ r.appeal=Math.max(35,Math.min(88,DF.rival+16*Math.sin(S.sol/47+i*2.1)+ri(-6,6)+(window.ColonySystems?.rivalAppeal(r)??0))); if(supplyDay&&r.pop>8&&rng()<0.6) r.pop-=Math.max(1,Math.round(r.pop*0.06)); });
   if(blackout){ log('No new ships can be guided in during the radio blackout. No parts this time.'+rtxt,'info'); return; }
   if(supplyDay){S.parts+=DF.ship; log('A supply ship landed with '+DF.ship+' parts.','info');}
   const open=S.padOpen&&S.appeal>=40;
@@ -740,7 +744,7 @@ const RESEARCH={
   reactor:{name:'Kilopower reactor design',fx:'Nuclear reactors cost 14 parts instead of 24.',fact:'In March 2018 NASA finished testing a small fission reactor called KRUSTY as part of the Kilopower project. The technology could power outposts on the Moon and Mars.',src:'NASA Kilopower',u:'https://www.nasa.gov/directorates/stmd/tech-demo-missions-program/kilopower-hmqzw/'}
 };
 function upCost(b){ return {parts:Math.ceil(DEF[b.type].cost/2), metal:6}; }
-function upgrade(b){ const c=upCost(b); if((b.lvl||1)>1||!UPG[b.type]) return 'Already upgraded.';
+function upgrade(b){ if(window.ColonySystems?.hasRepair(b))return 'Finish or cancel this repair before upgrading.'; const c=upCost(b); if((b.lvl||1)>1||!UPG[b.type]) return 'Already upgraded.';
   if(S.parts<c.parts||S.metal<c.metal) return `Not enough to upgrade. It needs ${c.parts} parts and ${c.metal} metal.`;
   S.parts-=c.parts; S.metal-=c.metal; b.lvl=2; b.offUntil=S.sol+4; b.solid=null; log(DEF[b.type].name+' is being upgraded. It is out of action for 4 sols.','info'); return null; }
 function buildingPanel(b){ const d=DEF[b.type], t=tileAt(b.c,b.r), up=UPG[b.type], L=b.lvl||1, key=b.type==='shield'&&t.type==='lava'?'lava':b.type, f=FACTS[key];
@@ -1337,7 +1341,7 @@ function syncScene(){
     else if(S.sol<(b.offUntil||0)){ if(b.solid!==false){ghost(b.mesh,true);b.solid=false;} }
     else if(b.solid!==true){ b.mesh.scale.setScalar((b.lvl||1)>1?1.22:1); ghost(b.mesh,false); b.solid=true; }
     // an astronaut stands by every machine that has a worker, and by every building site
-    const need=(!b.done)||(DEF[b.type].worker&&b.staffed);
+    const need=(!b.done)||(DEF[b.type].worker&&b.staffed)||window.ColonySystems?.repairing(b);
     if(need&&!b.astro){ b.astro=makeWorker(); const a=t.shade*6.28+2; b.astro.position.set(tx(t)+Math.cos(a)*0.72,groundY(tx(t)+Math.cos(a)*0.72,tz(t)+Math.sin(a)*0.72)+0.02,tz(t)+Math.sin(a)*0.72); b.astro.rotation.y=-a+Math.PI/2; R3.world.add(b.astro); }
     if(b.astro){ b.astro.visible=!!need; live.add(b.astro); }
   }
@@ -1520,5 +1524,6 @@ window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBL
 <script src="strategy.js"></script>
 <script src="horizons-snapshot.js"></script>
 <script src="operations.js"></script>
+<script src="colony-systems.js"></script>
 </body>
 </html>

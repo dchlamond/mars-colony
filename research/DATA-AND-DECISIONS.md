@@ -25,11 +25,11 @@ The existing DONKI Earth observations remain dated training triggers. The storm 
 
 A player predicts output from geography, spends limited construction resources, checks actual production against consumption, keeps reserves, and allows for communication latency. The project record explains what was demonstrated after the result. There is no extra quiz to unlock a reward.
 
-Still unverified: child comprehension and engagement, full-game balance with optional rewards, optimal project ordering and long-term replay value. Named council members currently provide role-specific advice; they do not yet have skills or personalities.
+Still unverified: child comprehension and engagement, full-game balance with optional rewards, optimal project ordering and long-term replay value. The management slice now adds named crew skills and duties (see MANAGEMENT.md); council personalities and repeated interpersonal dilemmas remain unfinished.
 
 ## Next systems, in order
 
-1. Maintenance and a finite emergency-supply pipeline: a repair competes with expansion for parts and crew time. Test carefully before replacing the current emergency-crate rule.
+1. Maintenance is now implemented with real crew/parts costs; see MANAGEMENT.md. A finite emergency-supply pipeline remains future work. The current emergency-crate rule is unchanged.
 2. A storm room: assign actual workers to shelters or essential machines, preview reserve losses, and explain outcomes.
 3. Rover science: route cost from terrain, battery and crew absence; sampled evidence feeds a technology choice with an opportunity cost.
 4. Verified Mars-target DONKI model snapshots: use issue time, modeled arrival, target and uncertainty for go/no-go decisions. Never equate Earth SEP intensity with Mars surface dose.
