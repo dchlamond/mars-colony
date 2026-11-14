@@ -1,4 +1,4 @@
-# Ares Atlas: Mars Colony
+# DEAD RECKONING: BLACKOUT
 
 A strategy game about the first town on Mars, played on a NASA-sourced map. Junior missions teach through short, recoverable challenges; Commander keeps the detailed colony simulation.
 Made for the NASA Space Apps Challenge 2026, challenge "Build a Junior Astronaut Mission Trainer".
@@ -10,7 +10,7 @@ NASA does not endorse this game.
 ## What it is
 
 Players aged 7 to 12 choose one of four real landing sites, then balance power,
-air, food, shelter and homes. Junior is the default: one goal at a time, one
+air, water, food, shelter and homes. Junior is the default: one goal at a time, one
 Parts price, automatic crew work, and a deliberate **Next day** action. Poor
 planning can stop machines or exhaust reserves; checkpoint retries preserve
 earlier progress. Sustainable production and spare beds allow new explorers to
@@ -18,21 +18,26 @@ arrive the next day.
 
 Commander retains production methods, maintenance, skilled crew, competitive
 recruitment, evidence projects and its original difficulty choices. Existing
-Commander saves stay compatible. Both modes use the Ares Atlas navy-and-brass
-interface, custom Blender habitat and greenhouse, original regolith materials,
-articulated astronauts and the clearly fictional Martian guide.
+Commander saves stay compatible. Five selectable interface designs use distinct
+fonts and palettes without gold; the mission adviser is a fictional human astronaut. All eleven building types use Blender exports, along with the rover,
+crew shuttle, articulated suits and layered rocks. The MOLA terrain is exported
+through Blender, and Grok Imagine supplies the regolith colour and fictional human adviser.
+High graphics adds screen-space ambient occlusion and directional shadow maps.
+This is not UE5 Lumen or hardware ray tracing.
 
-See [Junior rules and evidence](research/JUNIOR-MODE.md) for the precise trade-offs.
+See the [player and teacher guide](game/mission-guide.html), [Junior rules](research/JUNIOR-MODE.md), and [mechanics/learning audit](research/MECHANICS-AND-LEARNING.md). The audit distinguishes implemented goals from unfinished ones.
 
-## How the challenge is met
+## How the game addresses the challenge
 
 | Decision area in the challenge | What the player does | Real record behind it |
 |---|---|---|
 | Life support | Builds oxygen extractors. They make more air on low ground, where the air is thicker. | Tile heights from the MOLA laser altimeter (NASA Mars Trek). MOXIE on the Perseverance rover. |
+| Water management | Balances used, recycled and extracted water in Junior. Recycling cannot create new water; fresh extraction requires likely-ice terrain. | NASA ISS water recovery research; ice locations remain a latitude estimate. |
 | Radiation shielding | Builds soil shelters, then chooses shelter or work when a storm arrives. | Earth observations from NASA DONKI inspire fictional Mars scenarios; Curiosity supplies an actual Mars radiation measurement from May 2024. |
-| Power budgeting | Places solar panels by latitude, cleans dust, decides which machines get power. | Tile latitude. InSight and Opportunity dust records. |
-| Food production | Plans for growing time: 4 powered days in Junior, 20 sols initially in Commander. Washes soil or grows in water. | Phoenix lander perchlorate finding. |
-| Communication delay | Orders supplies days ahead and gets through a two-week radio blackout alone. | Mars solar conjunction (NASA/JPL). |
+| Power budgeting | Places solar panels by latitude, cleans dust, assigns a technician to align arrays, and budgets batteries. | NASA solar-orientation principles and InSight's documented 30 Wh/sol cleaning recovery; the 20% game bonus is explicitly invented. |
+| Surface fieldwork | Carries a dosimeter, records simulated relative readings, and compares open ground, rock and shelter. New evidence earns Fame once. | Curiosity RAD: the measured 4% cliff comparison and historical May 2024 radiation event, separated from the game index. |
+| Food production | Plans for growing time: 4 powered days in Junior, 20 sols initially in Commander. Commander also compares soil washing and water-based growing. | Phoenix lander perchlorate finding. |
+| Communication delay (Commander) | Orders supplies days ahead and gets through a two-week radio blackout alone. Junior omits this long campaign system. | Mars solar conjunction (NASA/JPL). |
 
 ## What is real and what is not
 
@@ -43,6 +48,24 @@ See [Junior rules and evidence](research/JUNIOR-MODE.md) for the precise trade-o
 - **Recorded, not live:** storm records are saved inside the game. The Space weather panel shows one saved week of NASA DONKI records and can be refreshed by hand. Those records are kept separate from the storms in play.
 
 Known limits: balance has been tested by scripts, not yet by children. Art is an implemented upgrade, not a claim of AAA production quality; astronaut motion is procedural, not a complete motion-capture library. OSDR and RadLab are listed by the challenge and not used yet.
+
+## Choose your interface
+
+Open **Mission settings → Choose your interface**, or compare the five live options
+at [the interface gallery](https://mars-colony-tau.vercel.app/ui-options.html). All
+choices work offline; the illustrated comparison gallery is an online extra.
+
+## First-person fieldwork
+
+Move the strategy map to a location and choose **Walk on Mars**. Use WASD or arrow
+keys to move, drag or lock the pointer to look, and press **E** or **Record reading**
+to save a dosimeter observation. Back to map stays at the top. The dosimeter uses
+a clearly labeled relative teaching index, not a live radiation feed or a safety
+assessment. Recorded conditions appear in Fame's field notes.
+
+**Align solar arrays** costs 2 Parts and one technician day, then increases solar
+generation by 20% for three production days. It cannot stack, has an eight-day
+cooldown, and does not erase dust losses. Those quantities are game tuning.
 
 ## Privacy
 
@@ -55,7 +78,10 @@ The game collects nothing and loads no files from other websites. The one outsid
 | `game/` | The whole game. This folder is what the website serves. |
 | `game/index.html` | Base simulation, NASA terrain and page. |
 | `game/junior.js` | Separate Junior rules, progression and checkpoint recovery. |
-| `game/ares-ui.js`, `game/ares-ui.css` | Responsive Ares Atlas interface. |
+| `game/ares-ui.js`, `game/ares-ui.css` | Responsive BLACKOUT interface with five selectable designs. |
+| `game/ui-options.html` | Compare the five playable UI designs. |
+| `game/mission-systems.js` | Solar alignment and earned Fame. |
+| `game/surface-survey.js` | Handheld dosimeter and field records. |
 | `game/ares-world.js`, `game/assets/ares/` | Original 3D buildings, material textures and procedural animation. |
 | `game/assets/` | Mars images, the four NASA models, fonts and the model decoder. |
 | `game/vendor/` | three.js and its loaders. |
@@ -95,13 +121,15 @@ See [Data and decisions](research/DATA-AND-DECISIONS.md) for provenance, assumpt
 **People** now assigns a finite crew to repairs, crops, power tuning or training. **Buildings** previews three production methods and queues repairs that consume parts and interrupt output. **Science** compares terrain-dependent service work. **Rivals** shows finite construction budgets, facilities, recruitment effects and trades. Saves preserve these systems; older missions initialize them safely. The models and numerical changes are documented in [Management rules](research/MANAGEMENT.md). Run `npm run test:management` with the local game server running.
 
 
-## Ares Atlas release checks
+## Release checks
 
 Run `npm install`, serve `game/` at `http://127.0.0.1:8765`, then run:
 
 ```sh
 npm run bundle
 npm run test:junior
+npm run test:mission-systems
+npm run test:walk-surface
 npm run test:ares-ui
 npm run test:ares-graphics
 npm run test:ares-offline
@@ -116,3 +144,9 @@ checks successful and unsuccessful policies, real costs, arrivals, recovery and
 old/new saves. The UI suite uses actual buttons and map clicks, verifies lessons
 and source dialogs, and tests desktop, small laptop and phone viewports. The
 single-file offline build embeds the new models, textures and portrait as well.
+
+## Authored art and engine boundary
+
+The [surface kit](game/assets/ares/SURFACE-KIT.md) lists original Blender models, editable sources, NASA design references and limits. [Rendering research](research/GRAPHICS-RESEARCH.md) records the lighting decisions and actual browser implementation. The [Unreal art-study scaffold](art/unreal/README.md) prepares the same assets for Lumen; it has not been opened or rendered in Unreal because the editor was unavailable. No UE5 game build is deployed.
+
+Junior now tracks each person in exactly one automatic role and displays water, crew/beds and Appeal. Careful scripted campaigns complete all four sites in 42 game days; this is not child-tested difficulty. Commander remains a deeper, longer mode with known balance limitations.

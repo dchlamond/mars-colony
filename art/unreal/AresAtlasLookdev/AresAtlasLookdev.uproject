@@ -1,0 +1,11 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "",
+  "Category": "Art and lighting study",
+  "Description": "Prepared Ares Atlas asset and Lumen look-development scaffold. Not an executed or packaged Unreal game.",
+  "Plugins": [
+    { "Name": "PythonScriptPlugin", "Enabled": true },
+    { "Name": "EditorScriptingUtilities", "Enabled": true },
+    { "Name": "InterchangeEditor", "Enabled": true }
+  ]
+}

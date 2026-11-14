@@ -13,3 +13,11 @@ smiling mouth, navy expedition coat, antique-brass piping and a compass medallio
 warm light against a navy background. No outside franchise assets or logos.
 
 See the repository's AI_USE.md and LICENSE for project disclosure and terms.
+
+## Current human mission adviser
+
+`mission-adviser.jpg` replaces the Martian character at the team's request. It is an original fictional human astronaut in a white/graphite suit with red accents, generated using Grok Imagine Quality 2.0 on 14 November 2026. No NASA marks, celebrity likeness request or claim of employment/endorsement was used. The original download is used without image alteration.
+
+Generation: https://grok.com/imagine/post/fb3b487c-05ce-41b7-a8ec-346435ba61a9
+
+Art direction: friendly competent human male mission adviser, head-and-shoulders portrait, practical NASA-inspired exploration suit, cool key light and restrained warm rim light, charcoal background, no lettering, no gold, no alien features.

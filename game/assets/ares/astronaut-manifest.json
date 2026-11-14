@@ -1,0 +1,31 @@
+{
+  "version": "S02",
+  "authoring": "Blender 5.2, original scripted asset authoring",
+  "assets": [
+    {
+      "asset": "astronaut-a02",
+      "bytes": 1333344,
+      "source_scene": "Ares Atlas / A02 exploration suit",
+      "export_scene": "Ares Atlas / A02 compact runtime export",
+      "height_metres": 1.895,
+      "gltf_forward": "+Z",
+      "gltf_up": "Y",
+      "joints": [
+        "torso",
+        "helmet",
+        "pelvis",
+        "shoulder_L",
+        "shoulder_R",
+        "elbow_L",
+        "elbow_R",
+        "hip_L",
+        "hip_R",
+        "knee_L",
+        "knee_R"
+      ],
+      "material_batches": 12,
+      "notes": "Rigid articulated Blender-authored pressure garment; not a skinned motion-capture character."
+    }
+  ],
+  "blend": "art/blender/exports/ares-astronaut-a02.blend"
+}

@@ -14,19 +14,19 @@ the rules of the game and what it should teach. AI tools were used to speed up t
 | Helmet view, Space weather panel, surface sample choice (`game/expedition.js`, `game/expedition.css`) | AI coding tools, directed by a team member | Merged into the game on 14 November 2026. |
 | Helper scripts (`tools/`) | Claude (Anthropic) | |
 | Project documents (`README.md`, `docs/`, this file) | Claude (Anthropic) | |
-| Building shapes that are not NASA models | Claude (Anthropic) | Simple shapes drawn in code. |
+| Earlier placeholder building shapes | Claude (Anthropic) | Runtime prototypes; the current Ares release replaces them with original Blender exports. |
 
 ## What was not generated
 
 - The Mars image, the height data, the storm records and the four detailed 3D models are NASA material. See `NOTICE`.
-- The two fonts and the 3D library are open-source work by other people. See `NOTICE`.
+- The bundled fonts and the 3D library are open-source work by other people. See `NOTICE`.
 
 ## Marks inside the project
 
-- Every code file starts with a comment that says it was generated with AI.
+- Original game and authoring sources include AI-assistance disclosures; unmodified third-party code retains its own attribution.
 - The page carries a `generator` note in its head.
 - The game's Credits screen states how AI was used.
-- The fictional Martian guide portrait is generated with Grok Imagine and visibly labeled as AI artwork in the interface. It is a story character, not evidence of life on Mars. No generated video is used.
+- The current human mission adviser is generated with Grok Imagine and labeled as fictional AI artwork. The earlier Martian portrait is retained as legacy artwork. Neither portrays an actual NASA employee or scientific evidence. No generated video is used.
 - No NASA logo, flag or mission identifier is used. The ones on the NASA models were painted over.
 
 ## Local strategy-interface revision, 14 November 2026
@@ -52,3 +52,11 @@ Junior crop times, automatic work shifts, storm timing and checkpoint recovery a
 training rules, not physical predictions. Scripted tests check behavior and viable
 paths; they do not establish child-tested difficulty, learning outcomes or AAA
 production quality.
+
+## Full surface kit and water/crew revision
+
+Codex assisted with the Blender surface kit, articulated suit and lighter models, vehicles, NASA-derived Blender terrain export, water mass balance, individual role allocation, UI and tests. The Grok-generated regolith colour is used unaltered as artistic material detail; its generation is recorded in NOTICE. Blender Cycles generated the actual-model preview images. Three.js screen-space ambient occlusion is an approximation, not hardware ray tracing. UE5 project/import source was prepared but has not been run in Unreal; no Lumen render or native game port is claimed.
+
+## DEAD RECKONING: BLACKOUT revision
+
+The team renamed the game and requested five interface alternatives without gold, a human astronaut adviser, useful first-person field work, generator boosts and Fame. Codex assisted with the code, testing and original design. Grok Imagine generated the new human adviser; provenance is recorded in NOTICE. NASA source facts are separated from teaching values and simulated radiation readings.

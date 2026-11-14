@@ -1,0 +1,63 @@
+const {chromium}=require('playwright');
+const assert=require('node:assert/strict');
+(async()=>{
+ const browser=await chromium.launch({channel:'chrome',headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
+ try{
+  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(process.env.GAME_URL||'http://127.0.0.1:8765');
+  await page.waitForFunction(()=>window.MissionSystems&&window.Junior&&window.G&&window.AresWorld?.pending===0);
+  const result=await page.evaluate(()=>{
+   let checks=0;const check=(v,m)=>{if(!v)throw Error(m);checks++;},near=(a,b)=>Math.abs(a-b)<1e-8;
+   R3=null;render=()=>{};syncScene=()=>{};buildMenu=()=>{};modal=()=>{};
+   const add=(type,extra={})=>{const t=S.tiles.find(t=>t.seen&&!t.owner&&!t.build&&t.type!=='rock');if(!t)throw Error('No test site');const b={type,c:t.c,r:t.r,done:true,on:true,age:4,...extra};S.builds.push(b);t.build=b;return b;};
+   const reset=()=>{Junior.start('junior',0,812);MissionSystems.fameInfo();S.junior.phase=7;S.junior.nextSupply=9999;S.o2=1000;S.food=1000;S.water=1000;};
+   const sum=c=>c.operators+c.builders+c.cleaners+c.technicians+c.explorers+c.sheltered+c.resting;
+   reset();check(!MissionSystems.boostInfo().available&&/solar array/.test(MissionSystems.boostInfo().reason),'No solar array means no alignment');
+   const panel=add('solar');add('battery');const normal=compute().gen,parts=S.parts;
+   check(MissionSystems.boostInfo().available,'Completed solar array and spare crew permit alignment');
+   check(MissionSystems.activateBoost().ok&&S.parts===parts-2,'Alignment charges exactly two Parts');
+   check(!MissionSystems.activateBoost().ok&&S.parts===parts-2,'Double-click cannot charge or stack another job');
+   let crew=Junior.crewRoles();check(crew.technicians===1&&crew.resting===5&&sum(crew)===S.pop,'One real crew member becomes a technician');
+   const technician=crew.assignments.find(p=>p.role==='power');check(technician.type==='solar'&&technician.c===panel.c&&technician.r===panel.r,'Technician has a real solar work target');
+   check(near(compute().gen,normal),'Booking work gives no immediate energy');
+   const batteryBefore=S.battery;tickSol();
+   check(near(S.battery-batteryBefore,normal),'The alignment work day still produces normal energy');
+   check(MissionSystems.boostInfo().remainingDays===3&&S.fame===4,'Completed alignment starts three days and one-time Fame');
+   check(near(compute().gen,3+(normal-3)*1.2),'Bonus changes actual solar output, excluding the pod');
+   crew=Junior.crewRoles();check(crew.technicians===0&&sum(crew)===S.pop,'Technician returns to available crew after work');
+   for(let n=3;n>0;n--){check(MissionSystems.boostInfo().remainingDays===n&&near(compute().gen,3+(normal-3)*1.2),'Boost production day '+(4-n)+' has exactly the stated output');tickSol();}
+   check(near(compute().gen,normal)&&MissionSystems.boostInfo().remainingDays===0,'Output returns to normal after exactly three production days');
+   check(MissionSystems.boostInfo().status==='cooldown'&&!MissionSystems.activateBoost().ok,'Cooldown prevents immediate repeat');
+   S.sol=S.missionSystems.boost.cooldownUntil;check(MissionSystems.activateBoost().ok,'A paid repeat is available after eight days');tickSol();check(S.fame===4,'Repeat alignment cannot farm Fame');
+   S.panelClean=.5;S.dust={active:true,arrive:S.sol,end:S.sol+10};check(near(compute().gen,3+(normal-3)*1.2*.5*.35),'Boost still respects dirt and atmospheric dust');
+   const beforeReactor=compute().gen;add('reactor');check(near(compute().gen-beforeReactor,14),'Reactor output receives no solar bonus');
+   reset();add('solar');S.parts=1;check(!MissionSystems.activateBoost().ok&&S.parts===1,'Insufficient Parts cannot start a free boost');
+   S.parts=20;S.storm={active:true};check(!MissionSystems.activateBoost().ok,'Radiation shelter blocks new alignment');S.storm=null;S.cleaning=1;check(!MissionSystems.activateBoost().ok,'Existing cleaning must finish first');S.cleaning=0;
+   check(MissionSystems.activateBoost().ok,'Alignment can start after prerequisites recover');S.storm={active:true,end:S.sol+5};tickSol();check(S.missionSystems.boost.working&&compute().crew.technicians===0,'Radiation pauses booked work without phantom labour');S.storm=null;
+   S.builds.find(b=>b.type==='solar').on=false;tickSol();check(S.missionSystems.boost.working,'Switched-off arrays pause booked alignment');S.builds.find(b=>b.type==='solar').on=true;tickSol();check(!S.missionSystems.boost.working,'Resumed work completes when crew and array return');
+   reset();add('solar');for(let i=0;i<6;i++)add('moxie');check(!MissionSystems.activateBoost().ok&&/crew member/.test(MissionSystems.boostInfo().reason),'Alignment cannot borrow essential operators');
+   S.builds.filter(b=>b.type==='moxie').slice(4).forEach(b=>b.on=false);const job=add('habitat',{done:false,progress:0});check(MissionSystems.activateBoost().ok,'Available builders can be reassigned');crew=Junior.crewRoles();check(crew.operators===4&&crew.technicians===1&&crew.builders===1&&crew.constructionWork===2&&sum(crew)===6,'Technician reduces actual construction capacity without double counting');tickSol();check(job.progress===2,'Building ledger uses the reduced work capacity');
+   reset();const t=S.tiles.find(t=>!t.owner),reading=condition=>({kind:'radiation',c:t.c,r:t.r,sol:S.sol,condition,exposureIndex:condition==='open'?100:condition==='rock'?96:30,source:'simulation'});
+   check(!MissionSystems.recordSurvey({...reading('open'),source:'NASA-live'}).ok&&S.fame===0,'Unsupported real-data claim is rejected');
+   check(!MissionSystems.recordSurvey({...reading('open'),c:-100}).ok,'Invalid surface coordinate is rejected');
+   check(MissionSystems.recordSurvey(reading('open')).reward===3&&S.fame===3,'First valid open-ground evidence awards three Fame');
+   S.sol++;check(MissionSystems.recordSurvey(reading('open')).reward===0&&S.fame===3,'Repeating a condition on a different day cannot farm Fame');
+   check(MissionSystems.recordSurvey(reading('rock')).reward===7&&S.fame===10,'Rock observation and open-versus-rock comparison are distinct awards');
+   check(MissionSystems.recordSurvey(reading('shelter')).reward===7&&S.fame===17,'Shelter comparison rewards a new inference once');
+   check(MissionSystems.fameInfo().nextMedal.threshold===20&&MissionSystems.fameInfo().nextMedal.remaining===3,'Fame UI exposes actual medal threshold and progress');
+   const save=JSON.stringify({score:S.fame,state:S.missionSystems});S.missionSystems=null;const restored=JSON.parse(save);S.missionSystems=restored.state;S.fame=restored.score;check(MissionSystems.recordSurvey(reading('rock')).reward===0,'Saved evidence ledger prevents repeat rewards after restore');
+   Junior.start('junior',0,812);MissionSystems.fameInfo();const pt=S.tiles.find(t=>t.seen&&!t.owner&&!t.build&&t.type!=='rock');tryBuild('solar',pt);tickSol();tickSol();
+   check(S.fame===3&&S.missionSystems.awards['mission-1']?.points===3,'Completing a real mission phase awards and records its existing Fame');
+   const checkpointFame=S.fame;const rt=S.tiles[0];MissionSystems.recordSurvey({kind:'radiation',c:rt.c,r:rt.r,condition:'open',exposureIndex:100,source:'simulation'});check(S.fame===checkpointFame+3,'A new observation after checkpoint earns Fame');
+   Junior.recover();check(S.fame===checkpointFame&&!S.missionSystems.surveys.open,'Retry rolls back both Fame and evidence ledger');
+   const afterRetry=MissionSystems.recordSurvey({kind:'radiation',c:rt.c,r:rt.r,condition:'open',exposureIndex:100,source:'simulation'});check(afterRetry.reward===3&&S.fame===checkpointFame+3,'Replaying evidence after retry restores the same total, never accumulates');
+   const target=S.tiles.find(t=>!t.owner&&hdist(t,S.builds[0])===4);target.type='plain';S.rover={c:target.c,r:target.r,crew:2,start:S.sol-2,arrive:S.sol,back:S.sol+2,done:false};let fame=S.fame;roverStep();check(S.fame===fame+3,'First rover terrain kind earns finite evidence Fame');S.rover.done=false;roverStep();check(S.fame===fame+3,'Repeating rover survey of same terrain kind adds no Fame');
+   Junior.start('commander',0,812);S.fame=55;check(!MissionSystems.boostInfo().supported&&!MissionSystems.activateBoost().ok&&S.fame===55,'Commander timed alignment is honestly unsupported and preserves score');
+   const ct=S.tiles[0];const commanderBefore=S.fame;MissionSystems.recordSurvey({kind:'radiation',c:ct.c,r:ct.r,condition:'open',exposureIndex:100,source:'simulation'});check(S.fame===commanderBefore+3&&medalCount()===2,'Commander field evidence adds to the existing score and medals');
+   check(/30 watt-hours/.test(MissionSystems.boostInfo().evidence.text)&&/game rules/.test(MissionSystems.boostInfo().scienceNote),'Science UI separates measured InSight evidence from tuned bonus');
+   return {checks,boost:{cost:2,workDays:1,productionDays:3,multiplier:1.2,cooldown:8},fieldEvidenceCap:17};
+  });
+  assert.deepEqual(errors,[],'No browser runtime errors');console.log(JSON.stringify(result,null,2));
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exit(1);});

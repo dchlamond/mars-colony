@@ -10,7 +10,7 @@
 <meta charset="utf-8">
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ares Atlas · Mars Colony</title>
+<title>DEAD RECKONING: BLACKOUT</title>
 <meta name="description" content="A strategy game for ages 7 to 12. Run the first town on Mars, on a real map of the planet, with real recorded NASA solar storms.">
 <meta name="generator" content="AI-assisted implementation with Claude and OpenAI Codex from the team's design. See AI_USE.md.">
 <style>
@@ -150,7 +150,7 @@ body.fp #camctl [data-a="in"],body.fp #camctl [data-a="out"],body.fp #camctl [da
 </head>
 <body>
 <header>
-  <h1>Mars Colony</h1>
+  <h1>DEAD RECKONING: BLACKOUT</h1>
   <div id="clock">Sol 1</div>
   <div id="timewrap" tabindex="0" aria-describedby="ttip">
     <div id="timebar"><div class="win" style="left:0"></div><div class="conj" id="conjband"></div><div class="win" style="right:0"></div><div class="cur" id="cur"></div></div>
@@ -1041,7 +1041,7 @@ function render(){
   $('banner').innerHTML=f;
   document.querySelectorAll('.bbtn').forEach(b=>{b.style.display=S.unlocked[b.dataset.t]?'':'none';b.classList.toggle('sel',buildSel===b.dataset.t);b.classList.toggle('poor',S.parts<DEF[b.dataset.t].cost||S.metal<DEF[b.dataset.t].metal)});
   syncScene();
-  $('camhelp').textContent=R3&&R3.fp?'Walk mode. Space pauses time. W A S D to walk. Hold Shift to run. Click the view to look with the mouse, or drag. Esc to leave.':'Drag to move the map. Scroll to zoom.';
+  $('camhelp').textContent=R3&&R3.fp?'W A S D to walk; Shift to run. Click to look, or drag. Esc frees the mouse. Back to map exits. E records a surface survey.':'Drag to move the map. Scroll to zoom.';
   $('buildhint').textContent=buildSel?DEF[buildSel].desc+' Click a tile to place it. Press Esc to cancel.':(S.cleaning?'Builders are cleaning panels. Building resumes soon.':'Free colonists do the building. Click any building on the map to read about it, switch it off or upgrade it.');
 }
 
@@ -1058,9 +1058,9 @@ function showScience(){
     modal({title:'The science behind Junior missions',keepOpen:true,html:`
       <p>Choose a place, watch the result, and discover why it matters.</p>
       <h3>Real observations</h3><p>NASA's MOLA instrument measured Mars's height. Lower ground feeds our air-thickness model, so it changes oxygen output. Real latitude feeds the sunlight model. MOXIE demonstrated making oxygen from Mars air.</p>
-      <h3>Training rules</h3><p>Buildings use Parts, crews share jobs automatically, and crops grow after four powered days. Supply shuttles bring eight Parts every eight days. These amounts and times are invented for learning.</p>
-      <p>You invite explorers only when air, food and beds are ready. Dust and radiation practice alerts give five days of warning. They are scripted lessons, not live NASA forecasts or predicted radiation doses. A shortage pauses the mission so you can retry a checkpoint.</p>
-      <h3>Read the map carefully</h3><p>Ice colours follow latitude, not surveyed deposits. Cave tiles mark volcanic regions, not confirmed entrances. Detailed sand, buildings and the fictional Martian guide are artwork.</p>`,buttons:[{label:'Data sources',fn:showData},{label:'Close',primary:true}]});return;
+      <h3>Training rules</h3><p>Buildings use Parts, crews share jobs automatically, and crops grow after four powered days. Supply shuttles bring eight Parts and twelve water every eight days. A powered Water Processor recovers more used water, and only an ice-site processor extracts new water. These amounts and times are invented for learning.</p>
+      <p>You invite explorers only when air, water, food, beds and crew capacity are ready. Dust and radiation practice alerts give five days of warning. They are scripted lessons, not live NASA forecasts or predicted radiation doses. A shortage pauses the mission so you can retry a checkpoint.</p>
+      <h3>Read the map carefully</h3><p>Ice colours follow latitude, not surveyed deposits. Cave tiles mark volcanic regions, not confirmed entrances. Detailed sand, buildings and the fictional human mission adviser are artwork.</p>`,buttons:[{label:'Data sources',fn:showData},{label:'Close',primary:true}]});return;
   }
   modal({title:'The science behind the game',html:`
    <p>This game is <b>based on real data</b>. It is not a full simulation. Numbers are made smaller and rounder so they are easy to follow.</p>
@@ -1081,7 +1081,7 @@ function showData(){
    <p><b>Facts shown on cards</b></p>
    <table>${Object.values(FACTS).map(f=>`<tr><td>${f.t}</td><td>${link(f.s,f.u)}</td></tr>`).join('')}</table>
    <p><b>Upgrades and Mission Control problems</b></p><table>${Object.values(RESEARCH).map(f=>`<tr><td>${f.fact}</td><td>${link(f.src,f.u)}</td></tr>`).join('')}${PROBLEMS.map(q=>`<tr><td>${typeof q.why==='function'?q.why():q.why}</td><td>${link(q.src,q.u)}</td></tr>`).join('')}</table>
-   <p><b>The map</b> is the real shape of Mars: the ground is shaped by heights from the MOLA laser altimeter (NASA Mars Global Surveyor, served by <a href="https://trek.nasa.gov/mars/" target="_blank" rel="noopener">NASA Mars Trek</a>) and coloured with a real global image of Mars from <a href="https://github.com/nasa/NASA-3D-Resources" target="_blank" rel="noopener">NASA 3D Resources</a>, sharpened with MOLA shaded relief so craters and valleys show clearly. In Walk mode, the sand texture and small rocks under your feet are drawn by the game, not photographed. A button switches to the MOLA colour height map. Tile coordinates are real latitude and longitude. Heights are stretched so mountains show.</p><p><b>Real data that changes the game:</b> a tile's height sets how thick the air is (oxygen extractors), its latitude sets sunlight (solar panels) and ice, and sunlight and air outputs follow clearly simplified formulas. Commander storm scenarios reference archived DONKI records near Earth; the May 20, 2024 scenario also cites a Mars surface measurement. Junior practice storms use their own teaching schedule. Earth records are not evidence of a Mars impact.</p><p><b>Artwork and 3D models.</b> Ares habitats and greenhouses were authored in Blender; the other colony buildings and articulated astronauts are original game models. Fine sand textures are original artistic detail. The fictional Martian guide is Grok Imagine artwork, visibly labeled in the interface. The exploration rover comes from <a href="https://github.com/nasa/NASA-3D-Resources" target="_blank" rel="noopener">NASA 3D Resources</a>. The older Habitat Demonstration Unit, InSight and astronaut files remain packaged as legacy assets. Agency logos, flags and mission patches were painted over on the NASA textures.</p><p><b>Not real yet.</b> Ice tiles follow a latitude rule of thumb, not the SWIM maps. Lava tube tiles mark volcano regions, not individual catalogued caves.</p>
+   <p><b>The map</b> is the real shape of Mars: the ground is shaped by heights from the MOLA laser altimeter (NASA Mars Global Surveyor, served by <a href="https://trek.nasa.gov/mars/" target="_blank" rel="noopener">NASA Mars Trek</a>) and coloured with a real global image of Mars from <a href="https://github.com/nasa/NASA-3D-Resources" target="_blank" rel="noopener">NASA 3D Resources</a>, sharpened with MOLA shaded relief so craters and valleys show clearly. In Walk mode, the close-up regolith artwork and Blender rocks are illustrative, not surveyed geology. A button switches to the MOLA colour height map. Tile coordinates are real latitude and longitude. Heights are stretched so mountains show.</p><p><b>Real data that changes the game:</b> a tile's height sets how thick the air is (oxygen extractors), its latitude sets sunlight (solar panels) and ice, and sunlight and air outputs follow clearly simplified formulas. Commander storm scenarios reference archived DONKI records near Earth; the May 20, 2024 scenario also cites a Mars surface measurement. Junior practice storms use their own teaching schedule. Earth records are not evidence of a Mars impact.</p><p><b>Artwork and 3D models.</b> All current colony building types, the articulated suit, survey rover, crew shuttle and layered rocks were authored in Blender. The NASA MOLA map was rebuilt in Blender from the same height samples. Fine regolith colour is original Grok Imagine artwork, with Blender mineral normals. These local details are illustrative, not surveyed geology. The fictional human mission adviser is Grok Imagine artwork, visibly labeled in the interface. The older NASA Habitat Demonstration Unit, InSight, Perseverance and astronaut files remain packaged as legacy assets; current Ares vehicles and crew are original Blender designs. Agency logos, flags and mission patches were painted over on the NASA textures.</p><p><b>Not real yet.</b> Ice tiles follow a latitude rule of thumb, not the SWIM maps. Lava tube tiles mark volcano regions, not individual catalogued caves.</p>
    <p><small>NASA data portals: <a href="https://ccmc.gsfc.nasa.gov/tools/DONKI/" target="_blank" rel="noopener">DONKI</a>, <a href="https://trek.nasa.gov/mars/" target="_blank" rel="noopener">Mars Trek</a>, <a href="https://api.nasa.gov/" target="_blank" rel="noopener">NASA Open APIs</a>.</small></p>
    <p><b>Listed by the challenge, not used yet:</b> <a href="https://osdr.nasa.gov/bio/repo/" target="_blank" rel="noopener">OSDR</a> and <a href="https://visualization.osdr.nasa.gov/radlab/gui/data-api/" target="_blank" rel="noopener">RadLab</a>.</p>
    <p><small>NASA does not endorse this game.</small></p>`,
@@ -1090,10 +1090,10 @@ function showData(){
 
 function showCredits(){
   modal({title:'Credits',html:`
-   <p><b>Mars Colony: Junior Mission Trainer</b> was made for the NASA Space Apps Challenge 2026.</p>
+   <p><b>DEAD RECKONING: BLACKOUT</b> was made for the NASA Space Apps Challenge 2026.</p>
    <p><b>NASA does not endorse this game.</b></p>
    <h3>How AI was used</h3>
-   <p>The idea and direction are the team's own. Claude (Anthropic) and OpenAI Codex assisted with code, lesson wording, interface design and testing. The Ares buildings are original models authored with AI-assisted Blender scripts. The selected visual concept was explored with Grok Imagine. Illustrated terrain detail is artistic; NASA data and simplified game rules are identified separately.</p>
+   <p>The idea and direction are the team's own. Claude (Anthropic) and OpenAI Codex assisted with code, lesson wording, interface design and testing. The Ares buildings are original models authored with AI-assisted Blender scripts. The selected visual concept, regolith colour material and fictional guide portrait were created with Grok Imagine. Original Blender models and Cycles thumbnails are incorporated into the playable game. Browser lighting uses screen-space occlusion and shadow maps, not UE5 Lumen or hardware ray tracing. Illustrated terrain detail is artistic; NASA data and simplified game rules are identified separately.</p>
    <h3>Things made by other people</h3>
    <table>
    <tr><td>three.js r128, with its GLTFLoader and DRACOLoader</td><td>MIT licence</td></tr>
@@ -1190,7 +1190,7 @@ function init3D(){
   const ring=new THREE.Mesh(new THREE.TorusGeometry(0.93,0.05,4,6),new THREE.MeshBasicMaterial({color:0xfffaf0})); ring.rotation.x=Math.PI/2; ringHold.add(ring); ringHold.visible=false; scene.add(ringHold);
   const sg=new THREE.BufferGeometry(); sg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(600*3),3));
   const specks=new THREE.Points(sg,new THREE.PointsMaterial({color:0xffffff,size:0.14})); specks.visible=false; scene.add(specks);
-  R3={renderer,scene,cam,hemi,sun,map,texTopo,texPhoto,topo:false,world,overlay,ring,ringHold,specks,target:new THREE.Vector3(),dist:18,yaw:0,pitch:0.9,bmeshes:new Set(),spin:[],labels:[],places:[],cflags:[],models:{},seenCount:-1};
+  R3={renderer,scene,cam,hemi,sun,map,texTopo,texPhoto,topo:false,world,overlay,ring,ringHold,specks,target:new THREE.Vector3(),dist:18,yaw:0,pitch:0.9,bmeshes:new Set(),spin:[],labels:[],places:[],cflags:[],models:{},seenCount:-1,surfaceGrid:{nx:HQ?640:240,ny:HQ?320:120}};
   // close-up ground detail: a patch of sandy texture and scattered rocks that follows the walker
   { const c=document.createElement('canvas'); c.width=c.height=256; const g=c.getContext('2d'); g.fillStyle='#b98a5e'; g.fillRect(0,0,256,256); let a=7;
     const rnd=()=>{a=(a*9301+49297)%233280;return a/233280;};
@@ -1205,33 +1205,89 @@ function layPatch(x,z){ const P=R3.patch, pos=P.geometry.attributes.position; P.
   for(let i=0;i<pos.count;i++) pos.setY(i,groundY(x+pos.getX(i),z+pos.getZ(i))+0.012); pos.needsUpdate=true; P.geometry.computeVertexNormals(); P.userData.c=[x,z];
   const m=new THREE.Matrix4(), q=new THREE.Quaternion(), e=new THREE.Euler(), v=new THREE.Vector3(), sc=new THREE.Vector3(); let a=Math.floor(x*13+z*7)+99991;
   const rnd=()=>{a=(a*9301+49297)%233280;return a/233280;};
-  for(let i=0;i<R3.rocks.count;i++){ const rx=x+(rnd()-.5)*24, rz=z+(rnd()-.5)*24, k=0.015+rnd()*rnd()*0.11; e.set(rnd()*6,rnd()*6,rnd()*6); q.setFromEuler(e); v.set(rx,groundY(rx,rz)+k*0.4,rz); sc.set(k,k*(0.5+rnd()*0.6),k); m.compose(v,q,sc); R3.rocks.setMatrixAt(i,m); }
+  for(let i=0;i<R3.rocks.count;i++){ const rx=x+(rnd()-.5)*24, rz=z+(rnd()-.5)*24, k=0.015+rnd()*rnd()*0.11; e.set(rnd()*6,rnd()*6,rnd()*6); q.setFromEuler(e); v.set(rx,surfaceY(rx,rz)+k*0.4,rz); sc.set(k,k*(0.5+rnd()*0.6),k); m.compose(v,q,sc); R3.rocks.setMatrixAt(i,m); }
   R3.rocks.instanceMatrix.needsUpdate=true; }
-// ---------- Walk mode: stand on the surface and look around your colony ----------
-const keys={};
-function toggleWalk(){ if(!R3) return; const btn=document.querySelector('#camctl [data-a="walk"]');
-  if(R3.fp){ R3.fp=null; R3.fpLocked=false; if(document.pointerLockElement&&document.exitPointerLock) document.exitPointerLock(); R3.cam.fov=36; R3.cam.near=0.1; R3.cam.updateProjectionMatrix(); R3.patch.visible=R3.rocks.visible=false; document.body.classList.remove('fp'); btn.textContent='Walk on Mars';
-    R3.scene.fog.near=300; R3.scene.fog.far=900; const pod=S.builds[0]; R3.target.set(tx(pod),0,tz(pod)); setSpeed(S.speed); render(); return; }
-  const pod=S.builds[0]; R3.fp={x:tx(pod)+1.6,z:tz(pod)+1.9,yaw:0.70,pitch:0.04,vx:0,vz:0,step:0,y:null}; R3.fpSpeed=S.speed; setSpeed(1); for(const k in keys) keys[k]=false; if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();
-  R3.cam.fov=62; R3.cam.near=0.03; R3.cam.updateProjectionMatrix(); layPatch(R3.fp.x,R3.fp.z); R3.patch.visible=R3.rocks.visible=true; document.body.classList.add('fp'); btn.textContent='Back to the map'; hover=null; $('tip').style.display='none'; render(); }
-const WALK_RANGE=200;   // how far from the landing pod you may walk, in tiles (a game limit)
-function tileNear(x,z){ let best=null,bd=1e9; const r0=Math.round(z/1.5); for(let r=r0-1;r<=r0+1;r++){ const c0=Math.round(x/SQ3-0.5*(r&1)); for(let c=c0-1;c<=c0+1;c++){ const t=tileAt(c,r); if(!t) continue; const d=(tx(t)-x)**2+(tz(t)-z)**2; if(d<bd){bd=d;best=t;} } } return best; }
-function walkStep(dt){ const f=R3.fp, pod=S.builds[0]; let mv=0, st=0;
-  if(keys.w||keys.arrowup||R3.fpFwd) mv+=1; if(keys.s||keys.arrowdown) mv-=1; if(keys.a) st-=1; if(keys.d) st+=1;
-  if(keys.arrowleft||keys.q) f.yaw+=dt*1.8; if(keys.arrowright||keys.e) f.yaw-=dt*1.8;
-  const dx=-Math.sin(f.yaw), dz=-Math.cos(f.yaw), len=Math.hypot(mv,st)||1, top=1.6*(keys.shift?2.4:1);
-  const wx=(dx*mv-dz*st)/len*top, wz=(dz*mv+dx*st)/len*top, ease=Math.min(1,dt*9);   // ease in and out, so steps do not start or stop dead
-  f.vx+=(wx-f.vx)*ease; f.vz+=(wz-f.vz)*ease;
-  let nx=f.x+f.vx*dt, nz=f.z+f.vz*dt;
-  const ox=nx-tx(pod), oz=nz-tz(pod), d=Math.hypot(ox,oz); if(d>WALK_RANGE){ nx=tx(pod)+ox/d*WALK_RANGE; nz=tz(pod)+oz/d*WALK_RANGE; }
-  f.x=Math.max(X0+1,Math.min(X0+PW-1,nx)); f.z=Math.max(Z0+1,Math.min(Z0+PH-1,nz));
-  const c=R3.patch.userData.c; if(Math.hypot(f.x-c[0],f.z-c[1])>5) layPatch(f.x,f.z);
-  const spd=Math.hypot(f.vx,f.vz); f.step+=spd*dt*5.5;
-  const gy=groundY(f.x,f.z)+0.36; f.y=f.y==null?gy:f.y+(gy-f.y)*Math.min(1,dt*12);
-  const y=f.y+Math.sin(f.step)*0.012*Math.min(1,spd), cp=Math.cos(f.pitch);
-  R3.cam.position.set(f.x,y,f.z); R3.cam.lookAt(f.x+dx*cp,y+Math.sin(f.pitch),f.z+dz*cp); R3.target.set(f.x,0,f.z);
-  const t=tileNear(f.x,f.z); if(t&&t!==f.tile){ f.tile=t; const b=t.build&&t.build.done?DEF[t.build.type].name:null;
-    $('fphud').innerHTML=`<b>${b||(t.type==='ice'?'Likely buried ice':t.type==='lava'?'Lava tube country':'Open ground')}</b> ${coord(t)} &middot; ${t.elev>=0?'+':''}${t.elev.toFixed(1)} km high &middot; Sunlight ${Math.round(t.sun*100)}% &middot; Air thickness ${Math.round(t.air*100)}%`; } }
+// ---------- Walk mode: continuous longitude, one visible collision surface ----------
+const keys={}, WALK_EYE=.49, WALK_BODY=.10, WALK_POLE_MARGIN=.025;
+const wrapWorldX=x=>X0+((x-X0)%PW+PW)%PW;
+function surfaceY(x,z){
+  // Match the actual rendered grid triangles, rather than bilinear DEM height
+  // between their vertices. The scientific DEM remains unchanged.
+  const grid=R3?.surfaceGrid||{nx:360,ny:180},u=(wrapWorldX(x)-X0)/PW*grid.nx,v=Math.max(0,Math.min(grid.ny,(z-Z0)/PH*grid.ny));
+  const ix=Math.min(grid.nx-1,Math.floor(u)),iz=Math.min(grid.ny-1,Math.floor(v)),fx=u-ix,fz=v-iz;
+  const x0=X0+ix/grid.nx*PW,z0=Z0+iz/grid.ny*PH,x1=x0+PW/grid.nx,z1=z0+PH/grid.ny;
+  const a=groundY(x0,z0),b=groundY(x1,z0),c=groundY(x0,z1),d=groundY(x1,z1);
+  return fx+fz<=1?a+(b-a)*fx+(c-a)*fz:d+(c-d)*(1-fx)+(b-d)*(1-fz);
+}
+function walkBlocked(x,z){
+  // Collide only with visible pressure buildings, not tile boundaries or
+  // decorative rock particles. Rounded footprints allow walking past corners.
+  const px=wrapWorldX(x);
+  const site=R3.surveySite;if(site){let dx=px-site.x;dx-=Math.round(dx/PW)*PW;if((dx/1.26)**2+((z-site.z)/.80)**2<1)return true;}
+  return S.builds.some(b=>{
+    if(!b.done||!['pod','habitat','green','shield','dome','reactor','moxie','battery','mine','ice'].includes(b.type))return false;
+    let dx=px-tx(b);dx-=Math.round(dx/PW)*PW;
+    const radius=(b.type==='green'?.63:b.type==='pod'||b.type==='habitat'?.66:.57)+WALK_BODY;
+    return dx*dx+(z-tz(b))**2<radius*radius;
+  });
+}
+function safeWalkEntry(x,z){
+  x=wrapWorldX(x);z=Math.max(Z0+WALK_POLE_MARGIN,Math.min(Z0+PH-WALK_POLE_MARGIN,z));
+  if(!walkBlocked(x,z))return {x,z};
+  for(let radius=1.30;radius<=4;radius+=.20)for(let i=0;i<24;i++){
+    const a=i*Math.PI/12,nx=x+Math.sin(a)*radius,nz=z+Math.cos(a)*radius;
+    if(nz>Z0+WALK_POLE_MARGIN&&nz<Z0+PH-WALK_POLE_MARGIN&&!walkBlocked(nx,nz))return {x:wrapWorldX(nx),z:nz};
+  }
+  return {x:wrapWorldX(x+3.2),z};
+}
+function clearWalkInput(){for(const k in keys)keys[k]=false;if(R3){R3.fpFwd=false;if(R3.fp)R3.fp.vx=R3.fp.vz=0;}}
+function toggleWalk(){if(!R3)return;const btn=document.querySelector('#camctl [data-a="walk"]');
+  if(R3.fp){
+    const ending=R3.fp;clearWalkInput();R3.fp=null;R3.fpLocked=false;
+    if(document.pointerLockElement&&document.exitPointerLock)document.exitPointerLock();
+    R3.cam.fov=36;R3.cam.near=.1;R3.cam.updateProjectionMatrix();R3.patch.visible=R3.rocks.visible=false;
+    document.body.classList.remove('fp');btn.textContent='Walk on Mars';R3.scene.fog.near=300;R3.scene.fog.far=900;
+    R3.target.set(wrapWorldX(ending.x),0,ending.z);window.SurfaceSurvey?.update();render();return;
+  }
+  const focus=R3.target.clone(),place=safeWalkEntry(focus.x,focus.z),facing=Math.hypot(place.x-focus.x,place.z-focus.z)>.2?Math.atan2(place.x-focus.x,place.z-focus.z):R3.yaw;
+  R3.fp={...place,yaw:facing,pitch:0.04,vx:0,vz:0,step:0,y:surfaceY(place.x,place.z)+WALK_EYE};R3.fpSpeed=S.speed;
+  if(!window.Junior?.isActive())setSpeed(1);clearWalkInput();
+  if(document.activeElement?.blur)document.activeElement.blur();
+  R3.cam.fov=62;R3.cam.near=.025;R3.cam.updateProjectionMatrix();layPatch(place.x,place.z);
+  // The whole map now has the artistic ground material. The old second,
+  // differently tessellated opaque patch crossed mountains and hid the surface.
+  R3.patch.visible=false;R3.rocks.visible=true;document.body.classList.add('fp');btn.textContent='Back to the map';
+  hover=null;$('tip').style.display='none';walkStep(0);window.SurfaceSurvey?.update();render();
+}
+function tileNear(x,z){x=wrapWorldX(x);let best=null,bd=1e9;const r0=Math.round(z/1.5);for(let r=Math.max(0,r0-1);r<=Math.min(ROWS-1,r0+1);r++)for(let dc=-1;dc<=1;dc++){
+  const c0=Math.round(x/SQ3-.5*(r&1)),c=((c0+dc)%COLS+COLS)%COLS,t=tileAt(c,r);if(!t)continue;
+  let dx=tx(t)-x;dx-=Math.round(dx/PW)*PW;const d=dx*dx+(tz(t)-z)**2;if(d<bd){bd=d;best=t;}
+}return best;}
+function walkStep(dt){const f=R3.fp;if(!f)return;dt=Math.max(0,Math.min(.1,Number.isFinite(dt)?dt:0));let mv=0,st=0;
+  if(keys.w||keys.arrowup||R3.fpFwd)mv++;if(keys.s||keys.arrowdown)mv--;if(keys.a)st--;if(keys.d)st++;
+  if(keys.arrowleft||keys.q)f.yaw+=dt*1.8;if(keys.arrowright)f.yaw-=dt*1.8;
+  const dx=-Math.sin(f.yaw),dz=-Math.cos(f.yaw),len=Math.hypot(mv,st)||1,top=1.6*(keys.shift?2.4:1),ease=1-Math.exp(-dt*9);
+  f.vx+=((dx*mv-dz*st)/len*top-f.vx)*ease;f.vz+=((dz*mv+dx*st)/len*top-f.vz)*ease;
+  const steps=Math.max(1,Math.ceil(Math.hypot(f.vx,f.vz)*dt/.06)),step=dt/steps;f.boundary='';
+  for(let i=0;i<steps;i++){
+    const nx=f.x+f.vx*step,wantedZ=f.z+f.vz*step,nz=Math.max(Z0+WALK_POLE_MARGIN,Math.min(Z0+PH-WALK_POLE_MARGIN,wantedZ));
+    if(nz!==wantedZ){f.boundary=wantedZ<Z0+WALK_POLE_MARGIN?'North polar edge: turn back or use the map.':'South polar edge: turn back or use the map.';f.vz=0;}
+    if(!walkBlocked(nx,nz)){f.x=nx;f.z=nz;}
+    else if(!walkBlocked(nx,f.z)){f.x=nx;f.vz=0;}
+    else if(!walkBlocked(f.x,nz)){f.z=nz;f.vx=0;}
+    else {f.vx=f.vz=0;}
+  }
+  const c=R3.patch.userData.c;if(!c||Math.hypot(f.x-c[0],f.z-c[1])>5)layPatch(f.x,f.z);R3.patch.visible=false;
+  const spd=Math.hypot(f.vx,f.vz);f.step+=spd*dt*5.5;
+  const standing=surfaceY(f.x,f.z)+WALK_EYE;f.y=f.y==null?standing:Math.max(standing,f.y+(standing-f.y)*Math.min(1,dt*16));
+  const reduced=document.body.classList.contains('reduce-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const y=Math.max(standing,f.y+(reduced?0:Math.sin(f.step)*.008*Math.min(1,spd))),cp=Math.cos(f.pitch);
+  R3.cam.position.set(f.x,y,f.z);R3.cam.lookAt(f.x+dx*cp,y+Math.sin(f.pitch),f.z+dz*cp);R3.target.set(f.x,0,f.z);
+  const t=tileNear(f.x,f.z);if(t&&(t!==f.tile||f.boundary!==f.lastBoundary)){f.tile=t;f.lastBoundary=f.boundary;const b=t.build&&t.build.done?DEF[t.build.type].name:null;
+    $('fphud').innerHTML=`<b>${b||(t.type==='ice'?'Possible buried ice':t.type==='lava'?'Lava tube country':'Open ground')}</b> ${coord(t)} &middot; ${t.elev>=0?'+':''}${t.elev.toFixed(1)} km &middot; ${f.boundary||'E: record survey · Back to map above'}`;
+  }
+  window.SurfaceSurvey?.update();
+}
 
 function resize3D(){ if(!R3)return; document.documentElement.style.setProperty('--hh',(document.querySelector('header').offsetHeight+20)+'px');
   const w=view.clientWidth,h=view.clientHeight; R3.renderer.setSize(w,h); R3.cam.aspect=w/h; R3.cam.updateProjectionMatrix(); }
@@ -1249,7 +1305,7 @@ function loadModels(){ if(!THREE.GLTFLoader) return; const L=new THREE.GLTFLoade
       o.position.set(-c.x*k,-box.min.y*k,-c.z*k); o.scale.setScalar(k);
       // The scene has no reflection map, so fully metallic surfaces would render black. Cap how metallic the NASA models are.
       o.traverse(n=>{ if(n.isMesh&&n.material){ for(const mt of [].concat(n.material)){ if(mt.metalness>0.3) mt.metalness=0.3; if(mt.roughness<0.45) mt.roughness=0.45; } } });
-      const hold=new THREE.Group(); hold.add(o); if(!R3) return; R3.models[key]=hold;
+      const hold=new THREE.Group(); hold.add(o); if(!R3) return; if(!(key==='perseverance'&&window.AresWorld?.rover))R3.models[key]=hold;
       if(!R3) return; for(const m of R3.bmeshes) if(m.userData.want===key) fillBuilding(m,m.userData.type,true);
       if(S) render();
     },()=>{}); };
@@ -1297,7 +1353,7 @@ function buildWorld(){
   R3.grid=hexLines(S.tiles,0x1a0f0a,0.22,0.05); O.add(R3.grid); R3.terr=new THREE.Group(); O.add(R3.terr); R3.terrSig='';
   R3.rmesh=S.rivals.map(r=>{ const g=new THREE.Group(); fillBuilding(g,'pod'); const t=tileAt(r.c,r.r); g.position.set(tx(t),tileY(t)+0.03,tz(t)); O.add(g); return g; });
   R3.cflags.forEach(f=>f.remove()); R3.cflags=[];
-  O.add(hexFill(S.tiles.filter(t=>t.type==='ice'),0xe4f2ff,0.2,0.07));
+  O.add(hexFill(S.tiles.filter(t=>t.type==='ice'),0xe4f2ff,0.025,0.07));
   for(const t of S.tiles.filter(t=>t.type==='lava')){ const g=new THREE.Group(); g.position.set(tx(t),tileY(t)+0.04,tz(t));
     part(g,new THREE.CylinderGeometry(0.4,0.4,0.03,16),0x0d0705,0,0.01,0); const m=part(g,new THREE.TorusGeometry(0.42,0.07,6,16),0x5e3520,0,0.04,0); m.rotation.x=Math.PI/2; t.decor=g; W.add(g); }
   S.builds.forEach(b=>{b.mesh=null;b.astro=null});
@@ -1346,11 +1402,11 @@ function syncScene(){
   for(const b of S.builds){ const t=tileAt(b.c,b.r);
     if(!b.mesh){ b.mesh=new THREE.Group(); b.mesh.userData.b=b; fillBuilding(b.mesh,b.type); b.mesh.rotation.y=(b.type==='pod'?0.4:t.shade*6.28); R3.world.add(b.mesh); R3.bmeshes.add(b.mesh); b.solid=null; }
     b.mesh.position.set(tx(t),tileY(t)+0.03,tz(t)); live.add(b.mesh);
-    if(!b.done){ const p=b.progress/DEF[b.type].work; b.mesh.scale.setScalar(0.35+0.65*p); if(b.solid!==false){ghost(b.mesh,true);b.solid=false;} }
+    if(!b.done){ const p=b.progress/(window.Junior?.isActive()?Junior.work(b.type):DEF[b.type].work); b.mesh.scale.setScalar(0.35+0.65*p); if(b.solid!==false){ghost(b.mesh,true);b.solid=false;} }
     else if(S.sol<(b.offUntil||0)){ if(b.solid!==false){ghost(b.mesh,true);b.solid=false;} }
     else if(b.solid!==true){ b.mesh.scale.setScalar((b.lvl||1)>1?1.22:1); ghost(b.mesh,false); b.solid=true; }
     // an astronaut stands by every machine that has a worker, and by every building site
-    const need=(!b.done)||(DEF[b.type].worker&&b.staffed)||window.ColonySystems?.repairing(b);
+    const need=!window.Junior?.isActive()&&((!b.done)||(DEF[b.type].worker&&b.staffed)||window.ColonySystems?.repairing(b));
     if(need&&!b.astro){ b.astro=makeWorker(); const a=t.shade*6.28+2; b.astro.position.set(tx(t)+Math.cos(a)*0.72,groundY(tx(t)+Math.cos(a)*0.72,tz(t)+Math.sin(a)*0.72)+0.02,tz(t)+Math.sin(a)*0.72); b.astro.rotation.y=-a+Math.PI/2; R3.world.add(b.astro); }
     if(b.astro){ b.astro.visible=!!need; live.add(b.astro); }
   }
@@ -1394,7 +1450,7 @@ function drawFlags(w,h,v){ const list=[{name:ME.name,av:ME.av,css:ME.css,pop:S.p
   list.forEach((o,i)=>{ let el=R3.cflags[i]; if(!el){ el=document.createElement('div'); el.className='cflag'; $('labels').appendChild(el); R3.cflags[i]=el; }
     const key=o.name+o.av+o.pop; if(el.dataset.k!==key){ el.dataset.k=key; el.style.borderColor=o.css; el.innerHTML=avatar(o.av,o.css,26)+`<span>${esc(o.name)} <small>${o.pop}</small></span>`; }
     v.set(tx(o.t),tileY(o.t)+2.3,tz(o.t)).project(R3.cam); const on=v.z<1&&Math.abs(v.x)<1.2&&Math.abs(v.y)<1.2; el.style.display=on?'flex':'none'; if(on){ el.style.left=((v.x+1)/2*w)+'px'; el.style.top=((1-v.y)/2*h-16)+'px'; } });
-  const op=R3.fp?0:Math.max(0.12,Math.min(0.75,(R3.dist-9)/14)); (R3.names||[]).forEach(m=>m.material.opacity=op); }
+  const op=R3.fp?0:Math.max(0,Math.min(0.55,(R3.dist-17)/18)); (R3.names||[]).forEach(m=>m.material.opacity=op); }
 function drawRover(now){
   if(!R3.models.perseverance) return;
   if(!R3.roverMesh){ R3.roverMesh=cloneModel('perseverance'); R3.roverMesh.scale.setScalar(0.8); R3.scene.add(R3.roverMesh); }
@@ -1404,7 +1460,7 @@ function drawRover(now){
   const x=tx(pod)+(tx(tgt)-tx(pod))*f, z=tz(pod)+(tz(tgt)-tz(pod))*f;
   m.position.set(x,groundY(x,z)+0.03,z); m.rotation.y=Math.atan2(tx(tgt)-tx(pod),tz(tgt)-tz(pod))+(t<R.arrive?0:Math.PI); }
 function badgeFor(b){ const d=DEF[b.type];
-  if(!b.done) return 'Building '+Math.round(b.progress/d.work*100)+'%';
+  if(!b.done) return 'Building '+Math.round(b.progress/(window.Junior?.isActive()?Junior.work(b.type):d.work)*100)+'%';
   if(S.sol<(b.offUntil||0)) return 'Upgrading: '+(b.offUntil-S.sol)+' sols';
   if(b.type==='green'&&b.powered&&(b.age||0)<growT()) return 'Growing: '+(growT()-(b.age||0))+' sols';
   if(!d.worker) return null; if(!b.on) return 'OFF'; if(!b.staffed) return S.eco&&S.eco.sheltering?null:'NO WORKER'; if(d.use&&!b.powered) return 'NO POWER'; return null; }
@@ -1412,18 +1468,18 @@ function animate3D(now){
   if(!R3) return; const {cam,target}=R3;
   const gy=groundY(target.x,target.z); R3.yaw=0; R3.pitch=tiltFor(R3.dist);
   const dtw=Math.min(0.1,(now-(R3.tPrev||now))/1000); R3.tPrev=now;
-  { const near=Math.max(0,Math.min(1,(21-R3.dist)/7)); if(R3.grid) R3.grid.material.opacity=R3.fp?0.08:buildSel?0.3:0.2*near; if(R3.tints) for(const m of R3.tints) m.material.opacity=R3.fp?0.1:0.34-0.14*near; }
+  { const near=Math.max(0,Math.min(1,(21-R3.dist)/7)); if(R3.grid) R3.grid.material.opacity=R3.fp?0.08:buildSel?0.3:0.2*near; if(R3.tints) for(const m of R3.tints) m.material.opacity=R3.fp?0.025:0.07-0.04*near; }
   if(R3.fp){ walkStep(dtw); R3.scene.userData.sky.position.copy(cam.position); const dusty=S.dust&&S.dust.active; R3.scene.fog.near=dusty?1:3; R3.scene.fog.far=dusty?14:70; }
   else { R3.scene.userData.sky.position.set(target.x,0,target.z);
   cam.position.set(target.x+R3.dist*Math.cos(R3.pitch)*Math.sin(R3.yaw), gy+R3.dist*Math.sin(R3.pitch), target.z+R3.dist*Math.cos(R3.pitch)*Math.cos(R3.yaw));
   cam.lookAt(target.x,gy+0.3,target.z); }
-  R3.sun.position.set(target.x-26,30,target.z+18);
+  R3.sun.position.set(target.x-26,18,target.z+18);
   drawRover(now); R3.sun.target.position.copy(target);
   if(R3.specks.visible){ const p=R3.specks.geometry.attributes.position; for(let i=0;i<p.count;i++) p.setXYZ(i,target.x+(Math.random()-.5)*40,gy+Math.random()*10,target.z+(Math.random()-.5)*40); p.needsUpdate=true; }
   if(hover&&!R3.fp){ R3.ringHold.visible=true; R3.ringHold.position.set(tx(hover),tileY(hover)+0.14+Math.sin(now*0.005)*0.02,tz(hover));
-    let ok=true; if(buildSel==='rover'){ const d=hdist(hover,S.builds[0]); ok=d>=3&&d<=10&&!S.rover; } else if(buildSel) ok=hover.seen&&!hover.build&&hover.type!=='rock'&&!(DEF[buildSel].needs==='ice'&&hover.type!=='ice'); R3.ring.material.color.set(ok?0xfffaf0:0xff4a2e); } else R3.ringHold.visible=false;
+    let ok=true; if(buildSel==='rover'){ const d=hdist(hover,S.builds[0]); ok=d>=3&&d<=10&&!S.rover; } else if(buildSel) ok=hover.seen&&!hover.build&&hover.type!=='rock'&&!(DEF[buildSel].needs==='ice'&&!window.Junior?.isActive()&&hover.type!=='ice'); R3.ring.material.color.set(ok?0xfffaf0:0xff4a2e); } else R3.ringHold.visible=false;
   animateWorkers(dtw);
-  R3.renderer.render(R3.scene,cam);
+  if(window.AresRender)AresRender.render();else R3.renderer.render(R3.scene,cam);
   const box=$('labels'), w=view.clientWidth, h=view.clientHeight; let i=0; const v=new THREE.Vector3();
   for(const b of S.builds){ const txt=badgeFor(b); if(!txt||!b.mesh) continue; v.set(b.mesh.position.x,b.mesh.position.y+1.5,b.mesh.position.z).project(cam); if(v.z>1) continue;
     let el=R3.labels[i]; if(!el){ el=document.createElement('div'); box.appendChild(el); R3.labels[i]=el; }
@@ -1444,19 +1500,19 @@ function pick(ev){ if(!R3) return null; const rc=R3.renderer.domElement.getBound
   return best; }
 const coord=t=>{ const la=latOf(t), lo=lonOf(t); return Math.abs(la).toFixed(0)+'°'+(la>=0?'N':'S')+', '+Math.abs(lo).toFixed(0)+'°'+(lo>=0?'E':'W'); };
 function showTip(ev){ const tip=$('tip'); if(!hover){tip.style.display='none';return;}
-  const t=hover, b=t.build; let h='';
-  if(b){ const d=DEF[b.type]; h=`<b>${d.name}</b>`+(b.done?'':` <small>Being built: ${Math.round(b.progress/d.work*100)}%. Click to cancel.</small>`);
+  const t=hover, b=t.build,junior=!!window.Junior?.isActive(); let h='';
+  if(b){ const d=DEF[b.type]; h=`<b>${junior&&b.type==='ice'?'Water Processor':d.name}</b>`+(b.done?'':` <small>Being built: ${Math.round(b.progress/(junior?Junior.work(b.type):d.work)*100)}%. Click to cancel.</small>`);
     if(b.done&&b.type==='pod') h+='<small>Where it all began. +3 power, shelters 3, beds for 8.</small>';
-    else if(b.done){ h+=`<small>${d.line}${d.worker?', needs 1 worker':''}${(b.lvl||1)>1?' (level 2)':''}</small><small>Click for details and upgrades.</small>`; } }
+    else if(b.done){ h+=`<small>${junior?Junior.info(b.type).benefit:d.line}${d.worker?', needs 1 worker':''}${(b.lvl||1)>1?' (level 2)':''}</small><small>Click for details and upgrades.</small>`; } }
   else h=`<b>${t.type==='ice'?'Likely buried ice':t.type==='lava'?'Lava tube country':'Open ground'}</b>`
-    +(t.type==='ice'?'<small>Good for an Ice Melter. Far from the equator, ice hides just under the soil.</small>':t.type==='lava'?'<small>Caves cluster around the giant Tharsis and Elysium volcanoes. A shield here protects 14 colonists.</small>':'')
+    +(t.type==='ice'?'<small>A possible water-extraction site. This is a latitude estimate, not a surveyed ice deposit.</small>':t.type==='lava'?'<small>Caves cluster around the giant Tharsis and Elysium volcanoes. A shield here protects 14 colonists.</small>':'')
     ;
   h+=`<small>${coord(t)} &middot; ${t.elev>=0?'+':''}${t.elev.toFixed(1)} km high</small><small>Sunlight ${Math.round(t.sun*100)}% &middot; Air thickness ${Math.round(t.air*100)}%</small>`;
-  if(buildSel==='rover'){ const d=hdist(t,S.builds[0]); h+=`<small><b>${d<3?'Too close to explore.':d>10?'Too far for the rover.':`Trip: ${2*d} sols there and back.`}</b></small>`; }
+  if(buildSel==='rover'){ const d=hdist(t,S.builds[0]); h+=`<small><b>${d<3?'Too close to explore.':d>10?'Too far for the rover.':`Trip: ${junior?'4 days':2*d+' sols'} there and back.`}</b></small>`; }
   if(t.owner) h+=`<small><b>Territory of ${S.rivals[t.owner-1].name}.</b> You cannot build here.</small>`; else if(!t.seen) h+='<small>Unclaimed land. Build next to it or send a rover to claim it.</small>';
-  if((buildSel==='mine'||buildSel==='reactor')&&!b&&S.builds.some(x=>(x.type==='pod'||x.type==='habitat')&&hdist(x,t)<=2)) h+='<small><b>Too close to the beds: colonists will be less happy.</b></small>';
+  if(!junior&&(buildSel==='mine'||buildSel==='reactor')&&!b&&S.builds.some(x=>(x.type==='pod'||x.type==='habitat')&&hdist(x,t)<=2)) h+='<small><b>Too close to the beds: colonists will be less happy.</b></small>';
   if(buildSel==='solar'&&!b) h+=`<small><b>A solar panel here makes ${fmt(5*t.sun)} power.</b> Panels work best near the equator.</small>`;
-  if(buildSel==='moxie'&&!b) h+=`<small><b>An extractor here makes ${fmt(3*t.air)} air.</b> Low ground has thicker air.</small>`;
+  if(buildSel==='moxie'&&!b) h+=`<small><b>An extractor here makes ${fmt((junior?4:3)*t.air)} air.</b> Low ground has thicker air.</small>`;
   tip.innerHTML=h; tip.style.display='block'; const rc=$('mapwrap').getBoundingClientRect();
   tip.style.left=Math.max(4,Math.min(rc.width-270,ev.clientX-rc.left+14))+'px'; tip.style.top=(ev.clientY-rc.top+14)+'px'; }
 function clickTile(t,ev){ if(!t||S.over) return;
@@ -1486,12 +1542,12 @@ function bindControls(){
   document.querySelectorAll('#camctl button').forEach(b=>b.onclick=()=>{ const a=b.dataset.a; if(a==='walk'){toggleWalk();return;} if(a==='qual'){ try{localStorage.setItem('marsq',HQ?'low':'high');}catch(e){} if(S.sol>3&&!b.dataset.sure){ b.dataset.sure='1'; b.textContent='Restarts the game. Tap again'; return; } location.reload(); return; } if(R3.fp) return; if(a==='in')R3.dist=Math.max(ZMIN,R3.dist*0.75); if(a==='out')R3.dist=Math.min(ZMAX,R3.dist*1.33); if(a==='home'){const pod=S.builds[0];R3.target.set(tx(pod),0,tz(pod));R3.dist=20;} if(a==='mode'){R3.topo=!R3.topo;R3.map.material.map=R3.topo?R3.texTopo:R3.texPhoto;R3.map.material.needsUpdate=true;b.textContent=R3.topo?'Map: heights':'Map: photo';} });
 }
 document.addEventListener('keyup',e=>{ keys[e.key.toLowerCase()]=false; });
-window.addEventListener('blur',()=>{ for(const k in keys) keys[k]=false; });
+window.addEventListener('blur',clearWalkInput);
 // Mouse look: clicking the view in Walk mode captures the mouse where the browser allows it. Dragging still works everywhere.
 document.addEventListener('mousemove',e=>{ if(!R3||!R3.fp||document.pointerLockElement!==R3.renderer.domElement) return; R3.fp.yaw-=e.movementX*0.0025; R3.fp.pitch=Math.max(-0.7,Math.min(0.9,R3.fp.pitch-e.movementY*0.0022)); });
-document.addEventListener('pointerlockchange',()=>{ if(!R3) return; const on=document.pointerLockElement===R3.renderer.domElement; if(on) R3.fpLocked=true; else if(R3.fpLocked){ R3.fpLocked=false; if(R3.fp) toggleWalk(); } });
+document.addEventListener('pointerlockchange',()=>{if(!R3)return;R3.fpLocked=document.pointerLockElement===R3.renderer.domElement;if(!R3.fpLocked)clearWalkInput();});
 document.addEventListener('keydown',e=>{ if(!R3||modalOpen) return; const k=e.key.toLowerCase(), s=R3.dist*0.06;
-  if(R3.fp){ if(/^(input|textarea|select)$/i.test(e.target.tagName||'')) return; if(k==='escape'){toggleWalk();return;} if(/^(w|a|s|d|q|e|shift|arrowup|arrowdown|arrowleft|arrowright)$/.test(k)){ keys[k]=true; e.preventDefault(); } return; }
+  if(R3.fp){if(/^(input|textarea|select)$/i.test(e.target.tagName||''))return;if(k==='escape'){clearWalkInput();if(document.pointerLockElement&&document.exitPointerLock)document.exitPointerLock();return;}if(k==='e'){if(!e.repeat)window.SurfaceSurvey?.record();e.preventDefault();return;}if(/^(w|a|s|d|q|shift|arrowup|arrowdown|arrowleft|arrowright)$/.test(k)){keys[k]=true;e.preventDefault();}return;}
   if(e.target!==document.body) return;
   if(k==='arrowleft'||k==='a')panBy(-s,0); else if(k==='arrowright'||k==='d')panBy(s,0); else if(k==='arrowup'||k==='w')panBy(0,-s); else if(k==='arrowdown'||k==='s')panBy(0,s); else return; e.preventDefault(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){buildSel=null;render();} if(e.key===' '&&!modalOpen&&e.target===document.body){e.preventDefault();setSpeed(S.speed?0:1);render();} });
@@ -1535,7 +1591,15 @@ window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBL
 <script src="operations.js"></script>
 <script src="colony-systems.js"></script>
 <script src="junior.js"></script>
+<script src="mission-systems.js"></script>
 <script src="ares-world.js"></script>
+<script src="vendor/Pass.js"></script>
+<script src="vendor/CopyShader.js"></script>
+<script src="vendor/SimplexNoise.js"></script>
+<script src="vendor/SSAOShader.js"></script>
+<script src="vendor/SSAOPass.js"></script>
+<script src="ares-render.js"></script>
+<script src="surface-survey.js"></script>
 <script src="ares-ui.js"></script>
 </body>
 </html>

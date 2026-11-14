@@ -1,0 +1,23 @@
+[
+  {
+    "asset": "habitat-h01-low",
+    "derived_from": "habitat-h01",
+    "ratio": 0.18,
+    "triangles": 8063,
+    "bytes": 255028
+  },
+  {
+    "asset": "astronaut-a02-low",
+    "derived_from": "astronaut-a02",
+    "ratio": 0.4,
+    "triangles": 6580,
+    "bytes": 237172
+  },
+  {
+    "asset": "outcrop-r02-low",
+    "derived_from": "outcrop-r02",
+    "ratio": 0.1,
+    "triangles": 1746,
+    "bytes": 55360
+  }
+]

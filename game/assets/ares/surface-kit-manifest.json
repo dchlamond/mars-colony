@@ -1,0 +1,232 @@
+{
+  "version": "S02",
+  "authoring": "Blender 5.2, original scripted asset authoring",
+  "assets": [
+    {
+      "source_mesh_objects": 93,
+      "export_meshes": 5,
+      "material_batches": 5,
+      "evaluated_triangles": 4116,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "solar-s02",
+      "bytes": 165572,
+      "blender_bounds": [
+        [
+          -0.8600000143051147,
+          -0.7444278001785278,
+          0.009999999776482582
+        ],
+        [
+          0.8600000143051147,
+          0.8299999833106995,
+          0.5019999742507935
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / S02 solar field"
+    },
+    {
+      "source_mesh_objects": 42,
+      "export_meshes": 4,
+      "material_batches": 4,
+      "evaluated_triangles": 7912,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "moxie-o02",
+      "bytes": 200796,
+      "blender_bounds": [
+        [
+          -0.7799999713897705,
+          -0.7300000190734863,
+          0.004999999888241291
+        ],
+        [
+          0.7799999713897705,
+          0.7300000190734863,
+          1.4800000190734863
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / O02 oxygen works"
+    },
+    {
+      "source_mesh_objects": 29,
+      "export_meshes": 5,
+      "material_batches": 5,
+      "evaluated_triangles": 6064,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "ice-w02",
+      "bytes": 138648,
+      "blender_bounds": [
+        [
+          -0.8299999833106995,
+          -0.7300000190734863,
+          0.004999999888241291
+        ],
+        [
+          0.8299999833106995,
+          0.7300000190734863,
+          1.3200000524520874
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / W02 ice water works"
+    },
+    {
+      "source_mesh_objects": 38,
+      "export_meshes": 6,
+      "material_batches": 6,
+      "evaluated_triangles": 3928,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "shield-r02",
+      "bytes": 164320,
+      "blender_bounds": [
+        [
+          -0.8600000143051147,
+          -0.8100000023841858,
+          0.004999999888241291
+        ],
+        [
+          0.8600000143051147,
+          0.7599999904632568,
+          0.8524999618530273
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / R02 storm refuge"
+    },
+    {
+      "source_mesh_objects": 50,
+      "export_meshes": 5,
+      "material_batches": 5,
+      "evaluated_triangles": 5256,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "battery-b02",
+      "bytes": 241980,
+      "blender_bounds": [
+        [
+          -0.7749999761581421,
+          -0.6700000166893005,
+          0.004999999888241291
+        ],
+        [
+          0.7749999761581421,
+          0.6700000166893005,
+          0.901384174823761
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / B02 energy bank"
+    },
+    {
+      "source_mesh_objects": 31,
+      "export_meshes": 4,
+      "material_batches": 4,
+      "evaluated_triangles": 3590,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "mine-m02",
+      "bytes": 156892,
+      "blender_bounds": [
+        [
+          -0.8399999737739563,
+          -0.7400000095367432,
+          0.004999999888241291
+        ],
+        [
+          0.8399999737739563,
+          0.7400000095367432,
+          1.034999966621399
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / M02 regolith processing"
+    },
+    {
+      "source_mesh_objects": 46,
+      "export_meshes": 5,
+      "material_batches": 5,
+      "evaluated_triangles": 5920,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "dome-d02",
+      "bytes": 161824,
+      "blender_bounds": [
+        [
+          -0.8069999814033508,
+          -0.9820000529289246,
+          0.029999999329447746
+        ],
+        [
+          0.8069999814033508,
+          0.8069999814033508,
+          1.1137408018112183
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / D02 community dome"
+    },
+    {
+      "source_mesh_objects": 53,
+      "export_meshes": 4,
+      "material_batches": 4,
+      "evaluated_triangles": 7120,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "reactor-p02",
+      "bytes": 291632,
+      "blender_bounds": [
+        [
+          -0.8799999952316284,
+          -0.75,
+          0.004999999888241291
+        ],
+        [
+          0.8799999952316284,
+          0.75,
+          1.5299999713897705
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / P02 surface power"
+    },
+    {
+      "source_mesh_objects": 16,
+      "export_meshes": 1,
+      "material_batches": 1,
+      "evaluated_triangles": 17464,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "outcrop-r02",
+      "bytes": 956204,
+      "blender_bounds": [
+        [
+          -0.8123753070831299,
+          -0.7876434922218323,
+          0.0
+        ],
+        [
+          0.8506987690925598,
+          0.7587723135948181,
+          1.0800000429153442
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / R02 layered weathered crag"
+    }
+  ],
+  "blend": "art/blender/exports/ares-surface-kit-s02.blend"
+}

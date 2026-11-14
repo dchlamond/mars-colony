@@ -1,23 +1,26 @@
 {
-  "checks": 38,
+  "checks": 63,
   "campaigns": [
     {
       "site": "Arcadia Planitia",
-      "day": 35,
+      "day": 42,
       "completed": true,
       "recovery": null,
       "phase": 7,
       "crew": 8,
-      "parts": 64,
-      "air": 169,
-      "food": 26,
+      "parts": 56,
+      "air": 221,
+      "food": 100,
+      "water": 93,
       "buildings": [
         "pod",
         "solar",
         "moxie",
         "solar",
         "moxie",
+        "ice",
         "green",
+        "solar",
         "green",
         "battery",
         "shield"
@@ -25,15 +28,104 @@
       "economy": {
         "away": 0,
         "reserved": 0,
-        "gen": 12.259718979853954,
-        "demand": 12,
+        "gen": 17.20206060149451,
+        "demand": 14,
         "store": 40,
         "shelter": 9,
-        "staffed": 4,
-        "idle": 4,
+        "staffed": 5,
+        "idle": 0,
+        "constructionWork": 0,
+        "crew": {
+          "total": 8,
+          "operators": 5,
+          "builders": 0,
+          "cleaners": 0,
+          "technicians": 0,
+          "explorers": 0,
+          "sheltered": 0,
+          "resting": 3,
+          "constructionWork": 0,
+          "assignments": [
+            {
+              "id": 0,
+              "name": "Nara",
+              "role": "operator",
+              "c": 2,
+              "r": 8,
+              "buildingKey": "2,8",
+              "type": "moxie"
+            },
+            {
+              "id": 1,
+              "name": "Tavi",
+              "role": "operator",
+              "c": 0,
+              "r": 7,
+              "buildingKey": "0,7",
+              "type": "moxie"
+            },
+            {
+              "id": 2,
+              "name": "Ivo",
+              "role": "operator",
+              "c": 0,
+              "r": 5,
+              "buildingKey": "0,5",
+              "type": "ice"
+            },
+            {
+              "id": 3,
+              "name": "Mina",
+              "role": "operator",
+              "c": 0,
+              "r": 3,
+              "buildingKey": "0,3",
+              "type": "green"
+            },
+            {
+              "id": 4,
+              "name": "Sol",
+              "role": "operator",
+              "c": 0,
+              "r": 1,
+              "buildingKey": "0,1",
+              "type": "green"
+            },
+            {
+              "id": 5,
+              "name": "Ada",
+              "role": "resting",
+              "c": 3,
+              "r": 11
+            },
+            {
+              "id": 6,
+              "name": "Explorer 7",
+              "role": "resting",
+              "c": 3,
+              "r": 11
+            },
+            {
+              "id": 7,
+              "name": "Explorer 8",
+              "role": "resting",
+              "c": 3,
+              "r": 11
+            }
+          ]
+        },
         "shut": 0,
+        "unstaffed": 0,
         "o2p": 11.677847530860273,
-        "foodp": 8,
+        "foodp": 12,
+        "waterp": 8.5,
+        "waterUse": 9,
+        "waterNet": -0.5,
+        "waterRecovered": 8.5,
+        "waterExtracted": 0,
+        "waterRecovery": 0.95,
+        "waterCrewUse": 8,
+        "waterPlantUse": 1,
         "metalp": 0,
         "partsp": 0,
         "beds": 8,
@@ -42,28 +134,72 @@
         "domes": 0,
         "greens": 2,
         "seedlings": 0,
-        "dry": 2,
+        "dry": 0,
         "sheltering": false,
-        "dust": 1
+        "dust": 1,
+        "appeal": {
+          "score": 95,
+          "label": "Thriving",
+          "reasons": [
+            {
+              "label": "Air is secure",
+              "points": 15,
+              "ready": true
+            },
+            {
+              "label": "Food is secure",
+              "points": 15,
+              "ready": true
+            },
+            {
+              "label": "Water reserve is healthy",
+              "points": 10,
+              "ready": true
+            },
+            {
+              "label": "Everyone has a bed",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Everyone has storm shelter",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Machines have power and crew",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Build a powered recreation dome for comfort",
+              "points": 0,
+              "ready": false
+            }
+          ]
+        }
       }
     },
     {
       "site": "Jezero Crater",
-      "day": 35,
+      "day": 42,
       "completed": true,
       "recovery": null,
       "phase": 7,
       "crew": 8,
-      "parts": 64,
-      "air": 168,
-      "food": 22,
+      "parts": 56,
+      "air": 205,
+      "food": 118,
+      "water": 93,
       "buildings": [
         "pod",
         "solar",
         "moxie",
         "solar",
         "moxie",
+        "ice",
         "green",
+        "solar",
         "green",
         "battery",
         "shield"
@@ -71,15 +207,104 @@
       "economy": {
         "away": 0,
         "reserved": 0,
-        "gen": 12.985564567238237,
-        "demand": 12,
+        "gen": 17.985564567238235,
+        "demand": 14,
         "store": 40,
         "shelter": 9,
-        "staffed": 4,
-        "idle": 4,
+        "staffed": 5,
+        "idle": 0,
+        "constructionWork": 0,
+        "crew": {
+          "total": 8,
+          "operators": 5,
+          "builders": 0,
+          "cleaners": 0,
+          "technicians": 0,
+          "explorers": 0,
+          "sheltered": 0,
+          "resting": 3,
+          "constructionWork": 0,
+          "assignments": [
+            {
+              "id": 0,
+              "name": "Nara",
+              "role": "operator",
+              "c": 52,
+              "r": 17,
+              "buildingKey": "52,17",
+              "type": "moxie"
+            },
+            {
+              "id": 1,
+              "name": "Tavi",
+              "role": "operator",
+              "c": 53,
+              "r": 18,
+              "buildingKey": "53,18",
+              "type": "moxie"
+            },
+            {
+              "id": 2,
+              "name": "Ivo",
+              "role": "operator",
+              "c": 49,
+              "r": 13,
+              "buildingKey": "49,13",
+              "type": "ice"
+            },
+            {
+              "id": 3,
+              "name": "Mina",
+              "role": "operator",
+              "c": 48,
+              "r": 11,
+              "buildingKey": "48,11",
+              "type": "green"
+            },
+            {
+              "id": 4,
+              "name": "Sol",
+              "role": "operator",
+              "c": 47,
+              "r": 9,
+              "buildingKey": "47,9",
+              "type": "green"
+            },
+            {
+              "id": 5,
+              "name": "Ada",
+              "role": "resting",
+              "c": 51,
+              "r": 16
+            },
+            {
+              "id": 6,
+              "name": "Explorer 7",
+              "role": "resting",
+              "c": 51,
+              "r": 16
+            },
+            {
+              "id": 7,
+              "name": "Explorer 8",
+              "role": "resting",
+              "c": 51,
+              "r": 16
+            }
+          ]
+        },
         "shut": 0,
+        "unstaffed": 0,
         "o2p": 11.402886840076238,
-        "foodp": 8,
+        "foodp": 12,
+        "waterp": 8.5,
+        "waterUse": 9,
+        "waterNet": -0.5,
+        "waterRecovered": 8.5,
+        "waterExtracted": 0,
+        "waterRecovery": 0.95,
+        "waterCrewUse": 8,
+        "waterPlantUse": 1,
         "metalp": 0,
         "partsp": 0,
         "beds": 8,
@@ -88,44 +313,177 @@
         "domes": 0,
         "greens": 2,
         "seedlings": 0,
-        "dry": 2,
+        "dry": 0,
         "sheltering": false,
-        "dust": 1
+        "dust": 1,
+        "appeal": {
+          "score": 95,
+          "label": "Thriving",
+          "reasons": [
+            {
+              "label": "Air is secure",
+              "points": 15,
+              "ready": true
+            },
+            {
+              "label": "Food is secure",
+              "points": 15,
+              "ready": true
+            },
+            {
+              "label": "Water reserve is healthy",
+              "points": 10,
+              "ready": true
+            },
+            {
+              "label": "Everyone has a bed",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Everyone has storm shelter",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Machines have power and crew",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Build a powered recreation dome for comfort",
+              "points": 0,
+              "ready": false
+            }
+          ]
+        }
       }
     },
     {
       "site": "Hellas Basin",
-      "day": 35,
+      "day": 42,
       "completed": true,
       "recovery": null,
       "phase": 7,
       "crew": 8,
-      "parts": 64,
-      "air": 155,
-      "food": 50,
+      "parts": 56,
+      "air": 209,
+      "food": 124,
+      "water": 98,
       "buildings": [
         "pod",
         "solar",
         "moxie",
-        "green",
+        "ice",
         "solar",
         "green",
         "moxie",
+        "solar",
+        "green",
         "battery",
         "shield"
       ],
       "economy": {
         "away": 0,
         "reserved": 0,
-        "gen": 12.431364319494264,
-        "demand": 12,
+        "gen": 17.431364319494264,
+        "demand": 14,
         "store": 40,
         "shelter": 9,
-        "staffed": 4,
-        "idle": 4,
+        "staffed": 5,
+        "idle": 0,
+        "constructionWork": 0,
+        "crew": {
+          "total": 8,
+          "operators": 5,
+          "builders": 0,
+          "cleaners": 0,
+          "technicians": 0,
+          "explorers": 0,
+          "sheltered": 0,
+          "resting": 3,
+          "constructionWork": 0,
+          "assignments": [
+            {
+              "id": 0,
+              "name": "Nara",
+              "role": "operator",
+              "c": 48,
+              "r": 27,
+              "buildingKey": "48,27",
+              "type": "moxie"
+            },
+            {
+              "id": 1,
+              "name": "Tavi",
+              "role": "operator",
+              "c": 49,
+              "r": 27,
+              "buildingKey": "49,27",
+              "type": "moxie"
+            },
+            {
+              "id": 2,
+              "name": "Ivo",
+              "role": "operator",
+              "c": 47,
+              "r": 24,
+              "buildingKey": "47,24",
+              "type": "ice"
+            },
+            {
+              "id": 3,
+              "name": "Mina",
+              "role": "operator",
+              "c": 45,
+              "r": 20,
+              "buildingKey": "45,20",
+              "type": "green"
+            },
+            {
+              "id": 4,
+              "name": "Sol",
+              "role": "operator",
+              "c": 42,
+              "r": 18,
+              "buildingKey": "42,18",
+              "type": "green"
+            },
+            {
+              "id": 5,
+              "name": "Ada",
+              "role": "resting",
+              "c": 49,
+              "r": 29
+            },
+            {
+              "id": 6,
+              "name": "Explorer 7",
+              "role": "resting",
+              "c": 49,
+              "r": 29
+            },
+            {
+              "id": 7,
+              "name": "Explorer 8",
+              "role": "resting",
+              "c": 49,
+              "r": 29
+            }
+          ]
+        },
         "shut": 0,
+        "unstaffed": 0,
         "o2p": 12.8,
-        "foodp": 8,
+        "foodp": 12,
+        "waterp": 8.5,
+        "waterUse": 9,
+        "waterNet": -0.5,
+        "waterRecovered": 8.5,
+        "waterExtracted": 0,
+        "waterRecovery": 0.95,
+        "waterCrewUse": 8,
+        "waterPlantUse": 1,
         "metalp": 0,
         "partsp": 0,
         "beds": 8,
@@ -134,28 +492,72 @@
         "domes": 0,
         "greens": 2,
         "seedlings": 0,
-        "dry": 2,
+        "dry": 0,
         "sheltering": false,
-        "dust": 1
+        "dust": 1,
+        "appeal": {
+          "score": 95,
+          "label": "Thriving",
+          "reasons": [
+            {
+              "label": "Air is secure",
+              "points": 15,
+              "ready": true
+            },
+            {
+              "label": "Food is secure",
+              "points": 15,
+              "ready": true
+            },
+            {
+              "label": "Water reserve is healthy",
+              "points": 10,
+              "ready": true
+            },
+            {
+              "label": "Everyone has a bed",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Everyone has storm shelter",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Machines have power and crew",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Build a powered recreation dome for comfort",
+              "points": 0,
+              "ready": false
+            }
+          ]
+        }
       }
     },
     {
       "site": "Arsia Mons",
-      "day": 35,
+      "day": 42,
       "completed": true,
       "recovery": null,
       "phase": 7,
       "crew": 8,
-      "parts": 64,
-      "air": 140,
-      "food": 22,
+      "parts": 56,
+      "air": 168,
+      "food": 118,
+      "water": 93,
       "buildings": [
         "pod",
         "solar",
         "moxie",
         "moxie",
         "solar",
+        "ice",
         "green",
+        "solar",
         "green",
         "battery",
         "shield"
@@ -163,15 +565,104 @@
       "economy": {
         "away": 0,
         "reserved": 0,
-        "gen": 13,
-        "demand": 12,
+        "gen": 18,
+        "demand": 14,
         "store": 40,
         "shelter": 9,
-        "staffed": 4,
-        "idle": 4,
+        "staffed": 5,
+        "idle": 0,
+        "constructionWork": 0,
+        "crew": {
+          "total": 8,
+          "operators": 5,
+          "builders": 0,
+          "cleaners": 0,
+          "technicians": 0,
+          "explorers": 0,
+          "sheltered": 0,
+          "resting": 3,
+          "constructionWork": 0,
+          "assignments": [
+            {
+              "id": 0,
+              "name": "Nara",
+              "role": "operator",
+              "c": 7,
+              "r": 19,
+              "buildingKey": "7,19",
+              "type": "moxie"
+            },
+            {
+              "id": 1,
+              "name": "Tavi",
+              "role": "operator",
+              "c": 5,
+              "r": 19,
+              "buildingKey": "5,19",
+              "type": "moxie"
+            },
+            {
+              "id": 2,
+              "name": "Ivo",
+              "role": "operator",
+              "c": 4,
+              "r": 17,
+              "buildingKey": "4,17",
+              "type": "ice"
+            },
+            {
+              "id": 3,
+              "name": "Mina",
+              "role": "operator",
+              "c": 3,
+              "r": 15,
+              "buildingKey": "3,15",
+              "type": "green"
+            },
+            {
+              "id": 4,
+              "name": "Sol",
+              "role": "operator",
+              "c": 2,
+              "r": 13,
+              "buildingKey": "2,13",
+              "type": "green"
+            },
+            {
+              "id": 5,
+              "name": "Ada",
+              "role": "resting",
+              "c": 11,
+              "r": 22
+            },
+            {
+              "id": 6,
+              "name": "Explorer 7",
+              "role": "resting",
+              "c": 11,
+              "r": 22
+            },
+            {
+              "id": 7,
+              "name": "Explorer 8",
+              "role": "resting",
+              "c": 11,
+              "r": 22
+            }
+          ]
+        },
         "shut": 0,
+        "unstaffed": 0,
         "o2p": 10.065695233300158,
-        "foodp": 8,
+        "foodp": 12,
+        "waterp": 8.5,
+        "waterUse": 9,
+        "waterNet": -0.5,
+        "waterRecovered": 8.5,
+        "waterExtracted": 0,
+        "waterRecovery": 0.95,
+        "waterCrewUse": 8,
+        "waterPlantUse": 1,
         "metalp": 0,
         "partsp": 0,
         "beds": 8,
@@ -180,15 +671,56 @@
         "domes": 0,
         "greens": 2,
         "seedlings": 0,
-        "dry": 2,
+        "dry": 0,
         "sheltering": false,
-        "dust": 1
+        "dust": 1,
+        "appeal": {
+          "score": 95,
+          "label": "Thriving",
+          "reasons": [
+            {
+              "label": "Air is secure",
+              "points": 15,
+              "ready": true
+            },
+            {
+              "label": "Food is secure",
+              "points": 15,
+              "ready": true
+            },
+            {
+              "label": "Water reserve is healthy",
+              "points": 10,
+              "ready": true
+            },
+            {
+              "label": "Everyone has a bed",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Everyone has storm shelter",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Machines have power and crew",
+              "points": 5,
+              "ready": true
+            },
+            {
+              "label": "Build a powered recreation dome for comfort",
+              "points": 0,
+              "ready": false
+            }
+          ]
+        }
       }
     }
   ],
   "persistence": {
     "juniorRestore": true,
     "legacyPreserved": true,
-    "savedBytes": 423850
+    "savedBytes": 425089
   }
 }

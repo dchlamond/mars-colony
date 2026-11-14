@@ -1,0 +1,32 @@
+{
+  "version": "S02",
+  "authoring": "Blender 5.2, original scripted asset authoring",
+  "assets": [
+    {
+      "source_mesh_objects": 16,
+      "export_meshes": 1,
+      "material_batches": 1,
+      "evaluated_triangles": 17464,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "outcrop-r02",
+      "bytes": 956204,
+      "blender_bounds": [
+        [
+          -0.8123753070831299,
+          -0.7876434922218323,
+          0.0
+        ],
+        [
+          0.8506987690925598,
+          0.7587723135948181,
+          1.0800000429153442
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / R02 layered weathered crag"
+    }
+  ],
+  "blend": "art/blender/exports/ares-outcrop-s02.blend"
+}

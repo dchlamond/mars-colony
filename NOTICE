@@ -1,12 +1,12 @@
-Mars Colony: Junior Mission Trainer
+DEAD RECKONING: BLACKOUT
 Copyright 2026 BBS AI Ambassadors Club. Licensed under the Apache License, Version 2.0.
 
 NASA does not endorse this game.
 
 This project includes material made by other people:
 
-- three.js r128, with GLTFLoader and DRACOLoader. Copyright 2010-2021 three.js authors. MIT licence.
-  Files: game/vendor/three.min.js, game/vendor/GLTFLoader.js, game/vendor/DRACOLoader.js
+- three.js r128, with GLTFLoader, DRACOLoader and the r128 SSAO/Pass/CopyShader/SimplexNoise helpers. Copyright 2010-2021 three.js authors. MIT licence.
+  Files: game/vendor/*.js. MIT licence text: game/vendor/LICENSE-three.txt.
 - Draco 3D decoder. Copyright Google. Apache-2.0 licence.
   File: game/assets/draco/draco_decoder.js
 - Cinzel font. Copyright 2020 The Cinzel Project Authors. SIL Open Font Licence 1.1.
@@ -30,5 +30,18 @@ Ares Atlas original art and implementation, November 2026
 Custom colony architecture, material code, interface ornaments and suit animation
 were authored for this project with AI assistance. Blender exports are in
 game/assets/ares/. The fictional Martian guide portrait was generated with Grok
-Imagine; its generation record is in game/assets/ares-ui/ARTWORK.md. The interface
-identifies the portrait as fictional AI artwork. These are not NASA assets.
+Imagine; its generation record is in game/assets/ares-ui/ARTWORK.md. It is retained
+as legacy artwork and has been replaced in the interface by a human adviser.
+These are not NASA assets.
+
+Grok Imagine surface artwork, 14 November 2026
+game/assets/ares/grok-regolith.jpg is original generated artistic regolith, not a NASA photograph or measured terrain. Generation: https://grok.com/imagine/post/8a17d34f-333c-44f5-b633-1a79f2ad3dc0 . The original downloaded image is retained unaltered. Interface/credits disclose AI artwork.
+
+Grok Imagine human adviser, 14 November 2026
+game/assets/ares-ui/mission-adviser.jpg is an original fictional human astronaut portrait generated for DEAD RECKONING: BLACKOUT. It is not a photograph of a NASA employee or evidence of agency endorsement. Generation: https://grok.com/imagine/post/fb3b487c-05ce-41b7-a8ec-346435ba61a9 . The downloaded image is used unaltered; the UI labels the character as fictional.
+
+BLACKOUT interface fonts
+Space Grotesk, Manrope, Barlow Condensed and Rajdhani are distributed under the SIL Open Font Licence 1.1 from the official google/fonts repository. Font-specific copyright notices and full licence text accompany each family in game/assets/fonts/LICENSE-spacegrotesk.txt, LICENSE-manrope.txt, LICENSE-barlowcondensed.txt and LICENSE-rajdhani.txt. Atkinson Hyperlegible is credited above. These fonts are bundled locally.
+
+BLACKOUT field instrument
+The Blender-authored glove and dosimeter in game/assets/ares/surface-dosimeter.glb are original fictional game equipment. Its displayed index and the authored rock teaching-site placement are simulation choices, not NASA measurements or hardware certification. The source script and editable Blender scene are retained in art/blender/.

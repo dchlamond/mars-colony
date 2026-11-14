@@ -6,7 +6,7 @@
   if (!window.THREE || !R3) return;
   const C = { ivory:0xd8c7a5, brass:0xbc9150, dark:0x25353b, navy:0x102e43,
     glass:0x8aa6a1, lamp:0xffd48b, rust:0x80503b, green:0x517c3f };
-  const state = { version:'ares-atlas-1', assets:{}, pending:0, errors:[], surface:'NASA MOLA relief with artistic regolith detail' };
+  const state = { version:'ares-atlas-2', assets:{}, pending:0, errors:[], surface:'NASA MOLA relief authored in Blender, with artistic mineral detail' };
   window.AresWorld = state;
   const textureLoader=new THREE.TextureLoader();
   function surfaceTexture(name,colour=false){const url='assets/ares/'+name+'.png';state.pending++;const tex=textureLoader.load((window.INLINE&&window.INLINE[url])||url,()=>state.pending--,undefined,()=>{state.errors.push(url);state.pending--;});tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.anisotropy=Math.min(8,R3.renderer.capabilities.getMaxAnisotropy());if(colour)tex.encoding=THREE.sRGBEncoding;return tex;}
@@ -111,7 +111,7 @@
   function garden() {const g=new THREE.Group();plinth(g,1.6,1.6);mesh(g,new THREE.SphereGeometry(.71,32,16,0,Math.PI*2,0,Math.PI/2),palette.glass,0,.15,0);for(let i=0;i<6;i++){const r=mesh(g,new THREE.TorusGeometry(.72,.013,5,32,Math.PI),palette.brass,0,.15,0);r.rotation.y=i*Math.PI/6;}ring(g,.72,.022,'brass',0,.15,0);for(const x of [-.3,.3]){box(g,.35,.08,.65,'soil',x,.18,0);for(const z of [-.2,0,.2])mesh(g,new THREE.SphereGeometry(.11,10,6),palette.green,x,.32,z);}airlock(g,0,.55);return g;}
   function reactor() {const g=new THREE.Group();plinth(g,1.4,1.4);cylinder(g,.22,.54,'ivory',0,.42,0);for(const y of [.2,.65])ring(g,.23,.024,'brass',0,y,0);pipe(g,[0,.6,0],[0,1.1,0],.035);const m=mesh(g,new THREE.ConeGeometry(.63,.21,32,1,true),palette.navy,0,1.06,0);m.material=palette.navy;for(let i=0;i<12;i++){const a=i*Math.PI/6;pipe(g,[0,1.16,0],[Math.sin(a)*.63,.955,Math.cos(a)*.63],.012);}return g;}
   function prototype(type) {
-    if(state.assets[type]&&(HQ||type==='green'))return state.assets[type];
+    if(state.assets[type])return state.assets[type];
     if(prototypeCache.has(type))return prototypeCache.get(type);
     const makers={pod:fallbackHabitat,habitat:fallbackHabitat,solar,moxie:oxygen,green:greenhouse,battery,ice:()=>drill('ice'),mine:()=>drill('mine'),shield,dome:garden,reactor};
     const g=batch((makers[type]||fallbackHabitat)());g.name='ARES '+type;g.userData.aresType=type;prototypeCache.set(type,g);return g;
@@ -142,6 +142,8 @@
       types.forEach(t=>state.assets[t]=holder);state.pending--;refreshModels();
     },undefined,e=>{state.errors.push(url);state.pending--;console.warn('Ares asset unavailable; retaining authored fallback:',url);});
   }
+  state.loadAsset=loadAsset;
+  state.refreshModels=refreshModels;
 
   // Rounded pressure suit and articulated limbs; all arms rest downward.
   makeWorker=function(){
@@ -281,13 +283,16 @@
     // One representative person beside the landing pod gives a new colony life.
     // It represents existing available crew, not an extra simulated colonist.
     const pod=S.builds[0],available=S.pop-(S.rover?.crew||0)>0&&!S.eco?.sheltering&&!S.over;
-    if(pod&&available&&!pod.astro){pod.astro=makeWorker();pod.astro.userData.b=pod;R3.world.add(pod.astro);}
-    if(pod?.astro)pod.astro.visible=available;
+    if(!window.Junior?.isActive()){
+      if(pod&&available&&!pod.astro){pod.astro=makeWorker();pod.astro.userData.b=pod;R3.world.add(pod.astro);}
+      if(pod?.astro)pod.astro.visible=available;
+    }
   };
   lighting();mapStyle();
   // Replace the current world's models and crew as well as future missions.
   if(S){for(const b of S.builds)if(b.astro){R3.world.remove(b.astro);b.astro=null;}refreshModels();R3.dist=11.5;R3.terrSig='';addOutcrops();}
-  loadAsset('assets/ares/habitat-h01.glb',['pod','habitat'],1.72);
+  loadAsset('assets/ares/habitat-h01'+(HQ?'':'-low')+'.glb',['pod','habitat'],1.72);
   loadAsset('assets/ares/greenhouse-g01.glb',['green'],1.85);
+  for(const [type,file] of Object.entries({solar:'solar-s02',moxie:'moxie-o02',ice:'ice-w02',shield:'shield-r02',battery:'battery-b02',mine:'mine-m02',dome:'dome-d02',reactor:'reactor-p02'}))loadAsset('assets/ares/'+file+'.glb',[type],type==='solar'?1.78:1.72);
   state.ready=true;
 })();

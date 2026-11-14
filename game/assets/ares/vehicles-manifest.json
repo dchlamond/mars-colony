@@ -1,0 +1,57 @@
+{
+  "version": "S02",
+  "authoring": "Blender 5.2, original scripted asset authoring",
+  "assets": [
+    {
+      "source_mesh_objects": 150,
+      "export_meshes": 5,
+      "material_batches": 5,
+      "evaluated_triangles": 18652,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "rover-rv02",
+      "bytes": 779568,
+      "blender_bounds": [
+        [
+          -0.7730000019073486,
+          -0.8450000286102295,
+          0.008999998681247234
+        ],
+        [
+          0.7730000019073486,
+          0.7480729222297668,
+          1.3300000429153442
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / RV02 science rover"
+    },
+    {
+      "source_mesh_objects": 33,
+      "export_meshes": 6,
+      "material_batches": 6,
+      "evaluated_triangles": 5020,
+      "geometry_decimated": false,
+      "notes": "Evaluated geometry and authored PBR materials; no baked lighting or ray tracing is embedded in this GLB.",
+      "asset": "shuttle-l02",
+      "bytes": 123312,
+      "blender_bounds": [
+        [
+          -0.8899999856948853,
+          -0.8899999856948853,
+          0.02500000037252903
+        ],
+        [
+          0.8899999856948853,
+          0.8899999856948853,
+          1.7000000476837158
+        ]
+      ],
+      "gltf_up": "Y",
+      "gltf_forward": "+Z",
+      "source_scene": "Ares Atlas / L02 crew lander"
+    }
+  ],
+  "blend": "art/blender/exports/ares-vehicles-s02.blend"
+}

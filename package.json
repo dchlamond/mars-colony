@@ -13,7 +13,10 @@
     "test:junior": "node tests/junior.cjs",
     "test:ares-graphics": "node tests/ares-graphics.cjs",
     "test:ares-ui": "node tests/ares-ui.cjs",
-    "test:ares-offline": "node tests/ares-offline.cjs"
+    "test:ares-offline": "node tests/ares-offline.cjs",
+    "test:mission-systems": "node tests/mission-systems.cjs",
+    "test:walk-surface": "node tests/walk-surface.cjs",
+    "test:survey-evidence": "node tests/survey-evidence.cjs"
   },
   "devDependencies": {
     "playwright": "1.65.1"
