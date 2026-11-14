@@ -1,0 +1,67 @@
+# Mars Colony: Junior Mission Trainer
+
+A strategy game of the first town on Mars, played on the real planet with real recorded NASA storms.
+Made for the NASA Space Apps Challenge 2026, challenge "Build a Junior Astronaut Mission Trainer".
+
+**Play it:** https://mars-colony-tau.vercel.app (no account, no download)
+
+NASA does not endorse this game.
+
+## What it is
+
+A child aged 7 to 12 commands the first town on Mars. They pick one of four real landing sites, then balance
+power, air, food, shelter and homes while two rival colonies compete for land and new colonists.
+Every choice costs something, and the game explains the real science behind each cost.
+
+## How the challenge is met
+
+| Decision area in the challenge | What the player does | Real record behind it |
+|---|---|---|
+| Life support | Builds oxygen extractors. They make more air on low ground, where the air is thicker. | Tile heights from the MOLA laser altimeter (NASA Mars Trek). MOXIE on the Perseverance rover. |
+| Radiation shielding | Builds soil shelters, then chooses shelter or work when a storm arrives. | Solar storm dates and strengths from NASA DONKI. Curiosity's radiation reading of May 2024. |
+| Power budgeting | Places solar panels by latitude, cleans dust, decides which machines get power. | Tile latitude. InSight and Opportunity dust records. |
+| Food production | Plants early, because crops take 20 sols. Washes soil or grows in water. | Phoenix lander perchlorate finding. |
+| Communication delay | Orders supplies days ahead and gets through a two-week radio blackout alone. | Mars solar conjunction (NASA/JPL). |
+
+## What is real and what is not
+
+- **Real:** the shape of Mars, the dates and strengths of the storms, and the facts on the cards. Each has a source link
+  on the game's **Data sources** screen.
+- **Simplified:** sunlight and air thickness per tile, ice by latitude, cave regions.
+- **Invented for the game:** rival colonies, Fame medals, costs, upgrades and how much each machine makes.
+- **Recorded, not live:** storm records are saved inside the game. Nothing is fetched while you play.
+
+Known limits: balance has been tested by scripts, not yet by children. Eight buildings are simple shapes.
+OSDR and RadLab are listed by the challenge and not used yet.
+
+## Privacy
+
+The game sends nothing and collects nothing. It loads no files from other websites.
+
+## What is where
+
+| Path | What it is |
+|---|---|
+| `game/` | The whole game. This folder is what the website serves. |
+| `game/index.html` | The page and all of the game's own code. |
+| `game/assets/` | Mars images, the four NASA models, fonts and the model decoder. |
+| `game/vendor/` | three.js and its loaders. |
+| `docs/` | Design and build notes from the team, and the plan for better graphics. |
+| `tools/strip_logos.py` | Paints over logos, flags and patches in the NASA model textures. |
+| `tools/split.py` | Imports an older single-file copy of the game. It overwrites `game/`. |
+| `AI_USE.md`, `NOTICE`, `LICENSE` | AI disclosure, third-party credits, Apache-2.0 licence. |
+
+## Run it on your own computer
+
+    cd game
+    python3 -m http.server 8000
+
+Then open http://localhost:8000.
+
+## How changes reach the website
+
+The site redeploys by itself every time something is pushed to the `main` branch.
+
+## Team
+
+BBS AI Ambassadors Club, Kuwait

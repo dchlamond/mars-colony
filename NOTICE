@@ -1,0 +1,24 @@
+Mars Colony: Junior Mission Trainer
+Copyright 2026 BBS AI Ambassadors Club. Licensed under the Apache License, Version 2.0.
+
+NASA does not endorse this game.
+
+This project includes material made by other people:
+
+- three.js r128, with GLTFLoader and DRACOLoader. Copyright 2010-2021 three.js authors. MIT licence.
+  Files: game/vendor/three.min.js, game/vendor/GLTFLoader.js, game/vendor/DRACOLoader.js
+- Draco 3D decoder. Copyright Google. Apache-2.0 licence.
+  File: game/assets/draco/draco_decoder.js
+- Cinzel font. Copyright 2020 The Cinzel Project Authors. SIL Open Font Licence 1.1.
+  Files: game/assets/fonts/cinzel-*.woff2, licence text in game/assets/fonts/LICENSE-Cinzel.txt
+- Atkinson Hyperlegible font. Copyright 2020 Braille Institute of America, Inc. SIL Open Font Licence 1.1.
+  Files: game/assets/fonts/atkinson-hyperlegible-*.woff2, licence text in game/assets/fonts/LICENSE-AtkinsonHyperlegible.txt
+- Mars global colour image and four 3D models (Habitat Demonstration Unit, InSight lander,
+  Mars 2020 Perseverance rover, Astronaut) from NASA 3D Resources, https://github.com/nasa/NASA-3D-Resources
+  NASA material, public domain. Agency logos, flags and mission patches in the model textures were painted over
+  with tools/strip_logos.py.
+  Files: game/assets/mars_hd.jpg, game/assets/mars_sd.jpg, game/assets/model_*.js
+- Mars heights from the MOLA laser altimeter (NASA Mars Global Surveyor), from NASA Mars Trek, https://trek.nasa.gov/mars/
+  Files: game/assets/mars_topo.jpg and the height grid inside game/index.html
+- Solar storm records from NASA DONKI, https://ccmc.gsfc.nasa.gov/tools/DONKI/
+  Each record and every other real fact is listed with its source on the game's Data sources screen.
