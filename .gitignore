@@ -3,3 +3,13 @@ node_modules/
 .env*
 dist/
 research/NOTES.md
+# Local visual exploration and machine-specific MCP diagnostics.
+/design-options/
+/design/
+/art/blender/CONNECTION.md
+/art/blender/verification/
+/art/blender/renders/
+/art/blender/*_request.py
+/art/blender/start_mcp_workshop.py
+/art/blender/mcp_client.py
+/art/blender/exports/*.glb

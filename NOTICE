@@ -25,3 +25,10 @@ This project includes material made by other people:
 
 NASA/JPL Horizons ephemeris snapshot
 833 daily Earth-centre to Mars-centre observer calculations, 2023-11-20 through 2026-03-01. Retrieved 2026-11-14. Source: https://ssd.jpl.nasa.gov/horizons/ . Original API response and query retained in research/horizons-earth-mars.txt and research/horizons-query.json; derived local snapshot in game/horizons-snapshot.js. Used for educational signal-time modeling. NASA/JPL does not endorse this game.
+
+Ares Atlas original art and implementation, November 2026
+Custom colony architecture, material code, interface ornaments and suit animation
+were authored for this project with AI assistance. Blender exports are in
+game/assets/ares/. The fictional Martian guide portrait was generated with Grok
+Imagine; its generation record is in game/assets/ares-ui/ARTWORK.md. The interface
+identifies the portrait as fictional AI artwork. These are not NASA assets.

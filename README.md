@@ -1,6 +1,6 @@
-# Mars Colony: Junior Mission Trainer
+# Ares Atlas: Mars Colony
 
-A strategy game of the first town on Mars, played on a NASA-sourced map with training scenarios based on archived space-weather records.
+A strategy game about the first town on Mars, played on a NASA-sourced map. Junior missions teach through short, recoverable challenges; Commander keeps the detailed colony simulation.
 Made for the NASA Space Apps Challenge 2026, challenge "Build a Junior Astronaut Mission Trainer".
 
 **Play it:** https://mars-colony-tau.vercel.app (no account, no download)
@@ -9,9 +9,20 @@ NASA does not endorse this game.
 
 ## What it is
 
-A child aged 7 to 12 commands the first town on Mars. They pick one of four real landing sites, then balance
-power, air, food, shelter and homes while two rival colonies compete for land and new colonists.
-Every choice costs something, and the game explains the real science behind each cost.
+Players aged 7 to 12 choose one of four real landing sites, then balance power,
+air, food, shelter and homes. Junior is the default: one goal at a time, one
+Parts price, automatic crew work, and a deliberate **Next day** action. Poor
+planning can stop machines or exhaust reserves; checkpoint retries preserve
+earlier progress. Sustainable production and spare beds allow new explorers to
+arrive the next day.
+
+Commander retains production methods, maintenance, skilled crew, competitive
+recruitment, evidence projects and its original difficulty choices. Existing
+Commander saves stay compatible. Both modes use the Ares Atlas navy-and-brass
+interface, custom Blender habitat and greenhouse, original regolith materials,
+articulated astronauts and the clearly fictional Martian guide.
+
+See [Junior rules and evidence](research/JUNIOR-MODE.md) for the precise trade-offs.
 
 ## How the challenge is met
 
@@ -20,19 +31,18 @@ Every choice costs something, and the game explains the real science behind each
 | Life support | Builds oxygen extractors. They make more air on low ground, where the air is thicker. | Tile heights from the MOLA laser altimeter (NASA Mars Trek). MOXIE on the Perseverance rover. |
 | Radiation shielding | Builds soil shelters, then chooses shelter or work when a storm arrives. | Earth observations from NASA DONKI inspire fictional Mars scenarios; Curiosity supplies an actual Mars radiation measurement from May 2024. |
 | Power budgeting | Places solar panels by latitude, cleans dust, decides which machines get power. | Tile latitude. InSight and Opportunity dust records. |
-| Food production | Plants early, because crops take 20 sols. Washes soil or grows in water. | Phoenix lander perchlorate finding. |
+| Food production | Plans for growing time: 4 powered days in Junior, 20 sols initially in Commander. Washes soil or grows in water. | Phoenix lander perchlorate finding. |
 | Communication delay | Orders supplies days ahead and gets through a two-week radio blackout alone. | Mars solar conjunction (NASA/JPL). |
 
 ## What is real and what is not
 
-- **Real:** the shape of Mars, the dates and strengths of the storms, and the facts on the cards. Each has a source link
+- **Real:** NASA-sourced Mars relief, archived observations and facts on cards. Each has a source link
   on the game's **Data sources** screen.
 - **Simplified:** sunlight and air thickness per tile, ice by latitude, cave regions.
-- **Invented for the game:** rival colonies, Fame medals, costs, upgrades and how much each machine makes.
+- **Invented for the game:** Junior practice-storm schedules, four-day crops, checkpoint retries, rival colonies, Fame medals, costs, upgrades and machine output.
 - **Recorded, not live:** storm records are saved inside the game. The Space weather panel shows one saved week of NASA DONKI records and can be refreshed by hand. Those records are kept separate from the storms in play.
 
-Known limits: balance has been tested by scripts, not yet by children. Eight buildings are simple shapes.
-OSDR and RadLab are listed by the challenge and not used yet.
+Known limits: balance has been tested by scripts, not yet by children. Art is an implemented upgrade, not a claim of AAA production quality; astronaut motion is procedural, not a complete motion-capture library. OSDR and RadLab are listed by the challenge and not used yet.
 
 ## Privacy
 
@@ -43,7 +53,10 @@ The game collects nothing and loads no files from other websites. The one outsid
 | Path | What it is |
 |---|---|
 | `game/` | The whole game. This folder is what the website serves. |
-| `game/index.html` | The page and all of the game's own code. |
+| `game/index.html` | Base simulation, NASA terrain and page. |
+| `game/junior.js` | Separate Junior rules, progression and checkpoint recovery. |
+| `game/ares-ui.js`, `game/ares-ui.css` | Responsive Ares Atlas interface. |
+| `game/ares-world.js`, `game/assets/ares/` | Original 3D buildings, material textures and procedural animation. |
 | `game/assets/` | Mars images, the four NASA models, fonts and the model decoder. |
 | `game/vendor/` | three.js and its loaders. |
 | `docs/` | Design and build notes from the team, and the plan for better graphics. |
@@ -80,3 +93,26 @@ See [Data and decisions](research/DATA-AND-DECISIONS.md) for provenance, assumpt
 ## Operating the colony
 
 **People** now assigns a finite crew to repairs, crops, power tuning or training. **Buildings** previews three production methods and queues repairs that consume parts and interrupt output. **Science** compares terrain-dependent service work. **Rivals** shows finite construction budgets, facilities, recruitment effects and trades. Saves preserve these systems; older missions initialize them safely. The models and numerical changes are documented in [Management rules](research/MANAGEMENT.md). Run `npm run test:management` with the local game server running.
+
+
+## Ares Atlas release checks
+
+Run `npm install`, serve `game/` at `http://127.0.0.1:8765`, then run:
+
+```sh
+npm run bundle
+npm run test:junior
+npm run test:ares-ui
+npm run test:ares-graphics
+npm run test:ares-offline
+npm test
+npm run test:operations
+npm run test:management
+npm run test:viewport-crew
+```
+
+The existing Commander suites opt into that mode explicitly. The Junior suite
+checks successful and unsuccessful policies, real costs, arrivals, recovery and
+old/new saves. The UI suite uses actual buttons and map clicks, verifies lessons
+and source dialogs, and tests desktop, small laptop and phone viewports. The
+single-file offline build embeds the new models, textures and portrait as well.

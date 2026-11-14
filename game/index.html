@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
   Mars Colony: Junior Mission Trainer. NASA Space Apps Challenge 2026.
-  AI disclosure: the code and text in this file were generated with Claude (Anthropic)
+  AI disclosure: AI-assisted code and text by Claude (Anthropic) and OpenAI Codex,
   from the team's own idea and design. See AI_USE.md in the repository.
   Licence: Apache-2.0. NASA does not endorse this game.
 -->
@@ -10,9 +10,9 @@
 <meta charset="utf-8">
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mars Colony: Junior Mission Trainer</title>
+<title>Ares Atlas · Mars Colony</title>
 <meta name="description" content="A strategy game for ages 7 to 12. Run the first town on Mars, on a real map of the planet, with real recorded NASA solar storms.">
-<meta name="generator" content="Code generated with Claude (Anthropic) from the team's design. See AI_USE.md.">
+<meta name="generator" content="AI-assisted implementation with Claude and OpenAI Codex from the team's design. See AI_USE.md.">
 <style>
 @font-face{font-family:'Cinzel';font-weight:600;font-display:swap;src:url(assets/fonts/cinzel-latin-600-normal.woff2) format('woff2')}
 @font-face{font-family:'Cinzel';font-weight:800;font-display:swap;src:url(assets/fonts/cinzel-latin-800-normal.woff2) format('woff2')}
@@ -143,6 +143,7 @@ body.fp #camctl [data-a="in"],body.fp #camctl [data-a="out"],body.fp #camctl [da
 </style>
 <link rel="stylesheet" href="expedition.css">
 <link rel="stylesheet" href="strategy.css">
+<link rel="stylesheet" href="ares-ui.css">
 <script src="vendor/three.min.js"></script>
 <script src="vendor/GLTFLoader.js"></script>
 <script src="vendor/DRACOLoader.js"></script>
@@ -874,7 +875,7 @@ function academy(i){
 }
 
 /* ---------------- MISSION CONTROL PROBLEMS (thinking during the game) ---------------- */
-const GROW=20; const growT=()=>S&&S.tech&&S.tech.lights?12:GROW;
+const GROW=20; const growT=()=>window.Junior?.isActive()?4:S&&S.tech&&S.tech.lights?12:GROW;
 function revealIce(){ const pod=S.builds[0]; let best=null,bd=1e9; for(const t of S.tiles) if(t.type==='ice'){ const d=hdist(t,pod); if(d<bd){bd=d;best=t;} }
   if(best) S.tiles.forEach(t=>{ if(hdist(t,best)<=1) t.seen=true; }); return best; }
 const PROBLEMS=[
@@ -1053,6 +1054,14 @@ function buildMenu(){
 }
 
 function showScience(){
+  if(window.Junior?.isActive()){
+    modal({title:'The science behind Junior missions',keepOpen:true,html:`
+      <p>Choose a place, watch the result, and discover why it matters.</p>
+      <h3>Real observations</h3><p>NASA's MOLA instrument measured Mars's height. Lower ground feeds our air-thickness model, so it changes oxygen output. Real latitude feeds the sunlight model. MOXIE demonstrated making oxygen from Mars air.</p>
+      <h3>Training rules</h3><p>Buildings use Parts, crews share jobs automatically, and crops grow after four powered days. Supply shuttles bring eight Parts every eight days. These amounts and times are invented for learning.</p>
+      <p>You invite explorers only when air, food and beds are ready. Dust and radiation practice alerts give five days of warning. They are scripted lessons, not live NASA forecasts or predicted radiation doses. A shortage pauses the mission so you can retry a checkpoint.</p>
+      <h3>Read the map carefully</h3><p>Ice colours follow latitude, not surveyed deposits. Cave tiles mark volcanic regions, not confirmed entrances. Detailed sand, buildings and the fictional Martian guide are artwork.</p>`,buttons:[{label:'Data sources',fn:showData},{label:'Close',primary:true}]});return;
+  }
   modal({title:'The science behind the game',html:`
    <p>This game is <b>based on real data</b>. It is not a full simulation. Numbers are made smaller and rounder so they are easy to follow.</p>
    <table><tr><th>Real (from NASA and partners)</th><td>Making oxygen from Mars air (MOXIE). Radiation on the surface and in solar storms (Curiosity RAD, DONKI). Buried water ice. Lava tube caves. Dust storms that block sunlight. The radio delay and the two-week blackout when the Sun is in the way. The 26-month gap between launch chances.</td></tr>
@@ -1067,12 +1076,12 @@ function showScience(){
 }
 function showData(){
   modal({title:'Data sources',html:`
-   <p><b>Real recorded storms, saved inside the game.</b> The solar storms in this game are these recorded events. After sol 230 the list starts again, and each storm is then titled as a replay:</p>
+   <p><b>Archived observations, saved inside the game.</b> These records support the science explanations. Earth-observed solar events do not prove a storm reached Mars.</p><p>${window.Junior?.isActive()?'Junior missions use scripted dust and radiation practice alerts, with five days to prepare. Their timing and consequences are invented training rules, not recorded Mars forecasts.':'Commander storm scenarios use the reference events below. After sol 230 the scenario list repeats and is labeled as a replay.'}</p>
    <table>${STORMS.map(s=>`<tr><td>${s.date}</td><td>${s.meas}</td><td><a href="${s.url}" target="_blank" rel="noopener">${s.src}</a></td></tr>`).join('')}</table>
    <p><b>Facts shown on cards</b></p>
    <table>${Object.values(FACTS).map(f=>`<tr><td>${f.t}</td><td>${link(f.s,f.u)}</td></tr>`).join('')}</table>
    <p><b>Upgrades and Mission Control problems</b></p><table>${Object.values(RESEARCH).map(f=>`<tr><td>${f.fact}</td><td>${link(f.src,f.u)}</td></tr>`).join('')}${PROBLEMS.map(q=>`<tr><td>${typeof q.why==='function'?q.why():q.why}</td><td>${link(q.src,q.u)}</td></tr>`).join('')}</table>
-   <p><b>The map</b> is the real shape of Mars: the ground is shaped by heights from the MOLA laser altimeter (NASA Mars Global Surveyor, served by <a href="https://trek.nasa.gov/mars/" target="_blank" rel="noopener">NASA Mars Trek</a>) and coloured with a real global image of Mars from <a href="https://github.com/nasa/NASA-3D-Resources" target="_blank" rel="noopener">NASA 3D Resources</a>, sharpened with MOLA shaded relief so craters and valleys show clearly. In Walk mode, the sand texture and small rocks under your feet are drawn by the game, not photographed. A button switches to the MOLA colour height map. Tile coordinates are real latitude and longitude. Heights are stretched so mountains show.</p><p><b>Real data that changes the game:</b> a tile's height sets how thick the air is (oxygen extractors), its latitude sets sunlight (solar panels) and ice, and training storm dates follow archived DONKI records near Earth from 20 November 2023 onward; the May 20, 2024 scenario also cites a Mars surface measurement. Earth records are not evidence of a Mars impact.</p><p><b>3D models</b> from <a href="https://github.com/nasa/NASA-3D-Resources" target="_blank" rel="noopener">NASA 3D Resources</a>: Habitat Demonstration Unit (landing pod), InSight lander (solar panel), Mars 2020 Perseverance rover (oxygen extractor: the real MOXIE rode inside it), Astronaut. We painted over the agency logos, flags and mission patches on these models. Other buildings are our own simple models.</p><p><b>Not real yet.</b> Ice tiles follow a latitude rule of thumb, not the SWIM maps. Lava tube tiles mark volcano regions, not individual catalogued caves.</p>
+   <p><b>The map</b> is the real shape of Mars: the ground is shaped by heights from the MOLA laser altimeter (NASA Mars Global Surveyor, served by <a href="https://trek.nasa.gov/mars/" target="_blank" rel="noopener">NASA Mars Trek</a>) and coloured with a real global image of Mars from <a href="https://github.com/nasa/NASA-3D-Resources" target="_blank" rel="noopener">NASA 3D Resources</a>, sharpened with MOLA shaded relief so craters and valleys show clearly. In Walk mode, the sand texture and small rocks under your feet are drawn by the game, not photographed. A button switches to the MOLA colour height map. Tile coordinates are real latitude and longitude. Heights are stretched so mountains show.</p><p><b>Real data that changes the game:</b> a tile's height sets how thick the air is (oxygen extractors), its latitude sets sunlight (solar panels) and ice, and sunlight and air outputs follow clearly simplified formulas. Commander storm scenarios reference archived DONKI records near Earth; the May 20, 2024 scenario also cites a Mars surface measurement. Junior practice storms use their own teaching schedule. Earth records are not evidence of a Mars impact.</p><p><b>Artwork and 3D models.</b> Ares habitats and greenhouses were authored in Blender; the other colony buildings and articulated astronauts are original game models. Fine sand textures are original artistic detail. The fictional Martian guide is Grok Imagine artwork, visibly labeled in the interface. The exploration rover comes from <a href="https://github.com/nasa/NASA-3D-Resources" target="_blank" rel="noopener">NASA 3D Resources</a>. The older Habitat Demonstration Unit, InSight and astronaut files remain packaged as legacy assets. Agency logos, flags and mission patches were painted over on the NASA textures.</p><p><b>Not real yet.</b> Ice tiles follow a latitude rule of thumb, not the SWIM maps. Lava tube tiles mark volcano regions, not individual catalogued caves.</p>
    <p><small>NASA data portals: <a href="https://ccmc.gsfc.nasa.gov/tools/DONKI/" target="_blank" rel="noopener">DONKI</a>, <a href="https://trek.nasa.gov/mars/" target="_blank" rel="noopener">Mars Trek</a>, <a href="https://api.nasa.gov/" target="_blank" rel="noopener">NASA Open APIs</a>.</small></p>
    <p><b>Listed by the challenge, not used yet:</b> <a href="https://osdr.nasa.gov/bio/repo/" target="_blank" rel="noopener">OSDR</a> and <a href="https://visualization.osdr.nasa.gov/radlab/gui/data-api/" target="_blank" rel="noopener">RadLab</a>.</p>
    <p><small>NASA does not endorse this game.</small></p>`,
@@ -1084,7 +1093,7 @@ function showCredits(){
    <p><b>Mars Colony: Junior Mission Trainer</b> was made for the NASA Space Apps Challenge 2026.</p>
    <p><b>NASA does not endorse this game.</b></p>
    <h3>How AI was used</h3>
-   <p>The idea and the design of this game are the team's own. The code, the lesson text and the project documents were generated with Claude, an AI model made by Anthropic, from the team's design. The team checked and directed the work.</p>
+   <p>The idea and direction are the team's own. Claude (Anthropic) and OpenAI Codex assisted with code, lesson wording, interface design and testing. The Ares buildings are original models authored with AI-assisted Blender scripts. The selected visual concept was explored with Grok Imagine. Illustrated terrain detail is artistic; NASA data and simplified game rules are identified separately.</p>
    <h3>Things made by other people</h3>
    <table>
    <tr><td>three.js r128, with its GLTFLoader and DRACOLoader</td><td>MIT licence</td></tr>
@@ -1525,5 +1534,8 @@ window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBL
 <script src="horizons-snapshot.js"></script>
 <script src="operations.js"></script>
 <script src="colony-systems.js"></script>
+<script src="junior.js"></script>
+<script src="ares-world.js"></script>
+<script src="ares-ui.js"></script>
 </body>
 </html>

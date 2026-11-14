@@ -6,6 +6,7 @@ const path=require('node:path');
  try{
   const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>{window.__MARS_MODE__='commander'});
   await page.goto(process.env.GAME_URL||'http://127.0.0.1:8765');await page.waitForFunction(()=>window.Operations&&G.R3);
   await page.evaluate(()=>{modalQ=[];modalOpen=false;$('overlay').style.display='none';render();});
   await page.locator('[data-tab=council]').click();

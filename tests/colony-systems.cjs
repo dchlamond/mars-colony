@@ -5,6 +5,7 @@ const assert=require('node:assert/strict');
  try{
   const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
   page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>{window.__MARS_MODE__='commander'});
   await page.goto(process.env.GAME_URL||'http://127.0.0.1:8765');await page.waitForFunction(()=>window.ColonySystems&&G.R3);
   const result=await page.evaluate(()=>{
    const C=ColonySystems;let checks=0;const check=(v,m)=>{if(!v)throw Error(m);checks++;};
