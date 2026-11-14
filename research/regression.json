@@ -1,0 +1,12 @@
+{
+  "checks": 10,
+  "parts": 24,
+  "queue": 1,
+  "mobileOverflow": false,
+  "offline": {
+    "rail": 9,
+    "models": 4,
+    "paused": 0
+  },
+  "errors": []
+}

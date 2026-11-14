@@ -30,3 +30,6 @@ the rules of the game and what it should teach. AI tools were used to speed up t
 - The game's Credits screen states how AI was used.
 - No generated image or video is used in the game. If one is added later, it must carry a visible watermark.
 - No NASA logo, flag or mission identifier is used. The ones on the NASA models were painted over.
+
+## Local strategy-interface revision, 14 November 2026
+OpenAI Codex assisted with the new interface, offline bundler, regression scripts and documentation, based on David's supplied brief and the Obsidian snapshot. Developer tests do not establish child-tested usability or learning outcomes. See research/AUDIT.md for scope and unfinished work.

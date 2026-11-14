@@ -8,6 +8,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mars Colony: Junior Mission Trainer</title>
 <meta name="description" content="A strategy game for ages 7 to 12. Run the first town on Mars, on a real map of the planet, with real recorded NASA solar storms.">
@@ -141,6 +142,7 @@ body.fp #camctl [data-a="in"],body.fp #camctl [data-a="out"],body.fp #camctl [da
 
 </style>
 <link rel="stylesheet" href="expedition.css">
+<link rel="stylesheet" href="strategy.css">
 <script src="vendor/three.min.js"></script>
 <script src="vendor/GLTFLoader.js"></script>
 <script src="vendor/DRACOLoader.js"></script>
@@ -372,7 +374,7 @@ const SITES=[
 // Lava tube tiles sit on the big volcano regions where known cave candidates cluster (approximate).
 const CAVES=[[-9,-120.5],[-10,-126],[1.5,-113],[11,-104.5],[21,-132],[24,-124],[25,147],[-6,-117]];
 let S = null, rng = Math.random;
-function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function mulberry(a){const next=function(){a|=0;a=a+0x6D2B79F5|0;next.state=a;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};next.state=a;return next;}
 const ri = (a,b)=>a+Math.floor(rng()*(b-a+1));
 
 function cube(c,r){const x=c-(r-(r&1))/2;return{x,z:r,y:-x-r}}
@@ -383,7 +385,7 @@ const count=type=>S.builds.filter(b=>b.done&&b.type===type).length;
 function newGame(seed,site){
   seed = seed || (Date.now()%2147483647);
   rng = mulberry(seed); site=SITES[site||0];
-  S = { seed, sol:1, speed:1, o2:100, food:DF.food, parts:DF.parts+ACAD.right*3, metal:DF.metal, rivals:[], claimN:0, lastSplit:null, panelClean:1, cleaning:0, nextQ:16, qDone:{}, journal:[], answers:{right:0,wrong:0}, blight:0, drill:false, rover:null, tech:{}, nextLab:55, trips:0, battery:0, pop:6, peak:6, appeal:55, fame:0, indep:0,
+  S = { seed, sol:1, speed:0, o2:100, food:DF.food, parts:DF.parts+ACAD.right*3, metal:DF.metal, rivals:[], claimN:0, lastSplit:null, panelClean:1, cleaning:0, nextQ:16, qDone:{}, journal:[], answers:{right:0,wrong:0}, blight:0, drill:false, rover:null, tech:{}, nextLab:55, trips:0, battery:0, pop:6, peak:6, appeal:55, fame:0, indep:0,
         padOpen:true, rival:8, tiles:[], builds:[], orders:[], log:[], imports:0, rescued:false,
         site, goal:0, unlocked:{}, seenFacts:{}, storm:null, dust:null, conj:null, conjSurvived:0,
         nextStorm:STORMS[0].sol, stormIdx:0, nextDust:150, nextFestival:90, lastGold:-999, grades:[], cause:null,
@@ -688,7 +690,8 @@ function orderCrate(type){
   render();
 }
 function tryBuild(type,t){
-  if(!t||!S.unlocked[type]) return 'locked';
+  if(S.over) return 'This mission has ended.';
+  if(!t||!S.unlocked[type]) return 'Finish the current objective to unlock this building.';
   if(type==='rover') return startRover(t);
   if(t.owner) return 'This land belongs to '+S.rivals[t.owner-1].name+'.';
   if(!t.seen) return 'Outside your territory. Build next to it, or send a rover to claim it.';
@@ -784,7 +787,7 @@ function pickSite(){
     <table><tr><th>Site</th><th>Sunlight</th><th>Air thickness</th><th>Ice</th><th>Caves</th></tr>
     <tr><td><small><i>Why it matters</i></small></td><td><small>Power from solar panels</small></td><td><small>Oxygen from extractors</small></td><td><small>Water for farms, extra oxygen</small></td><td><small>Big shelters for solar storms</small></td></tr>${SITES.map((st,i)=>{const q=siteStats(i);return `<tr><td><b>${st.name}</b><br><small>${q.el>=0?'+':''}${q.el.toFixed(1)} km</small></td><td>${Math.round(q.sun*100)}% (${word(q.sun,0.9,0.75)})</td><td>${Math.round(q.air*100)}% (${word(q.air,1.2,0.85)})</td><td>${st.lat>=38||st.lat<=-45?'Next door':q.iceRows<=2?'Close':'Far: '+q.iceRows+' tiles'}</td><td>${q.cave?'Next door':'None near'}</td></tr>`}).join('')}</table>
     <div class="real"><b>Real data</b>Heights come from the MOLA laser altimeter on NASA's Mars Global Surveyor. Sunlight depends on how far the site is from the equator. Air gets thinner the higher you go, just like on Earth's mountains.</div>`,
-    buttons:SITES.map((st,i)=>({label:`${st.name}<small>${st.blurb}</small>`,cls:'choice',fn:()=>{newGame(null,i);setSpeed(1);buildMenu();render();}}))});
+    buttons:SITES.map((st,i)=>({label:`${st.name}<small>${st.blurb}</small>`,cls:'choice',fn:()=>{newGame(null,i);setSpeed(0);buildMenu();render();}}))});
 }
 const U_MARS='https://www.nasa.gov/solar-system/what-is-mars-grades-5-8/',U_MOXIE='https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-oxygen-generating-experiment-moxie-completes-mars-mission/',U_QF='https://www.jpl.nasa.gov/news/press_kits/ingenuity/landing/quick_facts/',U_INSIGHT='https://www.nasa.gov/missions/insight/nasa-retires-insight-mars-lander-mission-after-years-of-science/',U_SWIM='https://swim.psi.edu',U_PHX='https://science.nasa.gov/mission/mars-phoenix/',U_STORM='https://www.nasa.gov/?p=670127',U_RAD='https://www.swri.org/press-release/swri-scientists-publish-first-radiation-measurements-surface-mars',U_DELAY='https://www.nasa.gov/podcasts/houston-we-have-a-podcast/chapea-2-audio-log-3/',U_CONJ='https://www.jpl.nasa.gov/news/nasas-mars-fleet-will-still-conduct-science-while-lying-low/',U_CHAPEA='https://www.nasa.gov/humans-in-space/chapea/';
 /* ---------------- MISSION SCHOOL (reading before the game) ---------------- */
@@ -1033,7 +1036,7 @@ function render(){
   $('banner').innerHTML=f;
   document.querySelectorAll('.bbtn').forEach(b=>{b.style.display=S.unlocked[b.dataset.t]?'':'none';b.classList.toggle('sel',buildSel===b.dataset.t);b.classList.toggle('poor',S.parts<DEF[b.dataset.t].cost||S.metal<DEF[b.dataset.t].metal)});
   syncScene();
-  $('camhelp').textContent=R3&&R3.fp?'Walk mode (game paused). W A S D to walk. Hold Shift to run. Click the view to look with the mouse, or drag. Esc to leave.':'Drag to move the map. Scroll to zoom.';
+  $('camhelp').textContent=R3&&R3.fp?'Walk mode. Space pauses time. W A S D to walk. Hold Shift to run. Click the view to look with the mouse, or drag. Esc to leave.':'Drag to move the map. Scroll to zoom.';
   $('buildhint').textContent=buildSel?DEF[buildSel].desc+' Click a tile to place it. Press Esc to cancel.':(S.cleaning?'Builders are cleaning panels. Building resumes soon.':'Free colonists do the building. Click any building on the map to read about it, switch it off or upgrade it.');
 }
 
@@ -1195,10 +1198,10 @@ function layPatch(x,z){ const P=R3.patch, pos=P.geometry.attributes.position; P.
 const keys={};
 function toggleWalk(){ if(!R3) return; const btn=document.querySelector('#camctl [data-a="walk"]');
   if(R3.fp){ R3.fp=null; R3.fpLocked=false; if(document.pointerLockElement&&document.exitPointerLock) document.exitPointerLock(); R3.cam.fov=36; R3.cam.near=0.1; R3.cam.updateProjectionMatrix(); R3.patch.visible=R3.rocks.visible=false; document.body.classList.remove('fp'); btn.textContent='Walk on Mars';
-    R3.scene.fog.near=300; R3.scene.fog.far=900; const pod=S.builds[0]; R3.target.set(tx(pod),0,tz(pod)); setSpeed(R3.fpSpeed||1); render(); return; }
-  const pod=S.builds[0]; R3.fp={x:tx(pod)+1.6,z:tz(pod)+1.9,yaw:0.70,pitch:0.04,vx:0,vz:0,step:0,y:null}; R3.fpSpeed=S.speed; setSpeed(0); for(const k in keys) keys[k]=false; if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();
+    R3.scene.fog.near=300; R3.scene.fog.far=900; const pod=S.builds[0]; R3.target.set(tx(pod),0,tz(pod)); setSpeed(S.speed); render(); return; }
+  const pod=S.builds[0]; R3.fp={x:tx(pod)+1.6,z:tz(pod)+1.9,yaw:0.70,pitch:0.04,vx:0,vz:0,step:0,y:null}; R3.fpSpeed=S.speed; setSpeed(1); for(const k in keys) keys[k]=false; if(document.activeElement&&document.activeElement.blur) document.activeElement.blur();
   R3.cam.fov=62; R3.cam.near=0.03; R3.cam.updateProjectionMatrix(); layPatch(R3.fp.x,R3.fp.z); R3.patch.visible=R3.rocks.visible=true; document.body.classList.add('fp'); btn.textContent='Back to the map'; hover=null; $('tip').style.display='none'; render(); }
-const WALK_RANGE=40;   // how far from the landing pod you may walk, in tiles (a game limit)
+const WALK_RANGE=200;   // how far from the landing pod you may walk, in tiles (a game limit)
 function tileNear(x,z){ let best=null,bd=1e9; const r0=Math.round(z/1.5); for(let r=r0-1;r<=r0+1;r++){ const c0=Math.round(x/SQ3-0.5*(r&1)); for(let c=c0-1;c<=c0+1;c++){ const t=tileAt(c,r); if(!t) continue; const d=(tx(t)-x)**2+(tz(t)-z)**2; if(d<bd){bd=d;best=t;} } } return best; }
 function walkStep(dt){ const f=R3.fp, pod=S.builds[0]; let mv=0, st=0;
   if(keys.w||keys.arrowup||R3.fpFwd) mv+=1; if(keys.s||keys.arrowdown) mv-=1; if(keys.a) st-=1; if(keys.d) st+=1;
@@ -1409,7 +1412,7 @@ function showTip(ev){ const tip=$('tip'); if(!hover){tip.style.display='none';re
   tip.style.left=Math.max(4,Math.min(rc.width-270,ev.clientX-rc.left+14))+'px'; tip.style.top=(ev.clientY-rc.top+14)+'px'; }
 function clickTile(t,ev){ if(!t||S.over) return;
   if(buildSel){ const err=tryBuild(buildSel,t); if(err){ $('buildhint').textContent=err; return; } if(!ev.shiftKey) buildSel=null; }
-  else if(t.build){ if(!t.build.done) cancel(t.build); else buildingPanel(t.build); }
+  else if(t.build){ buildingPanel(t.build); }
   render(); }
 function panBy(dx,dz){ const s=Math.sin(R3.yaw), c=Math.cos(R3.yaw); R3.target.x+=dx*c+dz*s; R3.target.z+=-dx*s+dz*c;
   R3.target.x=Math.max(X0,Math.min(X0+PW,R3.target.x)); R3.target.z=Math.max(Z0,Math.min(Z0+PH,R3.target.z)); }
@@ -1478,5 +1481,6 @@ window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBL
 </script>
 <script src="donki-snapshot.js"></script>
 <script src="expedition.js"></script>
+<script src="strategy.js"></script>
 </body>
 </html>

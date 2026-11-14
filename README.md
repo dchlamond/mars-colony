@@ -65,3 +65,8 @@ The site redeploys by itself every time something is pushed to the `main` branch
 ## Team
 
 BBS AI Ambassadors Club, Kuwait
+
+## Local strategy-interface revision
+The new interface is in `game/strategy.js` and `game/strategy.css`. Build the offline copy with `python3 tools/bundle.py`; open `dist/Mars-Colony.html` in Chrome. The existing game rules remain the starting point. Settings provides local save/continue; saves are tied to this browser and origin.
+
+This is a tested first interface slice, not the full upgrade brief. See `research/AUDIT.md`, `research/MECHANICS.md`, `research/regression.json`, and `research/balance.json`. Deployment status is recorded separately after verification. Tests use Playwright with installed Chrome; install Playwright separately, run the local server, then `node tests/regression.cjs "$PWD"` and `node tests/balance.cjs "$PWD"`.
