@@ -527,8 +527,8 @@ function tickSol(){
     const why=S.o2days<3?'air is running low':S.fooddays<3?'food is running low':cov<0.5?'there is not enough shelter':'life here is too hard';
     log('1 colonist moved to Colony Ares: '+(S.crowd>2&&S.o2days>=3&&S.fooddays>=3?'there are not enough beds':why)+'.','bad'); }
 
-  // --- ships and retirements, every 30 sols
-  if(S.sol%30===0) shipDay();
+  // --- crew every 10 sols; supplies and retirements every 30 sols
+  if(S.sol%10===0) shipDay();
 
   // --- crises
   stormStep(); dustStep(); conjStep(c); festivalStep(); problemStep(); roverStep(); labStep();
@@ -565,7 +565,7 @@ function finishBuild(b){
 }
 
 // How one ship's colonists are shared out. Each colony gets a share based on how appealing it is (raised to the power 1.5,
-// so a better colony pulls ahead), but no colony may take more than 60% of a ship, and every open, liveable colony gets at least 1.
+// so a better colony pulls ahead), but no colony may take more than 60% of a ship, and every open, liveable colony gets at least 1 when seats allow.
 function splitPool(pool,A){
   const w=A.map(a=>Math.pow(Math.max(0,a),1.5)), tot=w.reduce((a,b)=>a+b,0); if(!tot) return A.map(()=>0);
   let sh=w.map(x=>pool*x/tot); const cap=pool*0.6;
@@ -577,13 +577,13 @@ function splitPool(pool,A){
 function claimAll(){ S.rivals.forEach((r,i)=>{ const rad=2+Math.floor(Math.sqrt(r.pop)/1.3);
   for(let dr=-rad;dr<=rad;dr++)for(let dc=-rad-1;dc<=rad+1;dc++){ const t=tileAt(r.c+dc,r.r+dr); if(t&&!t.seen&&!t.owner&&hdist(t,r)<=rad){ t.owner=i+1; S.claimN++; } } }); }
 function shipDay(){
-  const blackout=inBlackout(), isWindow=S.sol>60&&(S.sol%CYCLE)<30, pool=isWindow?18:7;
-  const retire=(S.pop>3&&(S.sol>=90||!S.padOpen))?Math.max(1,Math.round(S.pop*0.08)):0;
+  const blackout=inBlackout(), supplyDay=S.sol%30===0, isWindow=S.sol>60&&(S.sol%CYCLE)<30, pool=isWindow?6:(S.sol%30===10?3:2);
+  const retire=(supplyDay&&S.pop>3&&(S.sol>=90||!S.padOpen))?Math.max(1,Math.round(S.pop*0.08)):0;
   S.pop-=retire;
   const rtxt=retire?' '+retire+' colonist'+(retire>1?'s':'')+' retired and flew home.':'';
-  S.rivals.forEach((r,i)=>{ r.appeal=Math.max(35,Math.min(88,DF.rival+16*Math.sin(S.sol/47+i*2.1)+ri(-6,6))); if(r.pop>8&&rng()<0.6) r.pop-=Math.max(1,Math.round(r.pop*0.06)); });
+  S.rivals.forEach((r,i)=>{ r.appeal=Math.max(35,Math.min(88,DF.rival+16*Math.sin(S.sol/47+i*2.1)+ri(-6,6))); if(supplyDay&&r.pop>8&&rng()<0.6) r.pop-=Math.max(1,Math.round(r.pop*0.06)); });
   if(blackout){ log('No new ships can be guided in during the radio blackout. No parts this time.'+rtxt,'info'); return; }
-  S.parts+=DF.ship; log('A supply ship landed with '+DF.ship+' parts.','info');
+  if(supplyDay){S.parts+=DF.ship; log('A supply ship landed with '+DF.ship+' parts.','info');}
   const open=S.padOpen&&S.appeal>=40;
   const got=splitPool(pool,[open?S.appeal*(1+0.15*medalCount()):0,...S.rivals.map(r=>r.appeal)]);
   S.rivals.forEach((r,i)=>r.pop+=got[i+1]); claimAll(); S.lastSplit=got;
@@ -1012,7 +1012,7 @@ function render(){
     $('rivals').innerHTML=all.map(a=>`<div class="riv">${avatar(a.av,a.css,24)}<div><b>${esc(a.name)}</b><div class="rb"><i style="width:${a.pop/mx*100}%;background:${a.css}"></i></div></div><b>${a.pop}</b></div>`).join('');
     $('splittxt').textContent=S.lastSplit?`Last ship of ${S.lastSplit.reduce((a,b)=>a+b,0)}: ${S.lastSplit.map((n,i)=>(i?S.rivals[i-1].name:ME.name)+' '+n).join(', ')}.`:'New colonists pick the colony that looks best to them.'; }
   $('pad').textContent='Landing pad: '+(S.padOpen?'OPEN':'CLOSED'); $('pad').classList.toggle('on',!S.padOpen);
-  $('padtxt').textContent=S.padOpen?`Next ship in ${30-(S.sol%30)} sols`:'New colonists go to the other colonies. People still retire.';
+  $('padtxt').textContent=S.padOpen?`Next crew shuttle in ${10-(S.sol%10)} sols`:'New colonists go to the other colonies. People still retire.';
   $('medals').innerHTML=MEDALS.map(m=>{const got=S.fame>=m.at;return `<svg width="34" height="34" viewBox="0 0 34 34" role="img" aria-label="${m.name}${got?' (earned)':' (not yet)'}"><title>${m.name}${got?' (earned)':' (not yet)'}</title><circle cx="17" cy="17" r="14" fill="${got?m.c:'none'}" stroke="#e0a84e" stroke-width="2" ${got?'':'stroke-dasharray="3 3"'}/><text x="17" y="22" text-anchor="middle" font-size="14" font-weight="700" fill="${got?'#24140e':'#b9a487'}" opacity="${got?1:.6}">${m.l}</text></svg>`}).join('');
   // independence
   $('indepcard').style.display=(S.goal>=5||count('green')>0)?'':'none';
@@ -1053,10 +1053,10 @@ function showScience(){
    <p>This game is <b>based on real data</b>. It is not a full simulation. Numbers are made smaller and rounder so they are easy to follow.</p>
    <table><tr><th>Real (from NASA and partners)</th><td>Making oxygen from Mars air (MOXIE). Radiation on the surface and in solar storms (Curiosity RAD, DONKI). Buried water ice. Lava tube caves. Dust storms that block sunlight. The radio delay and the two-week blackout when the Sun is in the way. The 26-month gap between launch chances.</td></tr>
    <tr><th>Partly real</th><td>Colonist happiness. Real crews need comfort and things to do, but the happiness score is our invention.</td></tr>
-   <tr><th>Made up for the game</th><td>Fame medals, the rival colonies and their territory, part and metal costs, upgrades, rover trip times, a ship every 30 sols, crates that land in 6 sols, and how much air or food each machine makes.</td></tr></table>
+   <tr><th>Made up for the game</th><td>Fame medals, the rival colonies and their territory, part and metal costs, upgrades, rover trip times, crew shuttles every 10 sols and supplies every 30 sols, crates that land in 6 sols, and how much air or food each machine makes.</td></tr></table>
    <div class="real"><b>Real numbers</b>
    A sol is 24 h 39 min. MOXIE made up to 12 g of oxygen an hour. Curiosity measures about 0.64 millisieverts of radiation a day; on May 20, 2024 a solar storm delivered 8,100 micrograys at once. Radio signals take about 3 to 23 minutes. Mars clocks run 477 millionths of a second a day faster than Earth clocks.</div>
-   <h3>How colonists are shared out</h3><p>Every 30 sols a ship brings 7 colonists (18 at a launch window). Each colony gets a share based on how appealing it is. A better colony gets more, but no colony can take more than 60% of a ship, and every open, liveable colony gets at least one. This sharing rule is our invention.</p>
+   <h3>How colonists are shared out</h3><p>Every 10 sols a shuttle brings 2 or 3 colonists (6 at a launch window). That is 7 colonists per 30 sols, or 18 during a launch window. Supply deliveries and retirements still happen every 30 sols. Each colony gets a share based on how appealing it is. A better colony gets more. The allocation targets a 60% maximum share before rounding to whole people, and gives each open, liveable colony at least one when seats allow. This sharing rule is our invention.</p>
    <h3>The radio blackout</h3><p>The blackout is real: about every 26 months the Sun sits between Earth and Mars. Its timing in this game (sol 373) is the game's own. It is not placed on the real calendar date.</p>
    <p><small>Hover over the time bar at the top for one more piece of real physics.</small></p>`,
    buttons:[{label:'Close',primary:true}]});
@@ -1241,6 +1241,41 @@ function loadModels(){ if(!THREE.GLTFLoader) return; const L=new THREE.GLTFLoade
       if(S) render();
     },()=>{}); };
   for(const key in MODEL_FILES){ if(window.MODEL_DATA&&window.MODEL_DATA[key]){ window.onModelData(key); continue; } const sc=document.createElement('script'); sc.src=MODEL_FILES[key][0]; sc.async=true; document.head.appendChild(sc); } }
+// Original articulated crew figures: arms rest at the sides, never a bind pose.
+function makeWorker(){
+  const g=new THREE.Group(), suit=0xdedbd1, dark=0x273b49;
+  part(g,new THREE.BoxGeometry(.15,.19,.09),suit,0,.29,0);
+  part(g,new THREE.BoxGeometry(.12,.15,.07),dark,0,.29,-.08);
+  part(g,new THREE.SphereGeometry(.085,12,10),suit,0,.445,0);
+  part(g,new THREE.SphereGeometry(.065,12,8),0x304956,0,.45,.045,{metalness:.25});
+  const joints=[];
+  for(const side of [-1,1]){
+    const arm=new THREE.Group();arm.position.set(side*.105,.365,0);g.add(arm);
+    part(arm,new THREE.CylinderGeometry(.026,.023,.16,8),suit,0,-.075,0);
+    part(arm,new THREE.SphereGeometry(.028,8,6),dark,0,-.16,0);joints.push(arm);
+    const leg=new THREE.Group();leg.position.set(side*.045,.20,0);g.add(leg);
+    part(leg,new THREE.CylinderGeometry(.032,.028,.16,8),suit,0,-.08,0);
+    part(leg,new THREE.BoxGeometry(.06,.045,.095),dark,0,-.17,.015);joints.push(leg);
+  }
+  g.userData.joints=joints;return g;
+}
+function animateWorkers(dt){
+  const reduced=document.body.classList.contains('reduce-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches;
+  for(const b of S.builds){const a=b.astro;if(!a||!a.visible)continue;
+    const joints=a.userData.joints;if(!joints)continue;
+    const moving=S.speed>0&&!modalOpen&&!S.over&&!reduced;
+    a.userData.clock=(a.userData.clock||0)+(moving?dt:0);
+    const phase=(a.userData.clock+(b.c+b.r)%7)%16, travel=phase<4||phase>12;
+    const pod=S.builds[0], target=tileAt(b.c,b.r), start=tileAt(pod.c,pod.r);
+    const blend=phase<4?phase/4:phase>12?(16-phase)/4:1;
+    const x=tx(start)+(tx(target)-tx(start))*blend+.55,z=tz(start)+(tz(target)-tz(start))*blend+.45;
+    if(!reduced){a.position.set(x,groundY(x,z)+.02,z);a.rotation.y=Math.atan2(tx(target)-tx(start),tz(target)-tz(start))+(phase>12?Math.PI:0);}
+    const swing=moving?Math.sin(a.userData.clock*7):0;
+    joints[0].rotation.x=travel?swing*.4:-.6+swing*.12;
+    joints[2].rotation.x=travel?-swing*.4:-.6-swing*.12;
+    joints[1].rotation.x=travel?-swing*.4:0;joints[3].rotation.x=travel?swing*.4:0;
+  }
+}
 function cloneModel(key){ const c=R3.models[key].clone(true); c.traverse(o=>{ if(o.isMesh){ o.material=o.material.clone(); o.castShadow=true; o.receiveShadow=true; } }); return c; }
 
 function buildWorld(){
@@ -1303,7 +1338,7 @@ function syncScene(){
     else if(b.solid!==true){ b.mesh.scale.setScalar((b.lvl||1)>1?1.22:1); ghost(b.mesh,false); b.solid=true; }
     // an astronaut stands by every machine that has a worker, and by every building site
     const need=(!b.done)||(DEF[b.type].worker&&b.staffed);
-    if(need&&!b.astro&&R3.models.astronaut){ b.astro=cloneModel('astronaut'); const a=t.shade*6.28+2; b.astro.position.set(tx(t)+Math.cos(a)*0.72,groundY(tx(t)+Math.cos(a)*0.72,tz(t)+Math.sin(a)*0.72)+0.02,tz(t)+Math.sin(a)*0.72); b.astro.rotation.y=-a+Math.PI/2; R3.world.add(b.astro); }
+    if(need&&!b.astro){ b.astro=makeWorker(); const a=t.shade*6.28+2; b.astro.position.set(tx(t)+Math.cos(a)*0.72,groundY(tx(t)+Math.cos(a)*0.72,tz(t)+Math.sin(a)*0.72)+0.02,tz(t)+Math.sin(a)*0.72); b.astro.rotation.y=-a+Math.PI/2; R3.world.add(b.astro); }
     if(b.astro){ b.astro.visible=!!need; live.add(b.astro); }
   }
   for(const m of [...R3.world.children]) if((m.userData.b||R3.bmeshes.has(m))&&!live.has(m)){ R3.world.remove(m); R3.bmeshes.delete(m); }
@@ -1374,6 +1409,7 @@ function animate3D(now){
   if(R3.specks.visible){ const p=R3.specks.geometry.attributes.position; for(let i=0;i<p.count;i++) p.setXYZ(i,target.x+(Math.random()-.5)*40,gy+Math.random()*10,target.z+(Math.random()-.5)*40); p.needsUpdate=true; }
   if(hover&&!R3.fp){ R3.ringHold.visible=true; R3.ringHold.position.set(tx(hover),tileY(hover)+0.14+Math.sin(now*0.005)*0.02,tz(hover));
     let ok=true; if(buildSel==='rover'){ const d=hdist(hover,S.builds[0]); ok=d>=3&&d<=10&&!S.rover; } else if(buildSel) ok=hover.seen&&!hover.build&&hover.type!=='rock'&&!(DEF[buildSel].needs==='ice'&&hover.type!=='ice'); R3.ring.material.color.set(ok?0xfffaf0:0xff4a2e); } else R3.ringHold.visible=false;
+  animateWorkers(dtw);
   R3.renderer.render(R3.scene,cam);
   const box=$('labels'), w=view.clientWidth, h=view.clientHeight; let i=0; const v=new THREE.Vector3();
   for(const b of S.builds){ const txt=badgeFor(b); if(!txt||!b.mesh) continue; v.set(b.mesh.position.x,b.mesh.position.y+1.5,b.mesh.position.z).project(cam); if(v.z>1) continue;
