@@ -1,0 +1,8 @@
+{
+  "query": "https://ssd.jpl.nasa.gov/api/horizons.api?format=json&COMMAND=%27499%27&OBJ_DATA=%27NO%27&MAKE_EPHEM=%27YES%27&EPHEM_TYPE=%27OBSERVER%27&CENTER=%27500%40399%27&START_TIME=%272023-11-20%27&STOP_TIME=%272026-03-01%27&STEP_SIZE=%271+d%27&QUANTITIES=%2720%2C21%27&CSV_FORMAT=%27YES%27",
+  "retrieved": "2026-11-14T11:51:22.894703+00:00",
+  "signature": {
+    "version": "1.2",
+    "source": "NASA/JPL Horizons API"
+  }
+}

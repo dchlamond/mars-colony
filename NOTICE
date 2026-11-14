@@ -22,3 +22,6 @@ This project includes material made by other people:
   Files: game/assets/mars_topo.jpg and the height grid inside game/index.html
 - Solar storm records from NASA DONKI, https://ccmc.gsfc.nasa.gov/tools/DONKI/
   Each record and every other real fact is listed with its source on the game's Data sources screen.
+
+NASA/JPL Horizons ephemeris snapshot
+833 daily Earth-centre to Mars-centre observer calculations, 2023-11-20 through 2026-03-01. Retrieved 2026-11-14. Source: https://ssd.jpl.nasa.gov/horizons/ . Original API response and query retained in research/horizons-earth-mars.txt and research/horizons-query.json; derived local snapshot in game/horizons-snapshot.js. Used for educational signal-time modeling. NASA/JPL does not endorse this game.

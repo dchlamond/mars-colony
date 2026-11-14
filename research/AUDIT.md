@@ -37,3 +37,38 @@ Chrome automation: ten assertions cover paused start, successful placement and c
 8. Small map controls remain.
 9. Council has only Rova, not six skilled founders.
 10. Unvalidated science claims in original facts still need the requested full review.
+
+## Evidence and consequences revision · 14 November 2026
+
+The previous production-status paragraph is historical: the shell and viewport/crew fixes are deployed. This section describes the next tested slice; deployment is verified separately in the session checkpoint.
+
+- Added three optional council projects with explicit stakes, three-sol operational evidence, transmission, acknowledgement, one-time rewards, cancellation confirmation and deadlines.
+- Saved NASA/JPL ephemeris now determines evidence transit time. The 833-row parser validates dates, schema, range and light-time consistency. Cached data works offline; no new third-party runtime request.
+- Site comparison forecasts run on copied building records so browsing the evidence cannot alter staffing, power or resources in the real simulation. The same build command places the chosen building.
+- Corrected Earth DONKI observations being presented without a clear fictional-Mars-scenario boundary. The Mars RAD record is distinguished. No dose model added.
+- Fixed panel scroll carrying over when changing sections. The previous viewport, crew, 10-sol shuttle and top return-button fixes remain.
+
+### Verification
+29 boundary assertions plus browser actions cover dataset-driven timing, one bond, duplicate refusal, three consecutive sols, streak reset, exactly-once rewards/failure, deadline expiry, rival bonus affecting a real 2-seat allocation, blackout hold/resume, unaffordable orders, end-state refusal, forecast isolation and old/current save restoration. A real comparison-panel click places a building. Mobile and standalone offline loading pass without page errors. Existing ten-check gameplay regression and five-viewport crew tests pass.
+
+Shelter-project scripted playthroughs use real construction costs/unlocks, normal ticks, supply requests and closed immigration; they do not inject resource supplies or completed buildings. One seed per site, early-game project only:
+
+| Difficulty | Project confirmed | Confirmation sols | Full campaign tested by this policy? |
+|---|---:|---|---|
+| Explorer | 4/4 | 38–40 | No |
+| Commander | 4/4 | 49 | No |
+| Veteran | 0/4 | Deadline missed at 76 | No |
+
+The first test bot stalled on an unavailable shield. Correcting the bot's power/air/unlock priorities is not evidence of a game balance improvement. The shelter promise allows 75 sols, giving a beginner time for both infrastructure and the roughly 21-sol initial radio round trip. Delaying a promise until infrastructure exists is permitted.
+
+The existing exploratory full-campaign suite was rerun (five policies × four sites, one seed):
+
+| Difficulty | Wins | Scenarios |
+|---|---:|---:|
+| Explorer | 1 | 20 |
+| Commander | 1 | 20 |
+| Veteran | 0 | 20 |
+
+This is still poor and insufficiently validated whole-game balance. The new projects were not chosen by those old bots, and the changed shuttle pacing is a confounder versus the earlier zero-win run. Do not attribute the 2 wins to educational projects or claim the balance targets are achieved. Full result files are balance.json and project-play.json.
+
+Remaining: full council staffing/skills, maintenance, repeated dilemmas, Mars-target forecast ingestion, rover control, confidence-aware ice maps, child playtests and validated winning strategies. This is a playable increase in depth, not completion of the entire brief. No submission or eligibility claim.
