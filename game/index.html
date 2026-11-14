@@ -140,6 +140,7 @@ body.fp #camctl [data-a="in"],body.fp #camctl [data-a="out"],body.fp #camctl [da
 @media (max-width:820px){ aside{top:auto;left:10px;right:10px;width:auto;height:44vh} #camhelp{display:none} #camctl{bottom:calc(44vh + 18px)} }
 
 </style>
+<link rel="stylesheet" href="expedition.css">
 <script src="vendor/three.min.js"></script>
 <script src="vendor/GLTFLoader.js"></script>
 <script src="vendor/DRACOLoader.js"></script>
@@ -1086,10 +1087,11 @@ function showCredits(){
    <tr><td>Mars global image and four 3D models, from ${link('NASA 3D Resources','https://github.com/nasa/NASA-3D-Resources')}</td><td>NASA, public domain. Logos, flags and patches painted over.</td></tr>
    <tr><td>Mars heights (MOLA), from ${link('NASA Mars Trek','https://trek.nasa.gov/mars/')}</td><td>NASA</td></tr>
    <tr><td>Solar storm records, from ${link('NASA DONKI','https://ccmc.gsfc.nasa.gov/tools/DONKI/')}</td><td>NASA</td></tr>
+   <tr><td>Space weather panel: one week of flare, eruption and particle records, from ${link('NASA DONKI','https://ccmc.gsfc.nasa.gov/tools/DONKI/')}</td><td>NASA. Saved on a stated date. The Refresh button asks NASA for newer records.</td></tr>
    </table>
    <p>Every real fact in the game is listed with its source under <b>Data sources</b>.</p>
    <h3>Privacy</h3>
-   <p>This game sends nothing and collects nothing. Your colony name stays on this device.</p>`,
+   <p>This game collects nothing. Your colony name stays on this device. The only request to another website happens if you press Refresh in the Space weather panel, which asks NASA for newer records.</p>`,
    buttons:[{label:'Data sources',fn:()=>showData()},{label:'Close',primary:true}]});
 }
 
@@ -1474,5 +1476,7 @@ modal({title:'Mars Colony',html:`<p><b>You are the commander of the first town o
 requestAnimationFrame(frame);
 window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBLEMS,FACTS,RESEARCH,STORMS,SITES,GOALS,UPG,DEF,DIFFS,setDiff:i=>{DF=DIFFS[i];},upgrade,splitPool,get S(){return S},tickSol,tryBuild,compute,newGame,tileAt,hdist,orderCrate,count,cleanPanels,ACAD};
 </script>
+<script src="donki-snapshot.js"></script>
+<script src="expedition.js"></script>
 </body>
 </html>

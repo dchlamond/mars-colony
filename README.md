@@ -29,14 +29,14 @@ Every choice costs something, and the game explains the real science behind each
   on the game's **Data sources** screen.
 - **Simplified:** sunlight and air thickness per tile, ice by latitude, cave regions.
 - **Invented for the game:** rival colonies, Fame medals, costs, upgrades and how much each machine makes.
-- **Recorded, not live:** storm records are saved inside the game. Nothing is fetched while you play.
+- **Recorded, not live:** storm records are saved inside the game. The Space weather panel shows one saved week of NASA DONKI records and can be refreshed by hand. Those records are kept separate from the storms in play.
 
 Known limits: balance has been tested by scripts, not yet by children. Eight buildings are simple shapes.
 OSDR and RadLab are listed by the challenge and not used yet.
 
 ## Privacy
 
-The game sends nothing and collects nothing. It loads no files from other websites.
+The game collects nothing and loads no files from other websites. The one outside request is optional: the Refresh button in the Space weather panel asks NASA's DONKI service for newer records.
 
 ## What is where
 

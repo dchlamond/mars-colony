@@ -1,0 +1,22 @@
+/* Mars Colony: Junior Mission Trainer.
+   AI disclosure: this file was generated with AI tools from the team's own design. See AI_USE.md. */
+#visor{display:none;position:fixed;inset:0;pointer-events:none;z-index:8;overflow:hidden}
+body.fp #visor{display:block}
+#visor:before{content:'';position:absolute;inset:-8% -5% -12%;border:clamp(24px,5vw,78px) solid #172025;border-radius:43% 43% 39% 39%;box-shadow:inset 0 0 0 3px #b2aaa0,inset 0 0 0 10px #444c4d,inset 0 0 32px 16px #0008,0 0 0 100px #11191d;background:linear-gradient(120deg,#d5f4ff12,transparent 28%,transparent 77%,#ffdfae16)}
+#visor:after{content:'';position:absolute;left:9%;right:9%;top:5%;height:78%;border-radius:45%;border-top:2px solid #f8e9d547;transform:rotate(-8deg)}
+#suit{position:absolute;bottom:-12px;left:0;width:100%;height:29%;filter:drop-shadow(0 -5px 9px #0005)}
+.eva-mark{position:absolute;top:calc(var(--hh) + 28px);left:9%;color:#f7e4cb;font:11px monospace;letter-spacing:3px;text-shadow:0 1px 4px #000}
+.eva-cross{position:absolute;left:50%;top:52%;width:10px;height:10px;border:1px solid #ffe6bc80;border-radius:50%}
+body.fp header{background:linear-gradient(180deg,#101c24e8,#162630c9);border:1px solid #80918d66;border-radius:12px;color:#ebddc5}
+body.fp #camctl,body.fp #fwd,body.fp #camhelp{z-index:12}
+body.fp #camhelp{bottom:65px;right:8%;max-width:75%;background:#102129d9;color:#e5d7be}
+body.fp #camctl{bottom:22px;right:8%}
+body.fp #fwd{bottom:22px;background:#233b40;color:#faf0df}
+#spaceButton{border-color:#8faca5;background:#203b42;color:#f4ead7}
+#spacePanel{position:fixed;z-index:40;right:20px;top:calc(var(--hh) + 12px);width:min(480px,calc(100vw - 40px));max-height:calc(100vh - var(--hh) - 36px);overflow:auto;background:#101f28f5;color:#e9e2d3;border:1px solid #6c8888;border-radius:16px;padding:22px;box-shadow:0 20px 80px #0008;font:14px/1.5 var(--body)}
+#spacePanel[hidden]{display:none}#spacePanel h2{font:800 22px var(--head);margin:6px 0}#spacePanel h3{font:700 15px var(--body);margin:18px 0 8px}#spacePanel p{color:#bfcac8}#spacePanel a{color:#9bd7d2}#spacePanel button{border:1px solid #6e938e;background:#28464a;color:#fff;border-radius:6px;padding:8px 12px}#spacePanel .close{float:right}#spacePanel small{color:#b0bdbb}#spacePanel table{width:100%;border-collapse:collapse;font-size:12px}#spacePanel td,#spacePanel th{padding:5px;text-align:left;border-bottom:1px solid #ffffff18}.bars{display:flex;height:96px;align-items:end;gap:9px;margin:22px 0 30px}.day{flex:1;position:relative;background:#83bdb5;border-radius:4px 4px 0 0;min-height:2px}.day span{position:absolute;top:100%;padding-top:5px;font-size:10px;white-space:nowrap}.day b{position:absolute;bottom:100%;font:11px monospace;color:#dce8dd}.source-tag{font:11px monospace;letter-spacing:1px;color:#9cd5c8}.eva-console{position:absolute;bottom:42px;left:14%;color:#b8ddd2;font:10px monospace;letter-spacing:2px}
+@media(max-width:650px){.eva-mark{left:7%;font-size:9px}.eva-console{display:none}#spacePanel{right:10px;width:calc(100vw - 20px)}body.fp #camhelp{font-size:10px}#suit{height:20%}}
+@media(prefers-reduced-motion:reduce){#suit{transform:none!important}}
+/* Ground readout sits above the helmet rim. */
+body.fp #fphud{z-index:12;top:calc(var(--hh) + 52px);background:#102129e6;color:#e9e2d3;border-color:#6c8888}
+body.fp #fphud b{color:#9bd7d2}

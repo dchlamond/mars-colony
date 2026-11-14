@@ -11,6 +11,7 @@ the rules of the game and what it should teach. AI tools were used to speed up t
 |---|---|---|
 | Game code (`game/index.html`) | Claude (Anthropic) | Written from the team's design document and directed by the team in review rounds. |
 | Lesson text, Mission Control problems, fact card wording | Claude (Anthropic) | Drafted from the team's design. Facts carry source links to NASA and partner pages. |
+| Helmet view, Space weather panel, surface sample choice (`game/expedition.js`, `game/expedition.css`) | AI coding tools, directed by a team member | Merged into the game on 14 November 2026. |
 | Helper scripts (`tools/`) | Claude (Anthropic) | |
 | Project documents (`README.md`, `docs/`, this file) | Claude (Anthropic) | |
 | Building shapes that are not NASA models | Claude (Anthropic) | Simple shapes drawn in code. |
