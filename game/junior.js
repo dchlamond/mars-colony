@@ -63,7 +63,7 @@ const scenarioLocked=()=>shortMission()&&!window.Blackout.allowsAction();
 function init(){
  S.junior={version:2,phase:0,failures:0,recovery:null,invited:false,totalArrivals:0,arrival:null,dustDone:false,radiationDone:false,discovered:false,nextSupply:9,completed:false};
  S.o2=96;S.food=144;S.water=64;S.parts=68;S.metal=0;S.speed=0;S.nextStorm=S.nextDust=S.nextFestival=S.nextLab=S.nextQ=1e9;
- S.rescued=S.rescuedFood=true;S.padOpen=false;S.goal=0;S.management=null;S.operations=null;S.say='Start with sunlight. Build a solar panel, then choose Next day to see the crew work.';
+ S.rescued=S.rescuedFood=true;S.padOpen=false;S.goal=0;S.management=null;S.operations=null;S.say='Start with sunlight. Build a solar panel, then watch the crew work. Use the bottom time controls or Space to pause.';
  unlocked();S.eco=compute();checkpoint();
 }
 // A roster is a real allocation of the colony head count. Display figures must

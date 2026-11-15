@@ -42,7 +42,7 @@
     window.BlackoutAudio?.cue(result?.ok===false?'warning':'confirm');
     return result;
   }
-  function choiceHtml(c,i){
+  function choiceHtml(c,i){if(c.action==='next')return '';
     const cost=c.cost==null?'':typeof c.cost==='object'?Object.entries(c.cost).map(([k,v])=>num(v)+' '+k).join(' · '):typeof c.cost==='number'?`${c.cost} Parts`:String(c.cost);
     return `<button type="button" class="blackout-choice ${c.primary||c.action==='next'?'blackout-primary':''}" data-blackout-action="${esc(c.action)}" data-value="${esc(c.value??'')}" ${c.disabled?'disabled':''} ${c.selected?'aria-pressed="true"':''}><span><strong>${esc(c.label||c.value||c.action)}</strong>${c.detail?`<span>${esc(c.detail)}</span>`:''}</span>${cost?`<b class="blackout-cost">${esc(cost)}</b>`:''}</button>`;
   }

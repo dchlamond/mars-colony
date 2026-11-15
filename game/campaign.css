@@ -14,3 +14,12 @@ html[data-ui-theme=flight]{--ares-panel:#f0f7fbeF;--ares-deep:#e4edf5;--ares-sur
 
 .campaign-mode:has(#campaignControls.has-approach) #aresMission{top:calc(var(--shell-height,100px) + 178px)}
 @media(max-width:650px){.campaign-mode:has(#campaignControls.has-approach) #aresMission{top:calc(var(--shell-height,100px) + 8px)}}
+
+/* Unified navy flight deck and bottom clock. */
+html[data-ui-theme=flight]{--ares-panel:#10283ef5;--ares-deep:#081827;--ares-surface:#173b58;--ares-text:#eff7ff;--ares-muted:#b6ccdf;--ares-accent:#8dd5ff;--ares-line:#476b87}
+#aresNextDay,.campaign-clock,#speed{display:none!important}
+#realTimeControls{position:fixed;z-index:32;bottom:12px;left:50%;transform:translateX(-50%);width:430px;max-width:calc(100vw - 24px);padding:10px 14px;border:1px solid #6da1c8;border-radius:8px;background:#081d32;color:#eff7ff;box-shadow:0 5px 24px #0007;text-align:center;font:14px var(--body)}
+#realTimeControls[hidden]{display:none}#realTimeControls strong{display:block;font:700 13px var(--body);letter-spacing:.08em;margin-bottom:6px}#realTimeControls strong span{color:#9bd9ff}#realTimeControls>div{display:flex;gap:5px}#realTimeControls button{min-height:42px;flex:1;border:1px solid #52758f;border-radius:5px;background:#173750;color:white;font:600 15px var(--body);cursor:pointer}#realTimeControls #timePause{flex:2.7}#realTimeControls button[aria-pressed=true]{background:#b1e3ff;color:#09243b;border-color:#d9f2ff}#realTimeControls button:focus-visible{outline:3px solid #fff;outline-offset:2px}#realTimeControls button:disabled{opacity:.5}#realTimeControls small{display:block;margin-top:6px;color:#b6ccdf;font-size:12px}
+body #aresDock,body #blackoutDock{bottom:128px!important}#campaignControls{background:#10283ef5}#campaignControls button{color:#eff7ff}.campaign-table{color:var(--ares-text)}
+@media(max-width:650px){#campaignControls{bottom:212px}.campaign-mode #commandPanel,.campaign-mode #aresDrawer{bottom:265px!important}#realTimeControls{bottom:8px;padding:8px}#realTimeControls button{min-height:40px;font-size:13px}}
+@media(max-height:520px) and (min-width:651px){#realTimeControls{left:auto;right:12px;transform:none;width:355px}body #aresDock,body #blackoutDock{left:12px;right:auto;transform:none;bottom:12px!important}}
