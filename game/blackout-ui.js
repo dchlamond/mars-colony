@@ -143,7 +143,7 @@
   const priorRender=render;render=function(){priorRender();update();};
   document.addEventListener('blackout:systems',event=>openSystems(event.detail?.type==='ice'?'water':['solar','battery','reactor'].includes(event.detail?.type)?'power':'air'));
   document.addEventListener('blackout:update',()=>update());document.addEventListener('junior:update',()=>update());
-  const prefKey='blackout-accessibility';let prefs={};try{prefs=JSON.parse(localStorage.getItem(prefKey)||'{}');}catch(_){}
+  const prefKey='blackout-accessibility';let prefs={};try{const saved=JSON.parse(localStorage.getItem(prefKey)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved)){for(const key of ['motion','contrast'])if(typeof saved[key]==='boolean')prefs[key]=saved[key];if(['16','18','20'].includes(saved.text))prefs.text=saved.text;}}catch(_){}
   const prefControls={motionSetting:'motion',contrastSetting:'contrast',textSetting:'text'};
   Object.entries(prefControls).forEach(([id,key])=>{const input=byId(id);if(!input)return;if(prefs[key]!=null){if(input.type==='checkbox')input.checked=!!prefs[key];else input.value=prefs[key];input.dispatchEvent(new Event('change',{bubbles:true}));}input.addEventListener('change',()=>{prefs[key]=input.type==='checkbox'?input.checked:input.value;try{localStorage.setItem(prefKey,JSON.stringify(prefs));}catch(_){};});});
   window.BlackoutUI={update,openMission,openSystems,showMessage,downloadRecord,printRecord,action,get tab(){return ui.tab;}};

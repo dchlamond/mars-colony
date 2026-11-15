@@ -21,7 +21,8 @@
     "test:blackout-ui": "node tests/blackout-ui.cjs",
     "test:persistence": "node tests/persistence.cjs",
     "test:living-world": "node tests/ares-living-world.cjs",
-    "test:blackout-boundaries": "node tests/blackout-boundaries.cjs"
+    "test:blackout-boundaries": "node tests/blackout-boundaries.cjs",
+    "test:audit": "node tests/audit-simulation.cjs && node tests/audit-boundaries.cjs && node tests/audit-terrain.cjs && node tests/audit-commander.cjs"
   },
   "devDependencies": {
     "playwright": "1.65.1"

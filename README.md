@@ -1,5 +1,7 @@
 # DEAD RECKONING: BLACKOUT
 
+Current gameplay audit: [15 November release checks and student-test recommendations](research/FINAL-GAMEPLAY-AUDIT-2026-11-15.md). Run `npm run test:audit` for the fast engine, persistence, terrain and campaign checks.
+
 A strategy game about the first town on Mars, played on a NASA-sourced map. Junior missions teach through short, recoverable challenges; Commander keeps the detailed colony simulation.
 Made for the NASA Space Apps Challenge 2026, challenge "Build a Junior Astronaut Mission Trainer".
 

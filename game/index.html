@@ -966,12 +966,20 @@ function nextModal(){
   const m=modalQ.shift(); const ov=$('overlay');
   if(!m){ modalOpen=false; ov.style.display='none'; render(); return; }
   modalOpen=true; ov.style.display='flex';
-  const el=$('modal'); el.innerHTML=`<h2>${m.title}</h2>${m.html}<div class="btns"></div>`;
+  const el=$('modal'); el.setAttribute('aria-labelledby','modalTitle');el.innerHTML=`<h2 id="modalTitle">${m.title}</h2>${m.html}<div class="btns"></div>`;
   const row=el.querySelector('.btns');
   (m.buttons||[{label:'OK',primary:true}]).forEach(b=>{ const bt=document.createElement('button'); bt.className='btn '+(b.primary?'primary ':'')+(b.cls||''); bt.innerHTML=b.label; if(b.ok) bt.dataset.ok='1';
-    bt.onclick=()=>{ if(b.fn)b.fn(); nextModal(); }; row.appendChild(bt); });
+    bt.disabled=!!b.disabled;bt.onclick=()=>{ if(b.fn?.()===false)return; nextModal(); }; row.appendChild(bt); });
   const f=row.querySelector('button'); if(f) f.focus();
 }
+// Keep keyboard users inside the active briefing instead of tabbing into the map.
+document.addEventListener('keydown',e=>{
+ if(!modalOpen||e.key!=='Tab')return;
+ const focusable=Array.from($('modal').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],[tabindex="0"]')).filter(el=>el.getClientRects().length);
+ const first=focusable[0],last=focusable.at(-1);if(!first)return;
+ if(e.shiftKey&&(document.activeElement===first||!$('modal').contains(document.activeElement))){e.preventDefault();last.focus();}
+ else if(!e.shiftKey&&(document.activeElement===last||!$('modal').contains(document.activeElement))){e.preventDefault();first.focus();}
+},true);
 
 function meter(icon,name,frac,cls,txt){ return `<div class="meter ${cls}"><span>${icon}</span><b>${name}</b><div class="bar"><i style="width:${Math.max(0,Math.min(100,frac*100))}%"></i></div><div class="txt">${txt}</div></div>`; }
 const ICON={
@@ -1548,7 +1556,7 @@ window.addEventListener('blur',clearWalkInput);
 document.addEventListener('mousemove',e=>{ if(!R3||!R3.fp||document.pointerLockElement!==R3.renderer.domElement) return; R3.fp.yaw-=e.movementX*0.0025; R3.fp.pitch=Math.max(-0.7,Math.min(0.9,R3.fp.pitch-e.movementY*0.0022)); });
 document.addEventListener('pointerlockchange',()=>{if(!R3)return;R3.fpLocked=document.pointerLockElement===R3.renderer.domElement;if(!R3.fpLocked)clearWalkInput();});
 document.addEventListener('keydown',e=>{ if(!R3||modalOpen) return; const k=e.key.toLowerCase(), s=R3.dist*0.06;
-  if(R3.fp){if(/^(input|textarea|select)$/i.test(e.target.tagName||''))return;if(k==='escape'){e.preventDefault();toggleWalk();return;}if(k==='e'){if(!e.repeat)window.SurfaceSurvey?.record();e.preventDefault();return;}if(/^(w|a|s|d|q|shift|arrowup|arrowdown|arrowleft|arrowright)$/.test(k)){keys[k]=true;e.preventDefault();}return;}
+  if(R3.fp){if(/^(input|textarea|select)$/i.test(e.target.tagName||''))return;if(k==='escape'){if($('spacePanel')&&!$('spacePanel').hidden)return;e.preventDefault();e.stopImmediatePropagation();toggleWalk();return;}if(k==='e'){if(!e.repeat)window.SurfaceSurvey?.record();e.preventDefault();return;}if(/^(w|a|s|d|q|shift|arrowup|arrowdown|arrowleft|arrowright)$/.test(k)){keys[k]=true;e.preventDefault();}return;}
   if(e.target!==document.body) return;
   if(k==='arrowleft'||k==='a')panBy(-s,0); else if(k==='arrowright'||k==='d')panBy(s,0); else if(k==='arrowup'||k==='w')panBy(0,-s); else if(k==='arrowdown'||k==='s')panBy(0,s); else return; e.preventDefault(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){buildSel=null;render();} if(e.key===' '&&!modalOpen&&e.target===document.body){e.preventDefault();setSpeed(S.speed?0:1);render();} });
