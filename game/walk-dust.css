@@ -1,0 +1,11 @@
+/* Below every HUD panel: the terrain gets a little warmth, the navy UI stays crisp. */
+#walkDust{position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;contain:strict;user-select:none}
+#walkDust[hidden],body:not(.fp) #walkDust{display:none}
+.walk-dust-veil{position:absolute;inset:0;background:linear-gradient(180deg,rgba(154,82,43,.025) 0%,rgba(179,96,48,.055) 48%,rgba(157,76,35,.075) 79%,rgba(138,66,31,.035) 100%)}
+.walk-dust-motes{position:absolute;inset:0;overflow:hidden}
+.walk-dust-motes i{position:absolute;left:var(--dust-x);top:var(--dust-y);width:var(--dust-size);height:var(--dust-size);border-radius:50%;background:#d59b72;opacity:0;animation:walkDustDrift var(--dust-time) linear var(--dust-delay) infinite;animation-play-state:paused}
+body.fp #walkDust:not([hidden]) .walk-dust-motes i{animation-play-state:running}
+@keyframes walkDustDrift{0%{transform:translate3d(-7vw,2vh,0);opacity:0}18%,72%{opacity:var(--dust-opacity)}100%{transform:translate3d(8vw,-3vh,0);opacity:0}}
+body.reduce-motion #walkDust .walk-dust-motes{display:none}
+@media(prefers-reduced-motion:reduce){#walkDust .walk-dust-motes{display:none}}
+@media(max-width:650px){.walk-dust-motes i:nth-child(n+11){display:none}}

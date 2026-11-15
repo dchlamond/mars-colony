@@ -18,13 +18,25 @@ function target(){if(!R3?.fp)return null;const t=tileNear(R3.fp.x,R3.fp.z);if(!t
  if(nearby)key=nearby.type==='shield'?'shelter':catalog[nearby.type]?nearby.type:key;
  if(window.SurfaceSurvey?.reading?.()?.condition==='rock')key=['hematite','clay','sulfate'][Math.abs(t.c+t.r)%3];
  return {key,t};}
-function scan(){if(modalOpen||!R3?.fp)return;const q=target();if(!q)return;const d=S.fieldDiscoveries||(S.fieldDiscoveries={version:1,entries:{}}),entry=catalog[q.key];
+function scan(){
+ if(modalOpen||!R3?.fp||S.over||window.FieldScan?.busy)return false;
+ const q=target();if(!q)return false;
+ const mission=S,origin={x:R3.fp.x,z:R3.fp.z};
+ const rock=window.SurfaceSurvey?.reading?.()?.condition==='rock'?SurfaceSurvey.site:null;
+ const site=rock||q.t,rawX=rock?rock.x:tx(site),z=rock?rock.z:tz(site),x=rawX+Math.round((origin.x-rawX)/PW)*PW;
+ clearWalkInput();
+ return window.FieldScan.start({label:catalog[q.key].name,anchor:{x,y:surfaceY(x,z),z,radius:rock ? 0.8 : 0.65,height:rock ? 1.5 : 0.65},valid:()=>{
+  if(S!==mission||!R3?.fp||S.over)return false;let dx=R3.fp.x-origin.x;dx-=Math.round(dx/PW)*PW;
+  return Math.hypot(dx,R3.fp.z-origin.z)<1.4;
+ },complete:()=>finishScan(q)});
+}
+function finishScan(q){const d=S.fieldDiscoveries||(S.fieldDiscoveries={version:1,entries:{}}),entry=catalog[q.key];
  if(!d.entries[q.key]){d.entries[q.key]={key:q.key,sol:S.sol,c:q.t.c,r:q.t.r};if(!window.Blackout?.isActive()){addFame(3,'Field discovery: '+entry.name);S.parts+=1;}log('Discovered '+entry.name+'. NASA evidence added to the discovery ledger.','good');}
- const fp=R3.fp;document.exitPointerLock?.();window.BlackoutAudio?.cue('success');
+ clearWalkInput();document.exitPointerLock?.();window.BlackoutAudio?.cue('success');
  window.CampaignUI.show('Field discovery · '+entry.name,'<p>'+entry.fact+'</p><p><b>Use the evidence:</b> '+entry.why+'</p><p><a href="'+entry.url+'" target="_blank" rel="noopener">Open NASA evidence</a></p><small>This is a placed teaching sample. Pressing F records its lesson, not a measured mineral identification. The dosimeter uses E for exposure readings.</small>');
 }
 function ledger(){const entries=S.fieldDiscoveries?.entries||{};CampaignUI.show('Discovery ledger','<p>Walk on Mars and press <b>F</b> near rocks, ice terrain and colony equipment. Each new type earns 3 Fame and 1 Part once in a campaign.</p><p>'+Object.keys(entries).length+' / '+Object.keys(catalog).length+' discoveries</p>'+Object.entries(catalog).map(([key,c])=>'<article class="discovery-entry"><h3>'+c.name+'</h3>'+(entries[key]?'<p>'+c.fact+'</p><p>'+c.why+'</p><small>Day '+entries[key].sol+' · teaching site '+entries[key].c+', '+entries[key].r+'</small> · <a href="'+c.url+'" target="_blank" rel="noopener">NASA source</a>':'<p>Not recorded yet. Explore to unlock this entry.</p>')+'</article>').join(''));}
 button.onclick=scan;document.addEventListener('keydown',e=>{if(e.code==='KeyF'&&!e.repeat&&!/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName||'')){e.preventDefault();scan();}});
-setInterval(()=>{const q=target();button.hidden=!q||modalOpen;if(q)button.textContent='F · Investigate '+catalog[q.key].name;},200);
+setInterval(()=>{const q=target();button.hidden=!q||modalOpen;button.disabled=!!window.FieldScan?.busy||!!S.over;if(q)button.textContent=window.FieldScan?.busy?'Scanning · hold position':'F · Scan '+catalog[q.key].name;},200);
 window.FieldDiscovery={catalog,target,scan,ledger};
 })();

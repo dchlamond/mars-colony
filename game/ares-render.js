@@ -238,13 +238,32 @@
   g.userData.pelvis=get('pelvis');
   return g;
  };
+ // Match the selected intro's off-white EVA suit, graphite seals and blue accents.
+ // Reuse the articulated mesh: no extra draw calls or heavier character rig.
+ function styleExpeditionSuit(scene){
+  const visited=new Set();scene.traverse(n=>{if(!n.isMesh)return;
+   const m=n.material;
+   if(/visor/i.test(m.name||'')){m.color.setHex(0x14232b);m.metalness=.65;m.roughness=.22;n.scale.x*=1.08;return;}
+   m.metalness=.04;m.roughness=.82;
+   const colors=n.geometry.getAttribute('color');if(!colors||visited.has(colors))return;visited.add(colors);
+   for(let i=0;i<colors.count;i++){
+    const r=colors.getX(i),g=colors.getY(i),b=colors.getZ(i);
+    if(r>.68&&g>.64&&b>.5)colors.setXYZ(i,.78,.76,.69);
+    else if(r>.6&&g>.5&&b>.4)colors.setXYZ(i,.50,.52,.50);
+    else if(r>.43&&g<.3&&b<.08)colors.setXYZ(i,.12,.24,.34);
+    else if(r>.3&&g<.32&&b<.15)colors.setXYZ(i,.055,.075,.09);
+   }
+   colors.needsUpdate=true;
+  });
+ }
  asset('assets/ares/astronaut-a02'+(HQ?'':'-low')+'.glb',scene=>{
+  styleExpeditionSuit(scene);
   const bounds=new THREE.Box3().setFromObject(scene),height=bounds.max.y-bounds.min.y,scale=.54/height;
   scene.scale.setScalar(scale);scene.position.y=-bounds.min.y*scale;
   const holder=new THREE.Group();holder.add(scene);suit=holder;
   for(const name of ['shoulder_L','hip_L','shoulder_R','hip_R','elbow_L','elbow_R','knee_L','knee_R'])if(!holder.getObjectByName(name))throw Error('Missing astronaut joint '+name);
   for(const b of S.builds)if(b.astro){releaseActor(b.astro);b.astro=null;}
-  clearActors();art.astronaut='Blender articulated A02';syncScene();
+  clearActors();art.astronaut='Blender articulated A02 · intro expedition palette';syncScene();
  });
  function vehicle(scene,size){const box=new THREE.Box3().setFromObject(scene),dims=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3()),scale=size/Math.max(dims.x,dims.z);scene.scale.setScalar(scale);scene.position.set(-center.x*scale,-box.min.y*scale,-center.z*scale);const holder=new THREE.Group();holder.add(scene);holder.traverse(n=>{if(n.isMesh){n.castShadow=HQ;n.receiveShadow=true;}});return holder;}
  asset('assets/ares/rover-rv02.glb',scene=>{R3.models.perseverance=vehicle(scene,1.05);if(R3.roverMesh){R3.scene.remove(R3.roverMesh);R3.roverMesh=null;}art.rover='Blender original survey rover';});
