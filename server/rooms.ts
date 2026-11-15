@@ -2,7 +2,7 @@
  * Colony economy reports are client-owned: classroom play, not ranked anti-cheat.
  * Memory-only rooms expire after 4 hours or service restart; no student identities. */
 type Report={pop:number;beds:number;appeal:number;fame:number;open:boolean;day:number;blocked:boolean;over:boolean};
-type Player={id:string;name:string;token:string;seen:number;report:Report;grants:number};
+type Player={id:string;name:string;slot:number;token:string;seen:number;report:Report;grants:number};
 type Room={code:string;host:string;players:Player[];seed:number;day:number;speed:number;started:boolean;last:number;created:number;pending:null|{pool:number;deadline:number};lastArrival:any;wave:number};
 const rooms=new Map<string,Room>(),sessions=new Map<string,{code:string,id:string}>(),limits=new Map<string,{at:number,n:number}>();
 const pace=[0,8000,4000,2000,1000,500];
@@ -22,15 +22,15 @@ function tick(r:Room,now:number){
  if(now-r.last>=pace[r.speed]){r.day++;r.last=now;if(r.day%10===0)r.pending={pool:10,deadline:now+10000};}
 }
 function clean(now:number){for(const [code,r]of rooms)if(now-r.created>4*3600000){rooms.delete(code);for(const p of r.players)sessions.delete(p.token);}for(const [k,l]of limits)if(now-l.at>60000)limits.delete(k);}
-function snapshot(r:Room,p:Player){return {code:r.code,you:p.id,host:r.host===p.id,seed:r.seed,day:r.day,speed:r.speed,started:r.started,pending:r.pending,grants:p.grants,lastArrival:r.lastArrival,expires:r.created+4*3600000,players:r.players.map(x=>({id:x.id,name:x.name,...x.report,online:Date.now()-x.seen<15000})),waitingFor:r.players.filter(x=>Date.now()-x.seen>15000||x.report.blocked).map(x=>x.name)};}
+function snapshot(r:Room,p:Player){return {code:r.code,you:p.id,slot:p.slot,host:r.host===p.id,seed:r.seed,day:r.day,speed:r.speed,started:r.started,pending:r.pending,grants:p.grants,lastArrival:r.lastArrival,expires:r.created+4*3600000,players:r.players.map(x=>({id:x.id,name:x.name,slot:x.slot,...x.report,online:Date.now()-x.seen<15000})),waitingFor:r.players.filter(x=>Date.now()-x.seen>15000||x.report.blocked).map(x=>x.name)};}
 function report(v:any,previous:Report):Report{return {pop:Math.floor(clamp(v.pop,0,500)),beds:Math.floor(clamp(v.beds,0,600)),appeal:clamp(v.appeal,0,100),fame:clamp(v.fame,0,10000),open:v.open===true,day:Math.floor(clamp(v.day,1,10000)),blocked:v.blocked===true,over:v.over===true};}
 const defaults:Report={pop:6,beds:8,appeal:45,fame:0,open:false,day:1,blocked:false,over:false};
-function player(name:any):Player{return {id:uid(),token:uid()+uid(),name:String(name||'Colony').replace(/[^a-zA-Z0-9 _-]/g,'').trim().slice(0,24)||'Colony',seen:Date.now(),report:{...defaults},grants:0};}
+function player(name:any,slot=0):Player{return {id:uid(),slot,token:uid()+uid(),name:String(name||'Colony').replace(/[^a-zA-Z0-9 _-]/g,'').trim().slice(0,24)||'Colony',seen:Date.now(),report:{...defaults},grants:0};}
 function response(data:any,status=200,cookie?:string){const h:Record<string,string>={'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};if(cookie)h['Set-Cookie']=cookie;return new Response(JSON.stringify(data),{status,headers:h});}
 const cookie=(id:string,t:string)=>'mars_room_'+id+'='+t+'; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=14400';
 export async function handle(req:Request){
  const url=new URL(req.url),path=url.pathname.replace(/^\/room-api/,'')||'/',now=Date.now();
- if(path==='/health')return response({ok:true,service:'mars-classroom',version:1});
+ if(path==='/health')return response({ok:true,service:'mars-classroom',version:2});
  clean(now);
  const origin=req.headers.get('origin');
  if(origin&&!['https://mars-colony-tau.vercel.app','https://dead-reckoning-blackout.vercel.app','http://127.0.0.1:8765','http://localhost:8765'].includes(origin))return response({error:'This origin is not allowed.'},403);
@@ -50,7 +50,9 @@ export async function handle(req:Request){
   const found=rooms.get(String(body.code||'').trim().toUpperCase());if(!found)return response({error:'Room not found or expired. Ask the host for its eight-character code.'},404);r=found;
   if(r.started)return response({error:'This mission has started. Join the next room before launch.'},409);
   if(r.players.length>=8)return response({error:'This room already has eight colonies.'},409);
-  const p=player(body.name);r.players.push(p);sessions.set(p.token,{code:r.code,id:p.id});return response(snapshot(r,p),200,cookie(p.id,p.token));
+  // A member's site never shifts when the host leaves or another colony joins.
+  const slot=Array.from({length:8},(_,i)=>i).find(i=>!r.players.some(p=>p.slot===i))!;
+  const p=player(body.name,slot);r.players.push(p);sessions.set(p.token,{code:r.code,id:p.id});return response(snapshot(r,p),200,cookie(p.id,p.token));
  }
  const member=typeof body.member==='string'&&/^[a-f0-9]{32}$/.test(body.member)?body.member:'';
  const prefix='mars_room_'+member+'=';

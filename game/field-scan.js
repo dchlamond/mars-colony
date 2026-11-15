@@ -4,7 +4,7 @@
 const duration=2400;
 let job=null,frame=null,world=null;
 const hud=document.createElement('section');hud.id='fieldScan';hud.hidden=true;hud.setAttribute('aria-label','Field scan');
-hud.innerHTML='<div class="scan-reticle" aria-hidden="true"><i></i><span></span></div><div class="scan-readout"><span class="scan-kicker">FIELD ANALYSIS</span><strong id="scanTarget"></strong><div class="scan-track" role="progressbar" aria-label="Scanning progress" aria-valuemin="0" aria-valuemax="100"><span id="scanFill"></span></div><div class="scan-meta"><span id="scanPhase" role="status">Acquiring sample</span><b id="scanPercent">0%</b></div><small>Hold position · Esc cancels</small></div>';
+hud.innerHTML='<div class="scan-reticle" aria-hidden="true"><i></i><span></span></div><div class="scan-readout"><span class="scan-kicker">FIELD ANALYSIS</span><strong id="scanTarget"></strong><div class="scan-track" role="progressbar" aria-label="Scanning progress" aria-valuemin="0" aria-valuemax="100"><span id="scanFill"></span></div><div class="scan-meta"><span id="scanPhase" role="status">Acquiring sample</span><b id="scanPercent">0%</b></div><small>Hold your aim · Esc cancels</small></div>';
 document.body.append(hud);
 const node=id=>document.getElementById(id);
 function reduced(){return document.body.classList.contains('reduce-motion')||window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;}

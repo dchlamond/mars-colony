@@ -28,6 +28,7 @@
    R3.surveySite=t?{c:t.c,r:t.r,x:tx(t),z:tz(t),sampleX:tx(t),sampleZ:tz(t)+1.08,artistic:true}:null;
   }
   const site=R3.surveySite;siteMesh.visible=!!site;if(!site){siteLabel.style.display='none';return;}
+  siteMesh.userData.scanId='survey:'+site.c+':'+site.r;
   const x=site.x+(R3.fp?Math.round((R3.fp.x-site.x)/PW)*PW:0);
   const bottom=AresRender.surveyRockGeometry.boundingBox.min.y*siteMesh.scale.y;
   siteMesh.position.set(x,surfaceY(site.x,site.z)-bottom-.03,site.z);

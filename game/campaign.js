@@ -72,7 +72,7 @@ function afterDay(){
  // A new, distant completed district earns a single expansion reward.
  for(const b of S.builds)if(b.done&&['habitat','mine','ice'].includes(b.type)&&hdist(b,S.builds[0])>=4){const key=Math.floor(b.c/3)+':'+Math.floor(b.r/3);if(!d.districts.includes(key)){d.districts.push(key);S.parts+=6;addFame(5,'Expanded into a new district.');log('New district connected: +6 parts and +5 Fame. Expansion reveals nearby land.','good');}}
  if(S.junior&&S.junior.completed&&S.sol%10===0)queueWave();
- if(!S.junior&&S.sol%10===0)S.rivals.forEach((r,i)=>{r.appeal=R.clamp(50+12*Math.sin(S.sol/47+i)+ColonySystems.rivalAppeal(r),35,90);});
+ if(!S.junior&&S.sol%10===0&&!window.Classroom?.connected)S.rivals.forEach((r,i)=>{r.appeal=R.clamp(50+12*Math.sin(S.sol/47+i)+ColonySystems.rivalAppeal(r),35,90);});
  event('update',null);
 }
 tickSol=function(){

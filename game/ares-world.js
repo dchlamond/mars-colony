@@ -253,18 +253,38 @@
   scatter.name='Artistic basalt fragments';scatter.castShadow=HQ;scatter.receiveShadow=true;R3.scene.add(scatter);let scatterSignature='';
   function scatterRocks(){
     const pod=S.builds[0],signature=S.seed+':'+S.builds.map(b=>b.c+','+b.r).join(';');if(signature===scatterSignature)return;scatterSignature=signature;
-    const tiles=S.tiles.filter(t=>!t.build&&t.type!=='ice'&&hdist(t,pod)<7);
+    // Each tile owns fixed slots. Occupying one tile removes only its fragments,
+    // rather than reseeding the positions and discovery IDs of every survivor.
+    const tiles=S.tiles.filter(t=>t.type!=='ice'&&hdist(t,pod)<7),candidates=[];
+    for(const t of tiles)for(let slot=0;slot<2;slot++){
+      let seed=(Math.imul(t.c+1,73856093)^Math.imul(t.r+1,19349663)^Math.imul(slot+1,1640531535)^Math.imul((S.seed||0)|0,83492791))>>>0;
+      const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
+      const priority=rand(),a=rand()*6.28,d=.25+rand()*.46,x=tx(t)+Math.cos(a)*d,z=tz(t)+Math.sin(a)*d,k=.035+Math.pow(rand(),3)*.19;
+      candidates.push({id:'fragment:'+t.c+':'+t.r+':'+slot,t,priority,x,z,k,rx:rand()*.6,ry:rand()*6.28,rz:rand()*.5,sz:.8+rand()*.6});
+    }
+    candidates.sort((a,b)=>a.priority-b.priority||a.id.localeCompare(b.id));
+    // Select the shared quality subset before removing occupied tiles. Building
+    // cannot cause unrelated fragments to appear, disappear, or change location.
+    const visible=candidates.slice(0,scatter.instanceMatrix.count).filter(c=>!c.t.build);
     const m=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),p=new THREE.Vector3(),s=new THREE.Vector3();
-    let seed=43821;const rand=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296;};
-    scatter.visible=tiles.length>0;if(!tiles.length)return;
-    for(let i=0;i<scatter.count;i++){const t=tiles[Math.floor(rand()*tiles.length)],a=rand()*6.28,d=.25+rand()*.46,x=tx(t)+Math.cos(a)*d,z=tz(t)+Math.sin(a)*d,k=.035+Math.pow(rand(),3)*.19;e.set(rand()*.6,rand()*6.28,rand()*.5);q.setFromEuler(e);p.set(x,groundY(x,z)+k*.27,z);s.set(k,k,k*(.8+rand()*.6));m.compose(p,q,s);scatter.setMatrixAt(i,m);}
+    const attribute=scatter.geometry.attributes.position;let support=scatter.geometry.userData.walkSupport;
+    if(!support||support.attribute!==attribute||support.version!==attribute.version){const points=new Float32Array(attribute.count*3);for(let i=0;i<attribute.count;i++){points[i*3]=attribute.getX(i);points[i*3+1]=attribute.getY(i);points[i*3+2]=attribute.getZ(i);}support=scatter.geometry.userData.walkSupport={attribute,version:attribute.version,points};}
+    scatter.count=visible.length;scatter.visible=scatter.count>0;scatter.userData.scanIds=visible.map(c=>c.id);
+    for(let i=0;i<visible.length;i++){
+      const c=visible[i];e.set(c.rx,c.ry,c.rz);q.setFromEuler(e);p.set(0,0,0);s.set(c.k,c.k,c.k*c.sz);m.compose(p,q,s);
+      const a=m.elements,points=support.points;let minY=Infinity,lowest=0;
+      for(let j=0;j<points.length;j+=3){const y=a[1]*points[j]+a[5]*points[j+1]+a[9]*points[j+2];if(y<minY){minY=y;lowest=j;}}
+      const px=points[lowest],py=points[lowest+1],pz=points[lowest+2],supportX=a[0]*px+a[4]*py+a[8]*pz,supportZ=a[2]*px+a[6]*py+a[10]*pz;
+      const y=surfaceY(c.x+supportX,c.z+supportZ)-minY-Math.max(.003,c.k*.035);m.setPosition(c.x,y,c.z);scatter.setMatrixAt(i,m);
+    }
     scatter.instanceMatrix.needsUpdate=true;
   }
+  state.refreshRockScatter=()=>{scatterSignature='';scatterRocks();};
   function addOutcrops(){
     if(outcrops)R3.scene.remove(outcrops);
     const pod=S.builds[0],tiles=S.tiles.filter(t=>t.type==='rock'&&hdist(t,pod)<10&&!t.build);
     if(!tiles.length)return;
-    outcrops=new THREE.InstancedMesh(outcropGeometry,palette.rust,tiles.length);outcrops.name='Artistic basalt outcrops';outcrops.castShadow=HQ;outcrops.receiveShadow=true;
+    outcrops=new THREE.InstancedMesh(outcropGeometry,palette.rust,tiles.length);outcrops.name='Artistic basalt outcrops';outcrops.castShadow=HQ;outcrops.receiveShadow=true;outcrops.userData.scanIds=tiles.map(t=>'outcrop:'+t.c+':'+t.r);
     const m=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),p=new THREE.Vector3(),s=new THREE.Vector3();
     tiles.forEach((t,i)=>{const height=.45+t.shade*.8;e.set(0,t.shade*6.28,0);q.setFromEuler(e);s.set(.7+t.shade*.22,height,.7);p.set(tx(t),tileY(t)+height*.3,tz(t));m.compose(p,q,s);outcrops.setMatrixAt(i,m);});
     outcrops.instanceMatrix.needsUpdate=true;R3.scene.add(outcrops);

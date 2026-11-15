@@ -25,7 +25,9 @@
     "test:blackout-boundaries": "node tests/blackout-boundaries.cjs",
     "test:audit": "node tests/audit-simulation.cjs && node tests/audit-boundaries.cjs && node tests/audit-terrain.cjs && node tests/audit-commander.cjs",
     "test:campaign": "node tests/campaign-rules.cjs && node --experimental-strip-types tests/classroom-server.mjs",
-    "test:field-scan": "node tests/field-scan.cjs"
+    "test:field-scan": "node tests/field-scan.cjs",
+    "test:rock-finds": "node tests/field-scan.cjs && node tests/rock-find-rules.cjs && node tests/rock-save.cjs && node tests/patch-rocks.cjs && node tests/scatter-rocks.cjs && node tests/rock-grounding.cjs",
+    "test:classroom-client": "node tests/classroom-client.cjs"
   },
   "devDependencies": {
     "playwright": "1.65.1"

@@ -54,6 +54,19 @@ function captureMission(){
  if(captured.state.junior&&S.junior.checkpoint)captured.state.junior.checkpoint=JSON.parse(JSON.stringify(S.junior.checkpoint));
  return {version:SAVE_VERSION,state:captured.state,rngState:captured.rngState,me:{...ME},diff:DIFFS.indexOf(DF),history:strategy.history.slice(-200)};
 }
+function validateRockFinds(state){
+ if(state.rockFinds===undefined)return;
+ const fail=()=>{throw Error('This save has invalid rock discoveries.');};
+ const record=value=>{if(!value||typeof value!=='object'||Array.isArray(value))return false;const prototype=Object.getPrototypeOf(value);return prototype===null||Object.getPrototypeOf(prototype)===null;};
+ const fields=(value,keys)=>Reflect.ownKeys(value).length===keys.length&&keys.every(key=>Object.prototype.hasOwnProperty.call(value,key));
+ const ledger=state.rockFinds;
+ if(!record(ledger)||!fields(ledger,['version','entries'])||ledger.version!==1||!record(ledger.entries)||Reflect.ownKeys(ledger.entries).length>500)fail();
+ for(const id of Reflect.ownKeys(ledger.entries)){
+  if(typeof id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9:._/-]{0,127}$/.test(id)||['__proto__','constructor','prototype'].includes(id))fail();
+  const entry=ledger.entries[id],limit=entry?.kind==='parts'?3:entry?.kind==='water'||entry?.kind==='air'?5:null;
+  if(!record(entry)||!fields(entry,['kind','amount','sol','rewarded'])||limit===null||!Number.isFinite(entry.amount)||entry.amount<0||entry.amount>limit||!Number.isSafeInteger(entry.sol)||entry.sol<0||entry.sol>state.sol||typeof entry.rewarded!=='boolean'||entry.rewarded!==(entry.amount>0))fail();
+ }
+}
 function validateMission(data){
  if(!data||![1,SAVE_VERSION].includes(data.version))throw Error('This save version is not supported. Your current mission is unchanged.');
  const s=data.state;
@@ -74,6 +87,7 @@ function validateMission(data){
   for(const a of c.arrivals)if(!Array.isArray(a.names)||!Array.isArray(a.seats)||a.names.length!==a.seats.length||!a.names.every(n=>typeof n==='string')||!a.seats.every(n=>Number.isInteger(n)&&n>=0&&n<=100)||!Number.isFinite(a.waiting))throw Error('This save has invalid arrival records.');
  }
  if(s.fieldDiscoveries&&(s.fieldDiscoveries.version!==1||!s.fieldDiscoveries.entries||typeof s.fieldDiscoveries.entries!=='object'||Object.keys(s.fieldDiscoveries.entries).length>20))throw Error('This save has invalid discoveries.');
+ validateRockFinds(s);if(s.junior?.checkpoint)validateRockFinds(s.junior.checkpoint);
  return data;
 }
 function saveMission(){

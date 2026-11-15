@@ -47,11 +47,11 @@ function candidates(type){
 }
 function fail(reason){
   const o=state(),a=o.active;if(!a)return;
-  S.fame=Math.max(0,S.fame-5);o.rivalBoost={index:o.history.length%S.rivals.length,until:S.sol+30,amount:8};
-  const rival=S.rivals[o.rivalBoost.index].name;
-  o.history.unshift({id:a.id,sol:S.sol,outcome:'Missed',detail:reason+' The 2-part bond was spent; −5 Fame. '+rival+' gains +8 appeal for 30 sols.'});
+  S.fame=Math.max(0,S.fame-5);o.rivalBoost=!window.Classroom?.connected&&S.rivals.length?{index:o.history.length%S.rivals.length,until:S.sol+30,amount:8}:null;
+  const rival=o.rivalBoost?S.rivals[o.rivalBoost.index].name:null;
+  o.history.unshift({id:a.id,sol:S.sol,outcome:'Missed',detail:reason+' The 2-part bond was spent; −5 Fame.'+(rival?' '+rival+' gains +8 appeal for 30 sols.':' Classmates’ colonies are unchanged.')});
   o.history=o.history.slice(0,12);o.active=null;
-  log('Project missed: '+CONTRACTS[a.id].name+'. '+reason+' '+rival+' gains a temporary recruitment advantage.','bad');
+  log('Project missed: '+CONTRACTS[a.id].name+'. '+reason+(rival?' '+rival+' gains a temporary recruitment advantage.':''),'bad');
 }
 function accept(id){
   const o=state();if(S.over||o.active||o.completed.includes(id)||!CONTRACTS[id]||S.parts<2)return false;
@@ -89,7 +89,7 @@ let siteType='moxie',siteChoice=0;
 function section(tab,id){const host=document.querySelector(`[data-panel="${tab}"]`);let el=$(id);if(!el){el=document.createElement('section');el.id=id;el.className='operations';host.insertBefore(el,host.querySelector(':scope > h2')?.nextSibling||host.firstChild);}return el;}
 function councilHTML(){
  const o=state(),a=o.active;
- const rules='<details><summary>What is at stake?</summary><p>One project at a time. Commit 2 parts. Success returns the bond and grants 6 parts and 6 Fame. Missing or cancelling costs the bond and 5 Fame; one rival gets +8 appeal for 30 sols, competing harder for newcomers. Each project pays out once. These are fictional training contracts.</p></details>';
+ const room=!!window.Classroom?.connected;const rules='<details><summary>What is at stake?</summary><p>One project at a time. Commit 2 parts. Success returns the bond and grants 6 parts and 6 Fame. Missing or cancelling costs the bond and 5 Fame.'+(room?' Classmates’ colonies remain unchanged.':' One computer rival gets +8 appeal for 30 sols, competing harder for newcomers.')+' Each project pays out once. These are fictional training contracts.</p></details>';
  if(!a)return `<h3>Choose a council promise</h3><p>What can your colony prove? Choose a project you can afford to finish. You may keep building without taking one.</p>${rules}`+Object.entries(CONTRACTS).map(([id,c])=>`<article class="op-card"><small>${c.speaker}</small><h3>${c.name}</h3><p>${c.aim}</p><p><b>${c.days} sols</b> including Earth’s reply. Reply now: about ${replySols()} sols.</p>${button(o.completed.includes(id)?'Completed':'Review promise · 2 parts','review:'+id,o.completed.includes(id)||S.parts<2||S.over)}</article>`).join('');
  const c=CONTRACTS[a.id],eta=a.packet?a.packet.left:replySols();
  return `<h3>${c.name}</h3><p>${c.aim}</p><p class="op-deadline">${Math.max(0,a.deadline-S.sol)} sols left · deadline ${a.deadline}</p><ol class="op-stages"><li>Promise made · 2 parts committed</li><li>${a.ready?'Evidence collected':a.streak+' / 3 successful sols in a row'}</li><li>${a.packet?'Earth reply: '+a.packet.left+' sols'+(inBlackout()?' · on hold during blackout':''):'Send evidence · allow about '+eta+' sols'}</li></ol><progress max="3" value="${a.packet?2:a.ready?1.8:a.streak/3}"></progress><p>${explain(c,a)}</p>${button(a.packet?'Evidence in transit':a.ready?'Send evidence to Earth':'Collect evidence first','transmit',!!a.packet||!a.ready||inBlackout()||S.over)}${!a.packet&&inBlackout()?'<p>Radio blackout: no messages can leave.</p>':''}${button('Review cancellation','cancel',S.over)}${rules}<details><summary>What this project teaches</summary><p>${c.lesson}</p>${source(c.source)}</details>`;
@@ -130,10 +130,10 @@ function action(e){const el=e.target.closest('[data-op]');if(!el||el.disabled)re
  if(name==='council'){Strategy.openTab('council');update();}
  if(name==='sites'){Strategy.openTab('science');update();$('siteLab').scrollIntoView({block:'start'});}
  if(name==='review'){
-  const c=CONTRACTS[arg];modal({title:'Make a council promise?',html:`<p><b>${c.name}</b> · ${c.speaker}</p><p>${c.aim}</p><p>Pay 2 parts now. Confirm the evidence by sol ${S.sol+c.days}. Allow about ${replySols()} sols for Earth’s reply, plus any blackout.</p><p><b>Success:</b> +6 grant parts, bond returned, +6 Fame.<br><b>Miss or cancel:</b> bond lost, −5 Fame, a rival gets +8 recruitment appeal for 30 sols.</p><p>${c.lesson}</p>${source(c.source)}`,buttons:[{label:'Commit 2 parts',primary:true,fn:()=>accept(arg)},{label:'Keep planning'}]});
+  const c=CONTRACTS[arg];modal({title:'Make a council promise?',html:`<p><b>${c.name}</b> · ${c.speaker}</p><p>${c.aim}</p><p>Pay 2 parts now. Confirm the evidence by sol ${S.sol+c.days}. Allow about ${replySols()} sols for Earth’s reply, plus any blackout.</p><p><b>Success:</b> +6 grant parts, bond returned, +6 Fame.<br><b>Miss or cancel:</b> bond lost, −5 Fame.${window.Classroom?.connected?' Classmates’ colonies remain unchanged.':' A computer rival gets +8 recruitment appeal for 30 sols.'}</p><p>${c.lesson}</p>${source(c.source)}`,buttons:[{label:'Commit 2 parts',primary:true,fn:()=>accept(arg)},{label:'Keep planning'}]});
  }
  if(name==='transmit')transmit();
- if(name==='cancel')modal({title:'Cancel this promise?',html:'<p>The 2-part bond will be lost. Lose 5 Fame; a rival gains +8 recruitment appeal for 30 sols. You can attempt the project again.</p>',buttons:[{label:'Cancel promise',fn:()=>{fail('The commander cancelled the project.');render();}},{label:'Keep working',primary:true}]});
+ if(name==='cancel')modal({title:'Cancel this promise?',html:'<p>The 2-part bond will be lost. Lose 5 Fame.'+(window.Classroom?.connected?' Classmates’ colonies remain unchanged.':' A computer rival gains +8 recruitment appeal for 30 sols.')+' You can attempt the project again.</p>',buttons:[{label:'Cancel promise',fn:()=>{fail('The commander cancelled the project.');render();}},{label:'Keep working',primary:true}]});
  if(name==='focus'||name==='build'){
   const [c,r]=arg.split(',').map(Number),t=tileAt(c,r);if(!t)return;
   if(name==='focus'){R3.target.set(tx(t),0,tz(t));R3.dist=10;$('commandPanel').hidden=true;}

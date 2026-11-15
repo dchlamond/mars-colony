@@ -17,7 +17,7 @@ function update(){
  clock.hidden=!!R3?.fp||modalOpen;
  document.getElementById('timeDay').textContent='· DAY '+S.sol;
  document.getElementById('timePause').textContent=running()?'Pause · Space':'Resume · Space';
- clock.querySelectorAll('button').forEach(b=>b.disabled=!!S.over||(room&&!Classroom.host));
+ clock.querySelectorAll('button').forEach(b=>b.disabled=(!room&&!!S.over)||(room&&!Classroom.host));
  clock.querySelectorAll('[data-time-pace]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.timePace===S.speed)));
  const waiting=window.Blackout?.isActive()&&!Blackout.view().canAdvance;
  document.getElementById('timeState').textContent=room?Classroom.clockLabel():modalOpen?'Paused for briefing':waiting?'Choose your mission plan to continue':S.junior?.recovery?'Paused · retry your checkpoint':running()?'Automatic time · '+intervals[S.speed]/1000+' seconds per day':'Paused · press Space to resume';

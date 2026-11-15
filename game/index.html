@@ -528,7 +528,7 @@ function tickSol(){
   S.appeal+=(target-S.appeal)*0.08; S.appeal=Math.max(0,Math.min(100,S.appeal));
   S.cov=cov; S.comfort=comfort; S.o2days=o2days; S.fooddays=fooddays;
   if(S.appeal>=70) addFame(0.15,'Colonists have been happy for a long time.');
-  if(S.appeal<30&&S.sol%5===0&&S.pop>1&&!window.Classroom?.connected){ S.pop--; S.rivals[0].pop++;
+  if(S.appeal<30&&S.sol%5===0&&S.pop>1&&S.rivals.length&&!window.Classroom?.connected){ S.pop--; S.rivals[0].pop++;
     const why=S.o2days<3?'air is running low':S.fooddays<3?'food is running low':cov<0.5?'there is not enough shelter':'life here is too hard';
     log('1 colonist moved to Colony Ares: '+(S.crowd>2&&S.o2days>=3&&S.fooddays>=3?'there are not enough beds':why)+'.','bad'); }
 
@@ -1050,7 +1050,7 @@ function render(){
   $('banner').innerHTML=f;
   document.querySelectorAll('.bbtn').forEach(b=>{b.style.display=S.unlocked[b.dataset.t]?'':'none';b.classList.toggle('sel',buildSel===b.dataset.t);b.classList.toggle('poor',S.parts<DEF[b.dataset.t].cost||S.metal<DEF[b.dataset.t].metal)});
   syncScene();
-  $('camhelp').textContent=R3&&R3.fp?'W A S D to walk; Shift to run. Click to look, or drag. Esc frees the mouse. Back to map exits. E records a surface survey.':'Drag to move the map. Scroll to zoom.';
+  $('camhelp').textContent=R3&&R3.fp?'W A S D to walk; Shift to run. Click to look, or drag. Esc frees the mouse. Back to map exits. Aim at a rock and press F to scan. E records a dosimeter reading.':'Drag to move the map. Scroll to zoom.';
   $('buildhint').textContent=buildSel?DEF[buildSel].desc+' Click a tile to place it. Press Esc to cancel.':(S.cleaning?'Builders are cleaning panels. Building resumes soon.':'Free colonists do the building. Click any building on the map to read about it, switch it off or upgrade it.');
 }
 
@@ -1212,9 +1212,33 @@ function init3D(){
 }
 function layPatch(x,z){ const P=R3.patch, pos=P.geometry.attributes.position; P.position.set(x,0,z);
   for(let i=0;i<pos.count;i++) pos.setY(i,groundY(x+pos.getX(i),z+pos.getZ(i))+0.012); pos.needsUpdate=true; P.geometry.computeVertexNormals(); P.userData.c=[x,z];
-  const m=new THREE.Matrix4(), q=new THREE.Quaternion(), e=new THREE.Euler(), v=new THREE.Vector3(), sc=new THREE.Vector3(); let a=Math.floor(x*13+z*7)+99991;
-  const rnd=()=>{a=(a*9301+49297)%233280;return a/233280;};
-  for(let i=0;i<R3.rocks.count;i++){ const rx=x+(rnd()-.5)*24, rz=z+(rnd()-.5)*24, k=0.015+rnd()*rnd()*0.11; e.set(rnd()*6,rnd()*6,rnd()*6); q.setFromEuler(e); v.set(rx,surfaceY(rx,rz)+k*0.4,rz); sc.set(k,k*(0.5+rnd()*0.6),k); m.compose(v,q,sc); R3.rocks.setMatrixAt(i,m); }
+  // Global cells keep a rock fixed when this detail window follows the walker.
+  // Longitude repeats the same identities, including after a save or quality change.
+  const nx=Math.round(PW),nz=Math.round(PH),sx=PW/nx,sz=PH/nz,cx=Math.floor((x-X0)/sx),cz=Math.floor((z-Z0)/sz),cells=[];
+  const reachX=Math.ceil(12/sx)+1,reachZ=Math.ceil(12/sz)+1;
+  for(let iz=Math.max(0,cz-reachZ);iz<=Math.min(nz-1,cz+reachZ);iz++)for(let ix=cx-reachX;ix<=cx+reachX;ix++){
+    const wrappedX=((ix%nx)+nx)%nx;
+    let a=(Math.imul(wrappedX+1,73856093)^Math.imul(iz+1,19349663)^Math.imul((S.seed||0)|0,83492791))>>>0;
+    const rnd=()=>{a=(Math.imul(a,1664525)+1013904223)>>>0;return a/4294967296;};
+    const rx=X0+(ix+.5+(rnd()-.5)*.5)*sx,rz=Z0+(iz+.5+(rnd()-.5)*.5)*sz;
+    if(Math.abs(rx-x)>12||Math.abs(rz-z)>12)continue;
+    const medium=rnd()<.28,k=medium?.10+rnd()*.18:.025+rnd()*.07;
+    cells.push({id:'rock:'+wrappedX+':'+iz,x:rx,z:rz,k,rx:rnd()*6,ry:rnd()*6,rz:rnd()*6,sy:.5+rnd()*.6,d:(rx-x)**2+(rz-z)**2});
+  }
+  cells.sort((a,b)=>a.d-b.d||a.id.localeCompare(b.id));
+  const rocks=R3.rocks,m=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),sc=new THREE.Vector3();
+  const attribute=rocks.geometry.attributes.position;let support=rocks.geometry.userData.walkSupport;
+  if(!support||support.attribute!==attribute||support.version!==attribute.version){const points=new Float32Array(attribute.count*3);for(let i=0;i<attribute.count;i++){points[i*3]=attribute.getX(i);points[i*3+1]=attribute.getY(i);points[i*3+2]=attribute.getZ(i);}support=rocks.geometry.userData.walkSupport={attribute,version:attribute.version,points};}
+  rocks.count=Math.min(rocks.instanceMatrix.count,cells.length);rocks.userData.scanIds=[];rocks.userData.scanPositions=[];
+  for(let i=0;i<rocks.count;i++){
+    const c=cells[i];e.set(c.rx,c.ry,c.rz);q.setFromEuler(e);v.set(0,0,0);sc.set(c.k,c.k*c.sy,c.k);m.compose(v,q,sc);
+    // Anchor an actual support vertex, not the primitive's old radius. Authored
+    // rocks are flatter and can otherwise float after their geometry loads.
+    const a=m.elements,points=support.points;let minY=Infinity,lowest=0;
+    for(let j=0;j<points.length;j+=3){const y=a[1]*points[j]+a[5]*points[j+1]+a[9]*points[j+2];if(y<minY){minY=y;lowest=j;}}
+    const px=points[lowest],py=points[lowest+1],pz=points[lowest+2],supportX=a[0]*px+a[4]*py+a[8]*pz,supportZ=a[2]*px+a[6]*py+a[10]*pz;
+    const y=surfaceY(c.x+supportX,c.z+supportZ)-minY-Math.max(.004,c.k*.035);m.setPosition(c.x,y,c.z);rocks.setMatrixAt(i,m);rocks.userData.scanIds.push(c.id);rocks.userData.scanPositions.push({x:c.x,y,z:c.z});
+  }
   R3.rocks.instanceMatrix.needsUpdate=true; }
 // ---------- Walk mode: continuous longitude, one visible collision surface ----------
 const keys={}, WALK_EYE=.49, WALK_BODY=.10, WALK_POLE_MARGIN=.025;
@@ -1293,7 +1317,7 @@ function walkStep(dt){const f=R3.fp;if(!f)return;dt=Math.max(0,Math.min(.1,Numbe
   const y=Math.max(standing,f.y+(reduced?0:Math.sin(f.step)*.008*Math.min(1,spd))),cp=Math.cos(f.pitch);
   R3.cam.position.set(f.x,y,f.z);R3.cam.lookAt(f.x+dx*cp,y+Math.sin(f.pitch),f.z+dz*cp);R3.target.set(f.x,0,f.z);
   const t=tileNear(f.x,f.z);if(t&&(t!==f.tile||f.boundary!==f.lastBoundary)){f.tile=t;f.lastBoundary=f.boundary;const b=t.build&&t.build.done?DEF[t.build.type].name:null;
-    $('fphud').innerHTML=`<b>${b||(t.type==='ice'?'Possible buried ice':t.type==='lava'?'Lava tube country':'Open ground')}</b> ${coord(t)} &middot; ${t.elev>=0?'+':''}${t.elev.toFixed(1)} km &middot; ${f.boundary||'E: record survey · Back to map above'}`;
+    $('fphud').innerHTML=`<b>${b||(t.type==='ice'?'Possible buried ice':t.type==='lava'?'Lava tube country':'Open ground')}</b> ${coord(t)} &middot; ${t.elev>=0?'+':''}${t.elev.toFixed(1)} km &middot; ${f.boundary||'F: aim at a rock to scan · E: dosimeter'}`;
   }
   window.SurfaceSurvey?.update();
 }
@@ -1619,6 +1643,7 @@ window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBL
 <script src="blackout-audio.js"></script>
 <link rel="stylesheet" href="field-scan.css">
 <script src="field-scan.js"></script>
+<script src="rock-find-rules.js"></script>
 <script src="field-discovery.js"></script>
 <script src="classroom.js"></script>
 <script src="campaign-ui.js"></script>

@@ -146,7 +146,8 @@
   syncServices();
   // A player may enter before the asynchronous terrain GLB arrives. Resample
   // immediately against its triangles so asset replacement cannot bury them.
-  if(R3.fp){R3.fp.y=surfaceY(R3.fp.x,R3.fp.z)+WALK_EYE;walkStep(0);}
+  art.refreshRockScatter?.();
+  if(R3.fp){layPatch(R3.fp.x,R3.fp.z);R3.fp.y=surfaceY(R3.fp.x,R3.fp.z)+WALK_EYE;walkStep(0);}
  });
  function visualCopy(source){
   // Live building userData holds its owning game record, which points back to
@@ -213,6 +214,7 @@
   function replace(n){if(!n?.isInstancedMesh)return;n.geometry.dispose();n.geometry=rock;n.material=mat;n.castShadow=HQ;n.receiveShadow=true;n.userData.blenderRock=true;}
   replace(R3.rocks);
   R3.scene.traverse(n=>{if(/Artistic basalt/.test(n.name))replace(n);});
+  art.refreshRockScatter?.();if(R3.fp)layPatch(R3.fp.x,R3.fp.z);
   art.rocks='Blender stratified basalt';
  });
  // A close-up study formation deserves the complete stratified silhouette.
