@@ -48,7 +48,9 @@
   const data=reading();if(!data||modalOpen)return {ok:false,message:'Enter Walk on Mars before recording a reading.'};
   if(S.storm?.active){const result={ok:false,recorded:false,reward:0,message:'A radiation alert is active. Return to the map and keep the crew sheltered; outdoor surveys can wait.'};document.getElementById('surveyResult').textContent=result.message;return result;}
   const result=window.MissionSystems?.recordSurvey(data)||{ok:false,message:'Survey records are not ready yet.'};
-  document.getElementById('surveyResult').textContent=result.message;update();return result;
+  document.getElementById('surveyResult').textContent=result.message;
+  if(result.ok){tool.classList.add('scanning');clearTimeout(scanTimer);scanTimer=setTimeout(()=>tool.classList.remove('scanning'),650);}
+  update();return result;
  }
  function science(){
   clearWalkInput();
@@ -57,37 +59,34 @@
  }
  document.getElementById('recordSurvey').onclick=record;document.getElementById('surveyScience').onclick=science;
 
- // A separately lit first-person tool scene keeps the authored hand out of the
- // world's collision/shadow passes. This is a 3D asset, not a drawn suit overlay.
- const instrumentScene=new THREE.Scene(),instrumentCamera=new THREE.PerspectiveCamera(62,1,.01,5),holder=new THREE.Group();
- instrumentScene.add(holder);instrumentScene.add(new THREE.HemisphereLight(0xd7e5ec,0x765134,.9));
- const key=new THREE.DirectionalLight(0xffe2b8,2.0);key.position.set(-2,3,4);instrumentScene.add(key);
- const displayCanvas=document.createElement('canvas');displayCanvas.width=512;displayCanvas.height=384;const context=displayCanvas.getContext('2d');
- const displayTexture=new THREE.CanvasTexture(displayCanvas);displayTexture.encoding=THREE.sRGBEncoding;
- const display=new THREE.Mesh(new THREE.PlaneGeometry(.132,.107),new THREE.MeshBasicMaterial({map:displayTexture,toneMapped:false}));display.position.set(0,.305,.079);holder.add(display);
- let loaded=false,lastText='',lastFrameKey='',lastMission=S;
+ // Student-selected Field Scientist view model: the detailed transparent art
+ // preserves the chosen glove/materials; the screen remains live HTML data.
+ // This is a 2.5D view model, not world geometry or a NASA sensor replica.
+ const tool=document.createElement('div');tool.id='fieldScientist';tool.hidden=true;tool.setAttribute('aria-hidden','true');
+ tool.innerHTML='<img alt="" draggable="false"><div class="field-screen"><span class="field-heading">SURVEY</span><strong>100</strong><span class="field-unit">RELATIVE INDEX</span><span class="field-place">Open ground</span><span class="field-simulation">SIMULATION</span></div>';
+ document.body.append(tool);
+ let loaded=false,lastText='',lastMission=S,scanTimer;
  const art=window.AresWorld;if(art)art.pending++;
- new THREE.GLTFLoader().load((window.INLINE&&window.INLINE['assets/ares/surface-dosimeter.glb'])||'assets/ares/surface-dosimeter.glb',g=>{
-  holder.add(g.scene);g.scene.traverse(n=>{if(n.isMesh){n.castShadow=false;n.receiveShadow=false;}});loaded=true;if(art){art.pending--;art.dosimeter='Blender authored glove and survey instrument';}
- },undefined,()=>{if(art){art.pending--;art.errors.push('surface-dosimeter.glb');}});
+ const toolImage=tool.querySelector('img');
+ toolImage.onload=()=>{loaded=true;if(art){art.pending--;art.dosimeter='Field Scientist: selected transparent view model with live readings';}};
+ toolImage.onerror=()=>{if(art){art.pending--;art.errors.push('field-scientist.png');}};
+ toolImage.src=window.INLINE?.['assets/selected/field-scientist.png']||'assets/selected/field-scientist.png';
  function update(){
   if(lastMission!==S){lastMission=S;lastText='';document.getElementById('surveyResult').textContent='Compare open ground, rock and a built shelter.';}
-  const visible=!!R3.fp;panel.hidden=!visible;if(!visible)return;
+  const visible=!!R3.fp;panel.hidden=!visible;tool.hidden=!visible||!loaded;if(!visible)return;
   const value=reading();if(!value)return;
   const text=value.exposureIndex+'|'+value.condition;
   if(text!==lastText){
    lastText=text;document.getElementById('surveyIndex').textContent=value.exposureIndex;document.getElementById('surveyCondition').textContent=value.label;document.getElementById('surveyModel').textContent=value.model;
-   context.fillStyle='#122c29';context.fillRect(0,0,512,384);context.strokeStyle='#7eaa8a';context.lineWidth=8;context.strokeRect(7,7,498,370);
-   context.fillStyle='#d4d8a2';context.font='bold 34px sans-serif';context.textAlign='center';context.fillText('RAD SURVEY',256,58);context.font='bold 138px sans-serif';context.fillText(String(value.exposureIndex),256,221);context.font='28px sans-serif';context.fillText('RELATIVE INDEX',256,271);context.fillStyle='#b7e5e6';context.font='bold 28px sans-serif';context.fillText('SIMULATION',256,333);displayTexture.needsUpdate=true;
+   tool.querySelector('strong').textContent=value.exposureIndex;
+   tool.querySelector('.field-place').textContent=({open:'Open ground',rock:'Rock cover',shelter:'Shelter'})[value.condition];
   }
   document.getElementById('recordSurvey').disabled=!!S.storm?.active;
  }
- function render(renderer){
-  if(!R3.fp||!loaded)return;
-  const aspect=R3.cam.aspect,key=aspect+'|'+R3.cam.fov;if(key!==lastFrameKey){instrumentCamera.aspect=aspect;instrumentCamera.fov=R3.cam.fov;instrumentCamera.updateProjectionMatrix();lastFrameKey=key;}
-  const scale=.43*Math.min(1.5,aspect),reduced=document.body.classList.contains('reduce-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches;
-  holder.scale.setScalar(scale);holder.position.set(innerHeight<500&&aspect>1.4?-.21:.245*aspect,-.29+(reduced?0:Math.sin(R3.fp.step)*.002),-.56);holder.rotation.set(-.10,-.12,.08);
-  const previous=renderer.autoClear;renderer.autoClear=false;renderer.clearDepth();renderer.render(instrumentScene,instrumentCamera);renderer.autoClear=previous;
+ function render(){
+  tool.hidden=!R3.fp||!loaded;if(tool.hidden)return;
+  const reduced=document.body.classList.contains('reduce-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches;
+  tool.style.transform=reduced?'none':`translateY(${Math.sin(R3.fp.step)*2}px) rotate(${Math.sin(R3.fp.step*.5)*.35}deg)`;
  }
  window.SurfaceSurvey={reading,record,science,update,render,syncSite,get ready(){return loaded;},get site(){return R3.surveySite;},sources:{rad:SOURCE,cliff:CLIFF,storm:STORM}};
 })();

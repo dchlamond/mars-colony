@@ -974,7 +974,7 @@ function nextModal(){
 }
 // Keep keyboard users inside the active briefing instead of tabbing into the map.
 document.addEventListener('keydown',e=>{
- if(!modalOpen||e.key!=='Tab')return;
+ if(!modalOpen||e.key!=='Tab'||document.getElementById('missionFilm')?.open)return;
  const focusable=Array.from($('modal').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href],[tabindex="0"]')).filter(el=>el.getClientRects().length);
  const first=focusable[0],last=focusable.at(-1);if(!first)return;
  if(e.shiftKey&&(document.activeElement===first||!$('modal').contains(document.activeElement))){e.preventDefault();last.focus();}
@@ -1610,6 +1610,8 @@ window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBL
 <script src="vendor/SSAOPass.js"></script>
 <script src="ares-render.js"></script>
 <script src="surface-survey.js"></script>
+<link rel="stylesheet" href="selected-experience.css">
+<script src="selected-experience.js"></script>
 <script src="ares-ui.js"></script>
 <script src="blackout-ui.js"></script>
 <script src="blackout-audio.js"></script>

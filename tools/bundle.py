@@ -11,7 +11,7 @@ s=re.sub(r'<link rel="stylesheet" href="([^"]+)">',lambda m:'<style>'+css((game/
 s=css(s)
 s=re.sub(r'<script src="([^"]+)"></script>',lambda m:'<script>'+ (game/m[1]).read_text().replace('</script','<\\/script')+'</script>',s)
 images={str(p.relative_to(game)):data(p) for p in (game/'assets').glob('mars*.jpg')}
-for directory in ('ares', 'ares-ui'):
+for directory in ('ares', 'ares-ui', 'selected'):
     for p in (game/'assets'/directory).rglob('*'):
         if p.is_file() and p.suffix.lower() in ('.glb','.jpg','.jpeg','.png','.webp','.svg'):
             images[str(p.relative_to(game))]=data(p)

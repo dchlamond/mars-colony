@@ -67,3 +67,20 @@ OpenAI Codex, directed by the team's approved build plan, implemented the short 
 Four original Blender service props and improved procedural crew/world presentation were authored using AI-assisted Python and the installed Blender background process. Existing Grok-generated terrain colour and fictional adult adviser imagery are reused. A visible in-game label identifies generated artwork; exported game photos and the demonstration preserve a visible disclosure. No new synthetic child imagery or voice is used.
 
 The demonstration records the actual game and uses editorial captions; it is not a generated simulation of a finished product. Locally synthesized WebAudio uses original oscillator/noise code, not a recording of a person. NASA input records remain sourced observations/calculations, not AI-generated data. Automated tests do not establish human learning outcomes.
+
+## Student-selected cinematic release, 15 November 2026
+
+Students selected Cinematic Expedition (welcome 1), Field Scientist (equipment 2),
+and Two Futures (film 6). The welcome uses the selected ChatGPT-generated art
+with real HTML controls. The detailed first-person glove is a transparent image
+derived from the selected art through OpenAI image generation, with live HTML
+readings and motion. It is a 2.5D view model, not a newly rigged 3D hand.
+
+Film 6 combines the team's existing Grok-generated cinematics and actual game
+captures. Hades narration is the previously generated Inworld stock voice; it is
+not a student or cloned human voice. Codex translated the approved narration to
+Modern Standard Arabic and retimed the edit against the Hades recording. Arabic
+captions are burned into the video for reliable browser/fullscreen playback;
+editable SRT/VTT sidecars are included. The original synthesized music/effects
+are mixed beneath one continuous voice recording. No scientific input data were
+changed by this presentation release.
