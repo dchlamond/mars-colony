@@ -25,11 +25,9 @@ function quality(s,e){
  const score=clamp(reasons.reduce((n,r)=>n+(r[2]?r[1]:0),0)-noise,0,100);
  return {score,label:score>=80?'Thriving':score>=55?'Settling in':'Needs care',reasons:reasons.map(([label,points,ready])=>({label,points:ready?points:0,ready})).concat(noise?[{label:'Industry near homes',points:-noise,ready:false}]:[])};
 }
-function weather(day){
- if(day<300)return null;
- const cycle=Math.floor((day-300)/30),within=(day-300)%30;
- const duration=Math.min(27,12+cycle*3),solar=Math.max(.015,.12*Math.pow(.7,cycle));
- return {cycle:cycle+1,duration,solar,active:within<duration,daysLeft:Math.max(0,duration-within),next:within<duration?day+(duration-within):day+(30-within),radiation:within>=4&&within<Math.min(duration,6+cycle),cold:within>=8&&within<Math.min(duration,11+cycle),maintenance:1+cycle*.2};
-}
+// No NASA observation supports an automatic, endlessly intensifying weather
+// regime after game day 300. Separately labelled reference scenarios remain.
+// Keep this query for existing UI callers and older saves.
+function weather(){return null;}
 const api={clamp,awareness,allocate,quality,weather};root.CampaignRules=api;if(typeof module!=='undefined')module.exports=api;
 })(typeof window!=='undefined'?window:globalThis);

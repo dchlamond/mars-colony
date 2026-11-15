@@ -1,17 +1,11 @@
-/* Actual Junior engine policy players; no alternative simulator or free resources. */
-const {chromium}=require('playwright');
-const assert=require('node:assert/strict');
-const fs=require('node:fs');
-const path=require('node:path');
-(async()=>{
- const browser=await chromium.launch({channel:'chrome',headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
- const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
- page.on('pageerror',e=>errors.push(e.message));
- const outdir=path.join(__dirname,'../dist/verification');fs.mkdirSync(outdir,{recursive:true});
- try{
-  await page.goto(process.env.GAME_URL||'http://127.0.0.1:8765');
-  await page.waitForFunction(()=>window.Blackout&&window.Junior&&window.MissionSystems&&window.AresWorld?.pending===0,{timeout:30000});
-  const result=await page.evaluate(()=>{
+/* Actual Junior engine policy players; no alternative simulator or free resources.
+ * Rendering/controls are verified separately through CUA. No browser is launched. */
+const {engine}=require('./engine-harness.cjs');
+const fs=require('node:fs'),path=require('node:path');
+const outdir=path.join(__dirname,'../dist/verification');fs.mkdirSync(outdir,{recursive:true});
+try {
+ const e=engine();
+ const result=e.run(`(()=>{
    // Rendering is suppressed for fast policy runs. Every move still calls the
    // same public action and authoritative Junior simulation as the game UI.
    R3=null;render=()=>{};syncScene=()=>{};buildMenu=()=>{};
@@ -53,12 +47,14 @@ const path=require('node:path');
    cases.push('36 policy runs across three fixed seeds and four sites');
    // Independently calculated first-day physics/accounting, not expected values
    // returned by the production function under test.
-   setup('align');const air0=S.o2,water0=S.water,food0=S.food;
+   setup('align');const air0=S.o2,water0=S.water,food0=S.food,firstEconomy=compute();
+   near(firstEconomy.waterSupplied,4,'One staffed processor supplies four authored game units');
+   near(firstEconomy.waterExtracted,0,'MOLA tiles never claim measured water extraction');
    const expectedAir=4*S.builds.filter(b=>b.type==='moxie').reduce((n,b)=>n+tileAt(b.c,b.r).air,0);
    const expectedSun=3+5*S.builds.filter(b=>b.type==='solar').reduce((n,b)=>n+tileAt(b.c,b.r).sun,0);
    near(compute().gen,expectedSun,'Initial generation equals pod plus latitude-weighted panels');
    near(compute().demand,12,'Two oxygen units, processor and greenhouse use twelve power');
-   act('next');near(S.o2,air0+expectedAir-6,'First day oxygen ledger');near(S.food,food0,'A ripe watered greenhouse balances six crew food');near(S.water,water0-(6+.5)+(6*.95+.5*.9),'First day water recovery conserves throughput');
+   act('next');near(S.o2,air0+expectedAir-6,'First day oxygen ledger');near(S.food,food0,'A ripe watered greenhouse balances six crew food');near(S.water,water0-(6+.5)+(6*.95+.5*.9)+firstEconomy.waterSupplied,'First day water ledger includes recovery and explicit processor supply');
    near(MissionSystems.boostInfo().remainingDays,3,'Alignment completes after work day, then grants three production days');
    check(compute().crew.operators===4,'Four actual operators run the outpost');
    cases.push('Independent first-day generation, oxygen, food, water and technician checks');
@@ -102,7 +98,7 @@ const path=require('node:path');
    const fameBefore=S.fame;act('explain','stored-energy');act('transfer','reserve');const fameAfter=S.fame;
    check(Blackout.view().completed&&fameAfter-fameBefore===10,'Reasoning, transfer and completion award finite Fame');
    check(!Blackout.action('transfer','reserve').ok&&S.fame===fameAfter,'Repeated answers cannot farm Fame');
-   const record=Blackout.exportRecord();check(record.learning.explanation.correct&&record.learning.transfer.correct&&record.sources.length>=5,'Learning export carries actual answers and provenance');
+   const record=Blackout.exportRecord();check(record.learning.explanation.correct&&record.learning.transfer.correct&&record.sources.length===3&&record.sources.every(s=>['mola','horizons','donki'].includes(s.id)),'Learning export carries actual answers and provenance');
    check(!JSON.stringify(record).includes('userName'),'Learning record requires no identity');
    setup('battery','shelter',551,0);const repeat=finish();check(JSON.stringify(first.timeline)===JSON.stringify(repeat.timeline),'Identical policy produces identical timeline');
    cases.push('Deterministic replay, original-state isolation, durable first attempt and finite learning rewards');
@@ -133,9 +129,10 @@ const path=require('node:path');
    Junior.start('junior',0,112);rng();Junior.checkpoint();const checkpointRandom=rng();S.junior.recovery='test shortage';check(Junior.recover(),'Ordinary Junior recovery works');near(rng(),checkpointRandom,'Ordinary Junior recovery restores RNG continuation');
    const legacy=Junior.capture();delete legacy.state.water;Junior.restore(legacy,{render:false});check(S.water===64,'Pre-water Junior checkpoint migrates its documented starting tank');
    return {checks,cases,matrix,failures};
-  });
-  assert.deepEqual(errors,[],'No browser game errors during simulation policies');
-  fs.writeFileSync(path.join(outdir,'blackout-systems.json'),JSON.stringify({...result,errors},null,2));
-  console.log(JSON.stringify({checks:result.checks,runs:result.matrix.length,cases:result.cases,errors},null,2));
- }catch(error){fs.writeFileSync(path.join(outdir,'blackout-systems-failure.json'),JSON.stringify({error:error.stack,errors},null,2));await page.screenshot({path:path.join(outdir,'blackout-systems-failure.png')}).catch(()=>{});throw error;}finally{await browser.close();}
-})().catch(error=>{console.error(error);process.exitCode=1;});
+})()`,'blackout-systems');
+ fs.writeFileSync(path.join(outdir,'blackout-systems.json'),JSON.stringify(result,null,2));
+ console.log(JSON.stringify({checks:result.checks,runs:result.matrix.length,cases:result.cases},null,2));
+} catch(error) {
+ fs.writeFileSync(path.join(outdir,'blackout-systems-failure.json'),JSON.stringify({error:error.stack},null,2));
+ console.error(error);process.exitCode=1;
+}

@@ -1,46 +1,33 @@
-const {chromium}=require('playwright');
-const assert=require('node:assert/strict');
-(async()=>{
- const browser=await chromium.launch({channel:'chrome',headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
- try{
-  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
-  page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(process.env.GAME_URL||'http://127.0.0.1:8765');
-  await page.waitForFunction(()=>window.SurfaceSurvey?.ready&&AresWorld.pending===0&&SurfaceSurvey.site);
-  const result=await page.evaluate(()=>{
-   let checks=0;const check=(v,m)=>{if(!v)throw Error(m);checks++;};
-   Junior.start('junior',0,812);SurfaceSurvey.syncSite();if(!R3.fp)toggleWalk();
-   check(S.speed===0,'Junior Walk keeps deliberate turns');
-   let open;
-   for(const t of S.tiles){
-    if(t.owner)continue;R3.fp.x=tx(t);R3.fp.z=tz(t);
-    if(SurfaceSurvey.reading()?.condition==='open'&&!walkBlocked(R3.fp.x,R3.fp.z)){open=t;break;}
-   }
-   check(!!open,'Actual map contains accessible open condition');
-   check(SurfaceSurvey.record().reward===3&&S.fame===3&&S.missionSystems.surveys.open.c===open.c,'Current open position records actual tile');
-   check(SurfaceSurvey.record().reward===0&&S.fame===3,'Repeated record cannot farm');
-   const rock=SurfaceSurvey.site;R3.fp.x=rock.sampleX;R3.fp.z=rock.sampleZ;
-   check(!walkBlocked(R3.fp.x,R3.fp.z),'Authored outcrop sample position is physically accessible');
-   check(SurfaceSurvey.reading().condition==='rock'&&SurfaceSurvey.reading().exposureIndex===96,'Actual authored marker drives rock96');
-   check(SurfaceSurvey.record().reward===7&&S.fame===10,'Rock observation and comparison reward once');
-   const t=S.tiles.find(t=>t.seen&&!t.owner&&!t.build&&t.type!=='rock'&&hdist(t,rock)>1);
-   const b={type:'shield',c:t.c,r:t.r,done:true,on:true};S.builds.push(b);t.build=b;R3.fp.x=tx(t)+1;R3.fp.z=tz(t);
-   check(!walkBlocked(R3.fp.x,R3.fp.z)&&SurfaceSurvey.reading().condition==='shelter','Shelter marker accessible outside collision wall');
-   check(/not an indoor measurement/.test(SurfaceSurvey.reading().model),'Shelter marker explicitly not an indoor measurement');
-   check(SurfaceSurvey.record().reward===7&&S.fame===17,'Three conditions plus comparisons total17');
-   check(MissionSystems.fameInfo().fieldReadings.length===3,'Field notes expose actual stored readings');
-   S.storm={active:true};check(!SurfaceSurvey.record().ok&&S.fame===17,'Radiation alert blocks outdoor evidence');S.storm=null;
-   Strategy.saveMission();
-   check(JSON.parse(localStorage.getItem('mars-colony-save')).state.missionSystems.surveys.rock.exposureIndex===96,'Real local save includes reading');
-   Junior.start('junior',0,813);SurfaceSurvey.update();
-   check(S.fame===0&&/Compare open ground/.test(document.getElementById('surveyResult').textContent),'New mission clears previous reward text');
-   Strategy.loadMission();
-   check(S.fame===17&&MissionSystems.fameInfo().fieldReadings.length===3,'Real local load restores score and ledger');
-   if(!R3.fp)toggleWalk();R3.fp.x=tx(open);R3.fp.z=tz(open);
-   check(SurfaceSurvey.record().reward===0&&S.fame===17,'Real save-load cannot repay condition');
-   toggleWalk();return{checks,readingScore:S.fame,notes:MissionSystems.fameInfo().fieldReadings};
-  });
-  await page.waitForTimeout(300);assert.deepEqual(errors,[],'No browser runtime errors');
-  console.log(JSON.stringify(result,null,2));
- }finally{await browser.close();}
-})().catch(e=>{console.error(e);process.exit(1);});
+/* The surface console may open a real terrain scan, but must never manufacture
+ * radiation doses, protection percentages or reward a simulated sensor value. */
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
+const {engine}=require('./engine-harness.cjs');
+const e=engine();let checks=0,scans=0,canScan=true;
+const check=(actual,expected,message)=>{assert.deepEqual(actual,expected,message);checks++;};
+e.context.THREE={};
+e.context.matchMedia=()=>({matches:false});
+e.context.document.head=e.context.document.createElement('head');
+e.context.document.exitPointerLock=()=>{};
+e.context.FieldDiscovery={scan(){scans++;return canScan;}};
+e.context.FieldScan={busy:false};
+e.run("R3=null;Junior.start('junior',0,812);modalOpen=false;var surveyTestTile=S.tiles.find(t=>!t.build&&t.type==='plain');R3={fp:{x:tx(surveyTestTile),z:tz(surveyTestTile),step:0}};");
+e.run(fs.readFileSync(path.resolve(__dirname,'../game/surface-survey.js'),'utf8'),'surface-survey.js');
+const survey=e.context.SurfaceSurvey,read=survey.reading();
+check(read.kind,'terrain','The console describes terrain rather than radiation');
+check(read.source,'NASA-MOLA','The console identifies its dataset family');
+check(Object.hasOwn(read,'exposureIndex'),false,'No invented exposure value is generated');
+check(read.c,e.run('surveyTestTile.c'),'Reading follows actual map column');
+check(read.r,e.run('surveyTestTile.r'),'Reading follows actual map row');
+check(/No mineral identification or radiation dose/.test(read.model),true,'Terrain is not presented as chemistry or dosimetry');
+const before=e.run('({fame:S.fame,parts:S.parts})');
+const started=survey.record();
+check(started.ok,true,'E starts the dataset scanner');check(scans,1,'A request reaches the scanner exactly once');
+check(started.recorded,false,'Starting does not claim an evidence record is complete');check(started.reward,0,'The console awards no fake sensor reward');
+check(e.run('S.fame'),before.fame,'No immediate Fame');check(e.run('S.parts'),before.parts,'No immediate Parts');
+canScan=false;check(survey.record().ok,false,'An unavailable target cannot create a reading');
+e.run('modalOpen=true;');const previousScans=scans;check(survey.record().ok,false,'Modal blocks scan');check(scans,previousScans,'Modal does not dispatch scan');e.run('modalOpen=false;');
+survey.update();check(e.nodes.get('surveyIndex').textContent,'READY','Panel does not show fabricated dose');check(e.nodes.get('strong').textContent,'MAP','Instrument does not show fabricated dose');
+e.run('R3.fp=null;');check(survey.reading(),null,'No reading outside Walk');check(survey.record().ok,false,'No scan outside Walk');
+let evidence;e.context.__captureEvidence=m=>{evidence=m;};e.run('modal=__captureEvidence;');survey.science();
+check(evidence.title,'NASA terrain records','Source popup describes available data');check(evidence.html.includes('pds-geosciences.wustl.edu/missions/mgs/megdr.html'),true,'Evidence links the NASA PDS dataset archive');check(/8,100|100 outside|30 at|96 illustrates/.test(evidence.html),false,'Unsupported numeric sensor examples are removed');
+console.log(JSON.stringify({checks,result:'passed',coverage:'terrain provenance, no invented radiation values, scanner delegation, no sensor rewards, modal/Walk guards and dataset source link'}));

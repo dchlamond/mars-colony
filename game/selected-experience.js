@@ -1,6 +1,8 @@
 /* Student-selected release: Cinematic Expedition / Field Scientist / Two Futures. */
 (function(){
   'use strict';
+  // Archived narration describes a radiation tool that is no longer in this dataset-only release.
+  const available=false;
   const url=path=>window.INLINE?.[path]||path;
   const film=document.createElement('dialog');film.id='missionFilm';
   film.setAttribute('aria-labelledby','missionFilmTitle');
@@ -19,6 +21,7 @@
     done?.();
   }
   function showFilm(done){
+    if(!available){done?.();return;}
     if(film.open)return;
     afterFilm=done;previousFocus=document.activeElement;previousModal=modalOpen;previousSpeed=S?.speed||0;
     clearWalkInput();if(document.pointerLockElement)document.exitPointerLock?.();
@@ -38,20 +41,20 @@
   film.addEventListener('keydown',e=>{if(e.key!=='Tab')e.stopPropagation();});
   function decorateWelcome(el){
     el.querySelector('h2').innerHTML='<span class="selected-kicker">DEAD RECKONING</span><span class="selected-title">BLACKOUT</span>';
-    el.querySelector('.ares-welcome-mark').outerHTML='<div class="cinematic-welcome"><p>Earth goes quiet.<br>You take command.</p><button id="watchSelectedFilm" type="button">Watch the introduction <span>2:06 · Hades · العربية</span></button></div>';
+    el.querySelector('.ares-welcome-mark').outerHTML='<div class="cinematic-welcome"><p>Earth goes quiet.<br>You take command.</p><p class="ares-caption">Explore NASA terrain data. Compare two futures.</p></div>';
     el.querySelector('.ares-welcome-intro').textContent='Six crew. A new world. Your next decision changes their future.';
     const nameField=document.createElement('div');nameField.className='colony-name-field';
     nameField.append(el.querySelector('label[for="aresColonyName"]'),el.querySelector('#aresColonyName'));
     el.querySelector('#aresLanding').prepend(nameField);
     const code=el.querySelector('#aresMissionCode');if(code)code.placeholder='Shared challenge';
     el.style.setProperty('--welcome-art',`url("${url('assets/selected/cinematic-expedition.png')}")`);
-    el.querySelector('#watchSelectedFilm').onclick=()=>showFilm();
+
     const begin=el.querySelector('.btns button'),start=begin.onclick;
     begin.onclick=()=>{
       // First Begin is a user gesture, so sound is allowed; Continue never delays.
-      if(!seen&&!window.INLINE)showFilm(()=>start());else start();
+      if(available&&!seen&&!window.INLINE)showFilm(()=>start());else start();
     };
     el.scrollTop=0;
   }
-  window.SelectedExperience={decorateWelcome,showFilm,closeFilm};
+  window.SelectedExperience={available,decorateWelcome,showFilm,closeFilm};
 })();

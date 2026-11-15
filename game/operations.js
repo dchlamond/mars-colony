@@ -3,24 +3,22 @@
 (function () {
 'use strict';
 const SOURCES={
-  mola:'https://pds-geosciences.wustl.edu/missions/mgs/mola.html',
+  mola:'https://trek.nasa.gov/mars/',
   horizons:'https://ssd.jpl.nasa.gov/horizons/manual.html',
-  moxie:'https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-oxygen-generating-experiment-moxie-completes-mars-mission/',
-  storm:'https://www.jpl.nasa.gov/news/nasa-watches-mars-light-up-during-epic-solar-storm/',
-  food:'https://www.nasa.gov/missions/station/veggie-plant-growth-system-activated-on-international-space-station/'
+  donki:'https://ccmc.gsfc.nasa.gov/tools/DONKI/'
 };
 const CONTRACTS={
   air:{name:'Make every breath here',speaker:'Nara · life-support engineer',days:65,
     aim:'Make at least as much air as your crew use, with 3 sols of air stored, for 3 sols in a row.',
-    lesson:'Low ground has thicker air in our model. An extractor still needs power and a worker. A full tank is not the same as a sustainable supply.',source:'moxie',
+    lesson:'MOLA provides terrain height. The formula connecting height to extractor output is a game rule, as are staffing, storage and this project’s thresholds. Check both stored air and game production.',source:'mola',
     passes:e=>e.o2p>=S.pop&&S.o2>=3*S.pop&&e.shut===0},
   shelter:{name:'Two sols without machines',speaker:'Rova · mission advisor',days:75,
     aim:'Provide shelter for everyone and store 2 sols of air and food. Keep this reserve for 3 sols in a row.',
-    lesson:'Sheltering stops production. Stored supplies keep the crew going. Curiosity measured 8,100 micrograys during the May 20, 2024 event on Mars; our shelter capacities are game numbers, not dose predictions.',source:'storm',
+    lesson:'DONKI records solar events with timestamps and instruments. Earth-observed entries do not establish Mars exposure. Stopping production, stored supplies and shelter capacity in this project are game rules, not dose predictions.',source:'donki',
     passes:e=>e.shelter>=S.pop&&S.o2>=2*S.pop&&S.food>=2*S.pop},
   food:{name:'A harvest we can live on',speaker:'Tavi · crop scientist',days:85,
     aim:'Grow at least as much food as the crew eat, with 3 sols of food stored, for 3 sols in a row.',
-    lesson:'A greenhouse needs time, power and people. Water increases this game’s crop yield. NASA’s space gardens study how to grow food away from Earth; these yields are not measured Martian harvests.',source:'food',
+    lesson:'Crop yield, growth time and the reserve target are game rules. After meeting the target, the reply timer uses the imported dated Horizons light-time calculation; it is not a crop measurement.',source:'horizons',
     passes:e=>e.foodp>=S.pop&&S.food>=3*S.pop&&e.shut===0}
 };
 const state=()=>S.operations||(S.operations={version:1,active:null,history:[],completed:[],rivalBoost:null});
@@ -84,7 +82,7 @@ const baseTick=tickSol;tickSol=function(){const before=S.sol;baseTick();if(S.sol
 // Temporary recruiting advantage affects actual passenger allocation, not just a ledger label.
 const baseSplit=splitPool;splitPool=function(pool,appeals){const b=state().rivalBoost;if(b&&S.sol<b.until){appeals=appeals.slice();appeals[b.index+1]+=b.amount;}return baseSplit(pool,appeals);};G.splitPool=splitPool;
 const button=(label,action,disabled=false)=>`<button type="button" data-op="${action}" ${disabled?'disabled':''}>${label}</button>`;
-const source=(key,label='Science source')=>`<a href="${SOURCES[key]}" target="_blank" rel="noopener">${label}</a>`;
+const source=(key,label='Dataset reference')=>`<a href="${SOURCES[key]}" target="_blank" rel="noopener">${label}</a>`;
 let siteType='moxie',siteChoice=0;
 function section(tab,id){const host=document.querySelector(`[data-panel="${tab}"]`);let el=$(id);if(!el){el=document.createElement('section');el.id=id;el.className='operations';host.insertBefore(el,host.querySelector(':scope > h2')?.nextSibling||host.firstChild);}return el;}
 function councilHTML(){
@@ -108,7 +106,7 @@ function renderSites(){
  const selected=Math.min(siteChoice,Math.max(0,list.length-1)),t=list[selected],f=forecasts[selected];
  host.innerHTML=`<h3>Which site earns its cost?</h3><label>Compare <select id="opSiteType"><option value="moxie">Oxygen extractors</option><option value="solar">Solar panels</option><option value="shield">Radiation shelters</option></select></label><p>Height comes from NASA’s map. Air and sunlight are modeled. ${siteType==='shield'?'Outputs are shelter spaces.':'Outputs are game '+(siteType==='solar'?'power':'air')+' per sol.'}</p><table class="site-comparison"><caption>Three available sites</caption><thead><tr><th scope="col">Compare</th>${list.map((t,i)=>'<th scope="col">'+String.fromCharCode(65+i)+'</th>').join('')}</tr></thead><tbody>${rows.map(([label,values])=>'<tr><th scope="row">'+label+'</th>'+values.map((v,i)=>'<td'+(i===selected?' class="chosen"':'')+'>'+v+'</td>').join('')+'</tr>').join('')}</tbody></table>`+
  (t?`<article class="op-card"><label>Your choice <select id="opSiteChoice">${list.map((t,i)=>'<option value="'+i+'">Site '+String.fromCharCode(65+i)+' · '+coord(t)+'</option>').join('')}</select></label><p><b>${f.after.idle} free workers</b> after completion. ${f.after.shut?f.after.shut+' machines would lose power.':'No machines lose power.'}</p>${siteType==='moxie'&&f.air<=0?'<p class="op-warning">This extractor cannot add air with the current power or staffing. Build its support first.</p>':''}<div class="op-actions">${button('Show chosen site on map','focus:'+t.c+','+t.r)}${button('Build here · '+DEF[siteType].cost+' parts + '+DEF[siteType].metal+' metal','build:'+t.c+','+t.r,!S.unlocked[siteType]||S.parts<DEF[siteType].cost||S.metal<DEF[siteType].metal||S.over)}</div>${!S.unlocked[siteType]?'<small>Finish the current colony objective to unlock this building.</small>':''}</article>`:'<p>No clear sites in your land. Explore with the rover.</p>')+
- `<details><summary>Where do these numbers come from?</summary><p>${source('mola','MOLA terrain')} supplies the existing coarse height sample. Air thickness uses a simplified height model; sunlight uses latitude. Potential assumes power and staffing; Added now uses the current economy. Solar potential assumes clean panels and no dust storm. Production and shelter values are game rules.</p><p>Preview assumes construction is complete and holds weather, crew and technology constant. Arrivals, dust and storms can change the result. Ice and caves are game map rules, not surveyed deposits.</p></details>`;
+ `<details><summary>Where do these numbers come from?</summary><p>${source('mola','MOLA terrain')} supplies the existing coarse height sample. Air thickness uses a simplified height model; sunlight uses latitude. Potential assumes power and staffing; Added now uses the current economy. Solar potential assumes clean panels and no dust storm. Production and shelter values are game rules.</p><p>Preview assumes construction is complete and holds weather, crew and technology constant. Arrivals, dust and storms can change the result. No ice deposit or cave interior is established by the imported elevation samples.</p></details>`;
  $('opSiteType').value=siteType;$('opSiteType').onchange=e=>{siteType=e.target.value;siteChoice=0;renderSites();};
  if(t){$('opSiteChoice').value=selected;$('opSiteChoice').onchange=e=>{siteChoice=Number(e.target.value);renderSites();};}
 }
@@ -117,7 +115,7 @@ function update(){
  if(tab==='council')section('council','projectCouncil').innerHTML=councilHTML();
  if(tab==='science')renderSites();
  if(tab==='Earth'){
-  const h=ephemeris();section('Earth','earthEvidence').innerHTML=`<h3>A signal cannot arrive instantly</h3><p><b>${h.minutes.toFixed(1)} minutes one way</b><br>${(h.minutes*2).toFixed(1)} minutes for a question and reply.</p><p>${h.date} · ${h.au.toFixed(3)} au · ${h.held?'last saved date held':'saved NASA/JPL Horizons calculation'}.</p><p>Project evidence takes about <b>${replySols()} game sols</b> for a reply. One playing second stands for one signal minute; rounded up to whole game sols. Pause freezes transit; faster speeds advance it.</p>${a?.packet?`<progress max="${a.packet.total}" value="${a.packet.total-a.packet.left}"></progress><p>${a.packet.left} sols of travel left${inBlackout()?' · paused by blackout':''}. Deadline: sol ${a.deadline}.</p>`:'<p>Prove a council project, then send your evidence here through the Council.</p>'}<small>Planet-centre down-leg light time; round trip approximated as twice one way. Game sol 1 uses 2023-11-20, one date per game sol. The 14-sol blackout timetable is scripted, not derived from these distances. Cargo still uses the separate six-sol orbital-crate rule.</small><p>${source('horizons','Read the JPL source')}</p>`;
+  const h=ephemeris();section('Earth','earthEvidence').innerHTML=`<h3>A signal cannot arrive instantly</h3><p><b>${h.minutes.toFixed(1)} minutes one way</b><br>${(h.minutes*2).toFixed(1)} minutes for a question and reply.</p><p>${h.date} · ${h.au.toFixed(3)} au · ${h.held?'last saved date held':'saved NASA/JPL Horizons calculation'}.</p><p>Project evidence takes about <b>${replySols()} game sols</b> for a reply. The game converts two signal minutes to one mission sol, rounded up. Pause freezes transit; tick speed changes how quickly those mission sols play.</p>${a?.packet?`<progress max="${a.packet.total}" value="${a.packet.total-a.packet.left}"></progress><p>${a.packet.left} sols of travel left${inBlackout()?' · paused by blackout':''}. Deadline: sol ${a.deadline}.</p>`:'<p>Prove a council project, then send your evidence here through the Council.</p>'}<small>Planet-centre down-leg light time; round trip approximated as twice one way. Game sol 1 uses 2023-11-20, one date per game sol. The 14-sol blackout timetable is scripted, not derived from these distances. Cargo still uses the separate six-sol orbital-crate rule.</small><p>${source('horizons','Read the JPL source')}</p>`;
  }
  if(tab==='buildings'){const host=section('buildings','buildEvidence');host.innerHTML='<h3>Predict before you spend</h3><p>Compare three available sites using terrain height, air and sunlight.</p>'+button('Compare sites in Science','sites');}
  if(tab==='chronicle')section('chronicle','projectHistory').innerHTML='<h3>Evidence and consequences</h3>'+(o.history.map(h=>`<article class="op-card"><b>${CONTRACTS[h.id].name} · ${h.outcome}</b><p>Sol ${h.sol}. ${esc(h.detail)}</p></article>`).join('')||'<p>Project outcomes will appear here, including what the colony demonstrated.</p>');

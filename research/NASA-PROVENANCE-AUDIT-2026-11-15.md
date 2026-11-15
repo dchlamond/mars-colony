@@ -1,36 +1,41 @@
-# NASA evidence and game-created content
+# NASA dataset audit — emergency release, 15 November 2026
 
-## Direct answer: water from rocks
+## Replaced or removed
 
-NASA evidence supports buried water ice on Mars. SWIM estimates where shallow ice is likely, and ice-exposing impacts confirm ice at some sites. It does not identify the individual rocks in this game. The game does not currently import SWIM probabilities into its deposit placement.
+- Individual +5 Water, +5 Air and +3 Parts rock rewards and randomized composition assignment removed.
+- F/E scans now save the nearest actual bundled MOLA sample with coordinates, raw encoded height and approximate kilometres. They do not identify the rendered rock’s composition. No supplies or Fame are awarded.
+- Numerical radiation indices 100/96/30 removed from the handheld tool, Blackout comparison and current discovery records.
+- Blackout now predicts and compares two actual MOLA elevations, including an equal-at-this-resolution answer. Both observation paths remain playable.
+- Latitude-generated ice deposits and uncatalogued cave tiles/bonuses removed. Old saved maps/checkpoints migrate to plain terrain.
+- Day-300 escalating storms removed. Historical event references are traceable to seven NASA DONKI SEP records archived in donki-sep-may-2024.json. Earth observations are not presented as Mars impacts.
+- Science lessons, questions, Council evidence and upgrade descriptions now use the imported MOLA/Horizons/DONKI records or explicitly say game rule. Article-only claims and NIST information removed from these displays.
+- The selected intro film is disabled on entry and in settings because its audio/subtitles describe the removed radiation tool. Selected welcome artwork and hand artwork remain. Original film assets are retained for later editing, but are not offered as current instruction.
+- Mission and teacher guides replaced with current controls and provenance. New missions open immediately without a film or sign-in.
 
-The scanner uses a seeded rule to assign each rendered rock one of three rewards. **+5 Water, +3 Parts, and +5 Air are fictional gameplay rewards**, not NASA measurements or extraction yields. The air reward is an invented sealed expedition cartridge, not breathable air naturally trapped in Martian rock. These distinctions now appear prominently in scan results and the discovery ledger.
+## Scientific input inventory
 
-Sources verified on November 15, 2026:
+| Dataset | Actual use | Limits |
+|---|---|---|
+| NASA Mars Global Surveyor MOLA | Global relief, terrain scan ledger and two-location elevation comparison | Existing360×180 8-bit resampled grid; approximate elevations. No rock mineralogy, ice probability, local cave or radiation data. |
+| NASA/JPL Horizons | Dated Earth–Mars range and one-way light-time calculations | A cached calculation series, with disclosed conversion to game time. Not cargo-flight time. |
+| NASA DONKI | Dated solar-event catalogue with instruments, IDs and source links | Earth observations are not Mars-dose measurements/forecasts. Scenario timing and damage remain designed gameplay. |
+| NASA global Mars imagery | World map appearance | Close-up textures, rocks, buildings and characters are authored artwork. |
 
-- [NASA/JPL: Distribution of buried ice on Mars](https://www.jpl.nasa.gov/images/pia26046-distribution-of-buried-ice-on-mars/) — likely shallow subsurface ice and confirming impacts; no dataset mapping to these rendered rocks.
-- [NASA/JPL: Curiosity finds mineral match](https://www.jpl.nasa.gov/news/nasas-curiosity-mars-rover-finds-mineral-match/) — measured hematite in a drilled Pahrump Hills sample; no claim that scanning yields manufactured parts.
-- [NASA: MOXIE completes Mars mission](https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-oxygen-generating-experiment-moxie-completes-mars-mission/) — oxygen produced from atmospheric carbon dioxide by equipment; no hollow-rock air supply.
+SWIM, RadLab and OSDR are not integrated or claimed as measured game inputs.
 
-## Provenance inventory
+## Playability and scope
 
-| Class | Elements |
-| --- | --- |
-| NASA observations or calculations used | MOLA-derived global elevations; NASA global Mars imagery; cached JPL Horizons Earth–Mars distance and light time; saved/refreshed DONKI event records. Rendering, interpolation and game-time conversion are authored implementation. |
-| NASA research references, rather than imported measurements driving these outputs | MOXIE oxygen production, ISS water recovery, InSight panel dust clearing, Curiosity mineral and radiation observations, SWIM ice research. |
-| Simplified game models | Height-to-air and latitude-to-sunlight formulas; starting stocks, resource units, production/consumption, building costs, staffing, harvest times, shelter capacities, solar boosts and cooldowns. Dosimeter values 100/96/30 are a teaching index, not measured doses. |
-| Game scenarios | Blackout narrative, day-nine objective, scripted event timing, countdowns, storm damage, cold/battery costs, evacuation rates. Day 300 and ever-worsening storms are designed difficulty, not a NASA date or measured progression. Historical references remain real but do not validate the scenario schedule. |
-| Game society and competition | Appeal weights, Fame, awareness, passenger allocation, waves of ten, leaderboard, expansion bonuses, council contracts, private rooms and rival colonies. |
-| Fictional and artistic | Crew and adviser characters, buildings, suits, handheld instrument, close-up rocks and geology, visual dust, trailers and artwork. Individual rock positions/compositions/rewards are generated. |
-| Not integrated | SWIM deposit probability maps, OSDR and RadLab. Ice tiles use a latitude estimate; cave tiles approximate volcanic regions rather than catalogued cave entrances. |
+Resource quantities, production, consumption, construction, shelter capacity, crew, Appeal, Fame, immigration and mission stories remain authored game rules. Their numbers are not represented as NASA measurements. The water processor now supplies4 game units per powered day on any eligible tile instead of depending on fabricated ice deposits (6 when upgraded). Recycling is separately accounted for. This retains a playable economy.
 
-NASA DONKI records observed near Earth do not establish that a storm hit Mars. The game’s recent event-count panel is not a suit-dose reading or Mars weather forecast.
+Legacy resource rewards already spent in saved colonies are not retroactively reconstructed; the old ledger is retained only for validation compatibility and is not displayed or rewarded again. Old radiation-award entries are removed once. Imported data does not make the whole colony simulation a validated astronaut survival model or establish competition eligibility.
 
-## Visible changes
+## Verification
 
-- A prominent fictional-reward label on scan results and the discovery ledger.
-- Game-model labels on Appeal and the leaderboard/arrival explanation.
-- Explicit scenario wording on the day-300 warning and extreme dust alerts.
-- A provenance table at the top of Data sources, separating observations/calculations, simplified models, fiction and datasets not imported.
-
-No resource rules or balances were changed in this disclosure update.
+- Broad engine simulation:4,999 assertions, including36 Blackout policies, four Junior sites, save/load and management.
+- Boundary/save simulation:13,456 assertions across192 missions.
+- Commander:24 campaigns;12 careful-policy wins,12 expected neglect losses, zero timeouts.
+- Campaign rules:15,026 assertions. Multiplayer:36 server +151 client checks.
+- Terrain:2,425 movement checks +320 actual GLB surface samples.
+- Individual scan lifecycle, Three.js raycasts, collision/range/visibility/cancellation:91 checks; MOLA record rules874; saves128; terrain record comparison147; source record provenance48; dataset boundaries27; survey tool22.
+- Local browser: immediate Blackout entry without film/account; visible Build and bottom time controls; both MOLA records render, Walk tool shows no radiation number, no console errors during these flows.
+- Production deploy verification recorded in the release response.

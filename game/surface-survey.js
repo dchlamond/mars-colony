@@ -1,10 +1,10 @@
-/* Original surface survey instrument. All readings below are a deterministic
-   teaching model, never live NASA measurements or personal radiation advice. */
+/* Surface terrain-record console. Numeric radiation simulations are disabled.
+   FieldDiscovery supplies the actual NASA dataset record and provenance. */
 (function(){
  'use strict';
  if(!window.THREE||!R3)return;
- const panel=document.createElement('section');panel.id='surfaceSurvey';panel.setAttribute('aria-label','Surface dosimeter');panel.hidden=true;
- panel.innerHTML='<div class="survey-heading"><b>Surface dosimeter</b><span>Simulation</span></div><div class="survey-reading"><strong id="surveyIndex">100</strong><span>relative exposure index<br><small id="surveyCondition">Open ground</small></span></div><p id="surveyModel">100 is our outdoor reference, not a dose in grays.</p><div class="survey-actions"><button id="recordSurvey" type="button">Record reading · E</button><button id="surveyScience" type="button">NASA evidence</button></div><p id="surveyResult" role="status">Compare open ground, rock and a built shelter.</p>';
+ const panel=document.createElement('section');panel.id='surfaceSurvey';panel.setAttribute('aria-label','NASA terrain survey');panel.hidden=true;
+ panel.innerHTML='<div class="survey-heading"><b>Terrain survey</b><span>NASA dataset</span></div><div class="survey-reading"><strong id="surveyIndex">READY</strong><span>Terrain record<br><small id="surveyCondition">Current location</small></span></div><p id="surveyModel">Scan to inspect the NASA elevation record and its source.</p><div class="survey-actions"><button id="recordSurvey" type="button">Scan terrain · E</button><button id="surveyScience" type="button">Dataset information</button></div><p id="surveyResult" role="status">Scan a location to open its dataset record.</p>';
  document.body.append(panel);
  const style=document.createElement('style');style.textContent=`
  #surfaceSurvey{position:fixed;left:18px;bottom:18px;z-index:22;width:330px;max-width:calc(100vw - 36px);padding:13px 15px;color:var(--ares-text);background:var(--ares-deep);border:1px solid var(--ares-line);box-shadow:0 5px 25px #0006;font:16px/1.35 var(--body,Arial,sans-serif)}
@@ -12,12 +12,10 @@
  @media(max-width:600px){#surfaceSurvey{width:270px;left:10px;bottom:65px;padding:10px}.survey-reading>strong{font-size:31px}#surfaceSurvey p{font-size:13px}.survey-actions button{font-size:16px;padding:7px 5px}.survey-heading{font-size:16px}#surveyResult{min-height:26px}}
  @media(max-height:500px) and (min-width:601px){#surfaceSurvey{width:300px;left:auto;right:10px;bottom:10px;padding:8px 10px}.survey-reading{margin:4px 0}.survey-reading>strong{font-size:28px}#surveyModel{display:none}#surveyResult{margin:4px 0;min-height:0}.survey-heading{font-size:14px}}
  `;document.head.append(style);
- const SOURCE='https://science.nasa.gov/resource/radiation-measurements-on-mars/';
- const CLIFF='https://www.nasa.gov/missions/mars-science-laboratory/how-nasas-curiosity-rover-is-making-mars-safer-for-astronauts/';
- const STORM='https://www.jpl.nasa.gov/news/nasa-watches-mars-light-up-during-epic-solar-storm/';
+ const SOURCE='https://pds-geosciences.wustl.edu/missions/mgs/megdr.html';
  const distance=(x,z,t)=>{let dx=wrapWorldX(x)-tx(t);dx-=Math.round(dx/PW)*PW;return Math.hypot(dx,z-tz(t));};
  let siteMesh=null,siteMission=null;
- const siteLabel=document.createElement('button');siteLabel.id='rockSurveyLabel';siteLabel.className='lab';siteLabel.textContent='Rock survey · teaching site';siteLabel.style.cssText='position:fixed;z-index:9;min-height:30px;padding:5px 9px;font:13px var(--body,Arial);display:none';document.body.append(siteLabel);
+ const siteLabel=document.createElement('button');siteLabel.id='rockSurveyLabel';siteLabel.className='lab';siteLabel.textContent='Terrain survey point';siteLabel.style.cssText='position:fixed;z-index:9;min-height:30px;padding:5px 9px;font:13px var(--body,Arial);display:none';document.body.append(siteLabel);
  siteLabel.onclick=()=>{const site=R3.surveySite;if(!site)return;R3.target.set(site.x,0,site.z);R3.dist=7;render();};
  function syncSite(){
   if(!window.AresRender?.surveyRockGeometry)return;
@@ -38,25 +36,26 @@
  }
  function reading(){
   if(!R3.fp)return null;const f=R3.fp,t=tileNear(f.x,f.z);if(!t)return null;
+  // Retain geometric conditions for navigation compatibility only. They do not
+  // imply measured mineral content, radiation exposure or shelter performance.
   const shelter=S.builds.find(b=>b.type==='shield'&&b.done&&distance(f.x,f.z,b)<1.65);
   const rock=!!R3.surveySite&&distance(f.x,f.z,R3.surveySite)<1.85;
-  const condition=shelter?'shelter':rock?'rock':'open',exposureIndex=condition==='shelter'?30:condition==='rock'?96:100;
-  return {kind:'radiation',c:t.c,r:t.r,sol:S.sol,condition,exposureIndex,sheltered:!!shelter,source:'simulation',
-   label:condition==='shelter'?'Shelter comparison marker':condition==='rock'?'Rock comparison marker':'Open ground',
-   model:condition==='shelter'?'Near-shelter marker: 30 is a game assumption, not an indoor measurement or protection rating.':condition==='rock'?'96 illustrates one NASA cliff result: about 4% less total radiation.':'100 is our outdoor reference, not a dose in grays.'};
+  const condition=shelter?'shelter':rock?'rock':'open';
+  return {kind:'terrain',c:t.c,r:t.r,sol:S.sol,condition,source:'NASA-MOLA',
+   label:'Map location '+t.c+', '+t.r,
+   model:'Open the dataset record for elevation and provenance. No mineral identification or radiation dose is inferred from this scene.'};
  }
  function record(){
-  const data=reading();if(!data||modalOpen)return {ok:false,message:'Enter Walk on Mars before recording a reading.'};
-  if(S.storm?.active){const result={ok:false,recorded:false,reward:0,message:'A radiation alert is active. Return to the map and keep the crew sheltered; outdoor surveys can wait.'};document.getElementById('surveyResult').textContent=result.message;return result;}
-  const result=window.MissionSystems?.recordSurvey(data)||{ok:false,message:'Survey records are not ready yet.'};
-  document.getElementById('surveyResult').textContent=result.message;
-  if(result.ok){tool.classList.add('scanning');clearTimeout(scanTimer);scanTimer=setTimeout(()=>tool.classList.remove('scanning'),650);}
-  update();return result;
+  if(!reading()||modalOpen)return {ok:false,recorded:false,reward:0,message:'Enter Walk on Mars before scanning terrain.'};
+  const started=!!window.FieldDiscovery?.scan();
+  const message=started?'Scanning the terrain record. Hold your aim.':'Aim at an available survey target, then scan.';
+  document.getElementById('surveyResult').textContent=message;
+  return {ok:started,recorded:false,reward:0,message};
  }
  function science(){
   clearWalkInput();
   if(document.pointerLockElement&&document.exitPointerLock)document.exitPointerLock();
-  modal({title:'Radiation is not temperature',keepOpen:true,html:`<p>A <b>dosimeter</b> detects ionizing radiation. A thermometer measures temperature. Our handheld model is an original game design, inspired by scientific surveying.</p><p>Curiosity carries NASA's <b>Radiation Assessment Detector (RAD)</b>. RAD measured radiation while the rover travelled to Mars and on the surface. <a href="${SOURCE}" target="_blank" rel="noopener">Read NASA's RAD evidence</a>.</p><p><b>Our relative index is simulated:</b> open ground is 100; beside a rock it is 96. That comparison illustrates one real Curiosity observation near a cliff, where total radiation fell by about 4%. It does not prove every rock offers that protection. A built shelter reads 30 by a game assumption, not a NASA engineering rating. <a href="${CLIFF}" target="_blank" rel="noopener">Read the cliff observation</a>.</p><p><b>Historical event, not today's reading:</b> during the May 20, 2024 storm, Curiosity measured an event dose of <b>8,100 micrograys</b>. That is an accumulated absorbed dose, not a temperature, hourly rate or live forecast for your tile. <a href="${STORM}" target="_blank" rel="noopener">Read the event report</a>.</p><p>Record different conditions, then compare them. Evidence earns Fame once; repeating the same condition does not add more.</p>`,buttons:[{label:'Return to survey',primary:true}]});
+  modal({title:'NASA terrain records',keepOpen:true,html:`<p>The Mars Orbiter Laser Altimeter (MOLA), aboard Mars Global Surveyor, measured the planet’s shape and elevation. The game uses a reduced-resolution copy for its global terrain.</p><p>Scanning opens the terrain dataset record and its provenance. Rendered rocks and buildings are visual objects; their appearance is not a chemical measurement. This console does not invent mineral contents, radiation doses or shelter protection percentages.</p><p><a href="${SOURCE}" target="_blank" rel="noopener">Open the NASA Planetary Data System MOLA archive</a></p>`,buttons:[{label:'Return to survey',primary:true}]});
  }
  document.getElementById('recordSurvey').onclick=record;document.getElementById('surveyScience').onclick=science;
 
@@ -64,7 +63,7 @@
  // preserves the chosen glove/materials; the screen remains live HTML data.
  // This is a 2.5D view model, not world geometry or a NASA sensor replica.
  const tool=document.createElement('div');tool.id='fieldScientist';tool.hidden=true;tool.setAttribute('aria-hidden','true');
- tool.innerHTML='<img alt="" draggable="false"><div class="field-screen"><span class="field-heading">SURVEY</span><strong>100</strong><span class="field-unit">RELATIVE INDEX</span><span class="field-place">Open ground</span><span class="field-simulation">SIMULATION</span></div>';
+ tool.innerHTML='<img alt="" draggable="false"><div class="field-screen"><span class="field-heading">TERRAIN</span><strong>MAP</strong><span class="field-unit">TERRAIN RECORD</span><span class="field-place">Current location</span><span class="field-simulation">NASA DATA</span></div>';
  document.body.append(tool);
  let loaded=false,lastText='',lastMission=S,scanTimer;
  const art=window.AresWorld;if(art)art.pending++;
@@ -73,21 +72,21 @@
  toolImage.onerror=()=>{if(art){art.pending--;art.errors.push('field-scientist.png');}};
  toolImage.src=window.INLINE?.['assets/selected/field-scientist.png']||'assets/selected/field-scientist.png';
  function update(){
-  if(lastMission!==S){lastMission=S;lastText='';document.getElementById('surveyResult').textContent='Compare open ground, rock and a built shelter.';}
+  if(lastMission!==S){lastMission=S;lastText='';document.getElementById('surveyResult').textContent='Scan a location to open its dataset record.';}
   const visible=!!R3.fp;panel.hidden=!visible;tool.hidden=!visible||!loaded;if(!visible)return;
   const value=reading();if(!value)return;
-  const text=value.exposureIndex+'|'+value.condition;
+  const text=value.c+'|'+value.r;
   if(text!==lastText){
-   lastText=text;document.getElementById('surveyIndex').textContent=value.exposureIndex;document.getElementById('surveyCondition').textContent=value.label;document.getElementById('surveyModel').textContent=value.model;
-   tool.querySelector('strong').textContent=value.exposureIndex;
-   tool.querySelector('.field-place').textContent=({open:'Open ground',rock:'Rock cover',shelter:'Shelter'})[value.condition];
+   lastText=text;document.getElementById('surveyIndex').textContent='READY';document.getElementById('surveyCondition').textContent=value.label;document.getElementById('surveyModel').textContent=value.model;
+   tool.querySelector('strong').textContent='MAP';
+   tool.querySelector('.field-place').textContent=value.c+', '+value.r;
   }
-  document.getElementById('recordSurvey').disabled=!!S.storm?.active;
+  document.getElementById('recordSurvey').disabled=!!window.FieldScan?.busy;
  }
  function render(){
   tool.hidden=!R3.fp||!loaded;if(tool.hidden)return;
   const reduced=document.body.classList.contains('reduce-motion')||matchMedia('(prefers-reduced-motion: reduce)').matches;
   tool.style.transform=reduced?'none':`translateY(${Math.sin(R3.fp.step)*2}px) rotate(${Math.sin(R3.fp.step*.5)*.35}deg)`;
  }
- window.SurfaceSurvey={reading,record,science,update,render,syncSite,get ready(){return loaded;},get site(){return R3.surveySite;},sources:{rad:SOURCE,cliff:CLIFF,storm:STORM}};
+ window.SurfaceSurvey={reading,record,science,update,render,syncSite,get ready(){return loaded;},get site(){return R3.surveySite;},sources:{mola:SOURCE}};
 })();

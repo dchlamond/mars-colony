@@ -46,7 +46,7 @@ async function play(config){
   else if(v.stage==='field'){
    if(!v.field.prediction){action='predictField';value=config.keyboard?'open':'shelter';}
    else if(v.field.readings.length<2){action='observe';value=v.field.readings.some(r=>r.condition==='open')?'shelter':'open';}
-   else {action='shelter';value=config.recovery&&!retried?'ship':'shelter';check((await page.locator('.blackout-field-feedback').innerText()).includes(config.keyboard?'opposite':'matches'),'Field prediction receives evidence feedback');}
+   else {action='shelter';value=config.recovery&&!retried?'ship':'shelter';const open=v.field.readings.find(r=>r.condition==='open'),shelter=v.field.readings.find(r=>r.condition==='shelter'),expected=open.raw===shelter.raw?'same encoded elevation':v.field.prediction===(open.elevationKm<shelter.elevationKm?'open':'shelter')?'matches':'opposite';check((await page.locator('.blackout-field-feedback').innerText()).includes(expected),'Field prediction feedback follows the actual MOLA samples');}
   }else if(v.stage==='request')action='request';
   else if(v.stage==='running')action=config.clean&&v.choices.some(c=>c.action==='clean')?'clean':'next';
   else if(v.stage==='outcome'){

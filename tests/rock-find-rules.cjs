@@ -2,40 +2,31 @@ const assert=require('node:assert/strict');
 const R=require('../game/rock-find-rules.js');
 let checks=0;const check=(condition,message)=>{assert.ok(condition,message);checks++;};
 const equal=(actual,expected,message)=>{assert.deepEqual(actual,expected,message);checks++;};
-const state=(seed=614)=>({seed,sol:7,parts:10,water:20,o2:30});
-const ids=Array.from({length:100},(_,i)=>'rock:3:4:'+i);
-const first=ids.map(id=>R.rewardFor(614,id));
-equal(ids.map(id=>R.rewardFor(614,id)),first,'Same seed and ID always yield the same find');
-equal(ids.slice().reverse().map(id=>R.rewardFor(614,id)).reverse(),first,'Results do not depend on scanning order');
-equal([...new Set(first.map(r=>r.kind))].sort(),['air','parts','water'],'All three reward categories are reachable');
-check(ids.some((id,i)=>JSON.stringify(R.rewardFor(615,id))!==JSON.stringify(first[i])),'Different mission seeds vary finds');
-const kindIds=Object.fromEntries(['parts','water','air'].map(kind=>[kind,ids.find(id=>R.rewardFor(614,id).kind===kind)]));
-for(const [kind,id] of Object.entries(kindIds)){
- const s=state(),key=kind==='air'?'o2':kind,before=s[key],expected=kind==='parts'?3:5;
- const result=R.collect(s,id);check(result.ok&&!result.alreadyCollected&&result.rewarded,'First collection succeeds');equal(s[key],before+expected,'Correct resource and fixed reward');equal(result.amount,expected,'Ledger reports applied amount');
- const after=JSON.stringify(s);check(R.collect(s,id).alreadyCollected,'Duplicate collection is recognized');equal(JSON.stringify(s),after,'Duplicate collection changes nothing');
- const restored=JSON.parse(JSON.stringify(s));check(R.collect(restored,id).alreadyCollected,'Save/load preserves collected IDs');equal(restored,s,'Save/load cannot duplicate supplies');
+const state=(seed=614)=>({seed,sol:7,parts:10,water:20,o2:30,fame:9});
+const location={c:0,r:0},ids=Array.from({length:100},(_,i)=>'rock:3:4:'+i);
+const supplies=s=>({parts:s.parts,water:s.water,o2:s.o2,fame:s.fame});
+equal(R.SOURCE_IDS,['mola'],'Only the NASA MOLA dataset is selectable');
+for(const id of ids){
+ equal(R.evidenceFor(614,id),{sourceId:'mola'},'Every ID links to MOLA, never an invented composition');
+ equal(R.evidenceFor(999,id),{sourceId:'mola'},'Changing the seed cannot invent another observation');
 }
-const forward=state(),reverse=state();ids.forEach(id=>R.collect(forward,id));ids.slice().reverse().forEach(id=>R.collect(reverse,id));
-for(const key of ['parts','water','o2'])equal(forward[key],reverse[key],'Collection order leaves totals unchanged');
-for(const id of ids)equal(forward.rockFinds.entries[id],reverse.rockFinds.entries[id],'Per-rock ledger is independent of collection order');
-const blackout=state(),before={parts:blackout.parts,water:blackout.water,o2:blackout.o2};
-const blocked=R.collect(blackout,kindIds.air,{reward:false});check(blocked.ok&&!blocked.rewarded&&blocked.amount===0,'Discovery-only mode records a zero-reward find');
-equal({parts:blackout.parts,water:blackout.water,o2:blackout.o2},before,'Discovery-only mode preserves mission supplies');
-check(R.collect(blackout,kindIds.air).alreadyCollected,'Discovery-only rock cannot later be cashed in');equal(blackout.o2,before.o2,'Changing mode does not replay a reward');
-const full=state();for(let i=0;i<R.MAX_ROCKS;i++)check(R.collect(full,'rock:'+i).ok,'Ledger accepts each supported rock');
-equal(Object.keys(full.rockFinds.entries).length,500,'Ledger is bounded to 500 rocks');
-const fullBefore=JSON.stringify(full);equal(R.collect(full,'rock:501'),{ok:false,reason:'ledger-full'},'No eviction allows reward farming after the cap');equal(JSON.stringify(full),fullBefore,'Full ledger changes no supplies');check(R.collect(full,'rock:0').alreadyCollected,'Previously collected rocks remain recognized at capacity');
-for(const initial of [NaN,Infinity,-Infinity,-100,Number.MAX_VALUE]){
- const s=state();s.parts=initial;s.sol=NaN;const result=R.collect(s,kindIds.parts);
- check(Number.isFinite(s.parts)&&s.parts>=0&&s.parts<=R.MAX_RESOURCE,'Corrupt resources remain finite and bounded');check(Number.isFinite(result.sol)&&result.sol>=0,'Recorded day remains finite');
-}
-const capped=state();capped.water=24;const limited=R.collect(capped,kindIds.water,{caps:{water:25}});equal(capped.water,25,'Caller can enforce resource capacity');equal(limited.amount,1,'Ledger records only actual capacity-limited reward');
-const airCapped=state();R.collect(airCapped,kindIds.air,{caps:{o2:32}});equal(airCapped.o2,32,'Air cap accepts actual o2 resource key');
-for(const id of ['',null,{},'__proto__','constructor','prototype','bad\nrock','x'.repeat(129),NaN,Infinity]){
- const s=state();check(!R.collect(s,id).ok,'Invalid or prototype-sensitive IDs are rejected');equal(s,state(),'Rejected ID does not mutate the mission');equal(R.rewardFor(614,id),null,'Reward preview rejects the same invalid IDs');
-}
-equal(R.rewardFor(NaN,'rock:1'),R.rewardFor(0,'rock:1'),'Invalid seeds normalize deterministically');
-const malformed=state();malformed.rockFinds={version:2,entries:{}};check(!R.collect(malformed,'rock:1').ok,'Unknown ledger version is preserved instead of resetting history');
-const badEntry=state();badEntry.rockFinds={version:1,entries:{x:{kind:'air',amount:NaN,sol:7}}};const rejected=R.collect(badEntry,'x');check(!rejected.ok&&rejected.alreadyCollected,'Malformed saved entry is not paid out a second time');
-console.log(JSON.stringify({checks,result:'passed',coverage:'deterministic individual rewards, order independence, exact supplies, repeat/save/load protection, Blackout discovery-only, 500-rock cap, finite capacities, safe IDs'}));
+const s=state(),before=supplies(s);
+const first=R.collect(s,ids[0],{c:71,r:40,reward:true,caps:{water:100}});
+check(first.ok&&!first.alreadyCollected,'First evidence recording succeeds');
+equal(s.rockEvidence.entries[ids[0]],{sourceId:'mola',sol:7,c:71,r:40},'Stores the actual supplied grid location');
+equal(supplies(s),before,'Recording does not change supplies or Fame even with obsolete reward options');
+check(!('rockFinds' in s),'Recording never creates an old reward ledger');
+const serialized=JSON.stringify(s);check(R.collect(s,ids[0]).alreadyCollected,'Repeated review recognizes the recorded ID');equal(JSON.stringify(s),serialized,'Repeated review changes no state');
+const restored=JSON.parse(serialized);check(R.collect(restored,ids[0],location).alreadyCollected,'Reloaded evidence retains scan history');equal(restored,s,'Reload and rescan cannot mutate supplies');
+const forward=state(),reverse=state();ids.forEach(id=>R.collect(forward,id,location));ids.slice().reverse().forEach(id=>R.collect(reverse,id,location));
+for(const id of ids)equal(forward.rockEvidence.entries[id],reverse.rockEvidence.entries[id],'Scan order does not affect evidence');
+equal(supplies(forward),supplies(state()),'Scanning one hundred rocks changes no resources or Fame');
+const legacy=state();legacy.rockFinds={version:1,entries:{'rock:old':{kind:'air',amount:5,sol:3,rewarded:true}}};const legacyBefore=JSON.stringify(legacy.rockFinds);
+check(R.collect(legacy,'rock:old',location).ok,'Archived reward IDs can have a new evidence-only record');equal(JSON.stringify(legacy.rockFinds),legacyBefore,'Archived rewards remain untouched');equal(supplies(legacy),supplies(state()),'Archived entries are never paid again');
+const full=state();for(let i=0;i<R.MAX_ROCKS;i++)check(R.collect(full,'rock:'+i,location).ok,'Ledger accepts supported evidence');
+equal(Object.keys(full.rockEvidence.entries).length,500,'Evidence ledger is bounded');const fullBefore=JSON.stringify(full);equal(R.collect(full,'rock:501',location),{ok:false,reason:'ledger-full'},'No evidence eviction at capacity');equal(JSON.stringify(full),fullBefore,'A full ledger changes no state');check(R.collect(full,'rock:0').alreadyCollected,'Review still works at capacity');
+for(const id of ['',null,{},'__proto__','constructor','prototype','bad\nrock','<img>','x'.repeat(129),NaN,Infinity]){const current=state();check(!R.collect(current,id,location).ok,'Unsafe ID rejected');equal(current,state(),'Unsafe ID does not mutate state');equal(R.evidenceFor(614,id),null,'Preview rejects unsafe ID');}
+for(const coords of [undefined,null,{},[],{c:-1,r:0},{c:72,r:0},{c:0,r:41},{c:0,r:-1},{c:.1,r:0},{c:0,r:NaN},{c:'0',r:0}]){const current=state();check(!R.collect(current,'rock:1',coords).ok,'Missing or out-of-bounds location rejected');equal(current,state(),'Invalid location leaves state unchanged');}
+const malformed=state();malformed.rockEvidence={version:2,entries:{}};check(!R.collect(malformed,'rock:1',location).ok,'Unknown evidence version rejected');
+const bad=state();bad.rockEvidence={version:1,entries:{r:{sourceId:'fictional-mineral',sol:7,c:0,r:0}}};check(!R.collect(bad,'r',location).ok,'Unapproved dataset rejected');
+console.log(JSON.stringify({checks,result:'passed',coverage:'MOLA-only references, supplied locations, zero resources/Fame, order independence, repeat/reload protection, archived reward compatibility, capacity and safe IDs'}));

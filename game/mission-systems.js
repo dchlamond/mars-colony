@@ -1,17 +1,27 @@
 /* Science-informed game rules. NASA principles are sourced; numerical bonuses are game tuning. */
 (function () {
 'use strict';
-const POWER_SOURCE='https://www.nasa.gov/smallsat-institute/sst-soa/power-subsystems/';
 const BOOST={cost:2,workDays:1,duration:3,multiplier:1.2,cooldown:8};
 const MILESTONES=['First solar power','Air for everyone','Water recovery and first harvest','Welcomed two explorers','Prepared for dust','Protected the crew','A self-supplying expedition'];
 function state(){
  if(!S.missionSystems){
-  S.missionSystems={version:1,awards:{},surveys:{},boost:null};
+  S.missionSystems={version:2,awards:{},surveys:{},boost:null};
   // Existing saves already received their milestone Fame. Record provenance
   // without paying them again, including when a checkpoint is restored.
   for(let n=1;n<=Math.min(7,S.junior?.phase||0);n++)S.missionSystems.awards['mission-'+n]={key:'mission-'+n,title:MILESTONES[n-1],points:3,sol:null,legacy:true};
  }
- return S.missionSystems;
+ const data=S.missionSystems;
+ // Retired radiation teaching values and generated terrain classifications are
+ // not NASA observations. Remove them from both the display API and save export.
+ data.awards=data.awards||{};data.surveys={};data.version=2;
+ let retiredPoints=0;
+ for(const key of Object.keys(data.awards))if(/^(surface-(open|rock|shelter)|compare-(rock|shelter)|rover-(plain|ice|lava|rock))$/.test(key)){
+  const points=data.awards[key]?.points;
+  if(Number.isFinite(points)&&points>0)retiredPoints+=points;
+  delete data.awards[key];
+ }
+ if(retiredPoints)S.fame=Math.max(0,(Number.isFinite(S.fame)?S.fame:0)-retiredPoints);
+ return data;
 }
 function notify(){document.dispatchEvent(new CustomEvent('missionsystems:update'));}
 function award(key,title,points){
@@ -24,7 +34,7 @@ function wantsTechnician(){return !!(S.junior&&state().boost?.working&&solar().l
 function solarMultiplier(){return S.junior&&state().boost?.remaining>0?BOOST.multiplier:1;}
 function boostInfo(){
  const junior=!!S.junior,b=state().boost,remainingDays=b?.remaining||0,cooldownDays=Math.max(0,(b?.cooldownUntil||0)-S.sol);
- const info={supported:junior,available:false,label:'Align solar arrays',cost:BOOST.cost,workDays:BOOST.workDays,duration:BOOST.duration,multiplier:BOOST.multiplier,cooldownDays,remainingDays,status:'blocked',sourceUrl:POWER_SOURCE,scienceNote:'Pointing a solar array toward the Sun improves its output. Our 20% bonus, three-day duration and eight-day cooldown are game rules, not NASA measurements.',evidence:{title:'InSight: a measured power recovery',text:'On 22 May 2021, InSight gained about 30 watt-hours per Martian day after wind-blown grains lifted panel dust. That observed recovery is different from our fictional 20% alignment bonus.',url:'https://www.jpl.nasa.gov/news/nasas-insight-mars-lander-gets-a-power-boost/'}};
+ const info={supported:junior,available:false,label:'Align solar arrays',cost:BOOST.cost,workDays:BOOST.workDays,duration:BOOST.duration,multiplier:BOOST.multiplier,cooldownDays,remainingDays,status:'blocked',sourceUrl:null,scienceNote:'This alignment action is an authored game rule: 20% extra solar output for three days, with an eight-day cooldown. These quantities are not NASA measurements.',evidence:null};
  if(!junior)return {...info,reason:'Commander uses its existing power research, upgrades and panel cleaning. This timed alignment action is for Junior missions.'};
  if(S.over||S.junior.recovery)return {...info,reason:'Retry your checkpoint before assigning work.'};
  if(b?.working)return {...info,status:'working',reason:solar().length?'One technician will align the arrays on the next day with available crew and no radiation alert.':'Alignment is waiting: switch on a completed solar array.'};
@@ -60,33 +70,17 @@ function finishDay(e){
 }
 function milestone(phase){return phase>=1&&phase<=7?award('mission-'+phase,MILESTONES[phase-1],3):0;}
 function fameInfo(){
- const score=Number.isFinite(S.fame)?S.fame:0,awards=Object.values(state().awards).sort((a,b)=>(b.sol||0)-(a.sol||0));
+ const data=state(),score=Number.isFinite(S.fame)?S.fame:0,awards=Object.values(data.awards).sort((a,b)=>(b.sol||0)-(a.sol||0));
  const medals=MEDALS.map(m=>({name:m.name,threshold:m.at,earned:score>=m.at})),next=medals.find(m=>!m.earned);
- return {score,label:medals.filter(m=>m.earned).at(-1)?.name||'New expedition',awards,medals,fieldReadings:Object.values(state().surveys),nextMedal:next?{...next,remaining:next.threshold-score}:null,
-  explanation:S.junior?'Fame records completed missions and different kinds of evidence. Each award is earned once per mission save. Repeating a click or measurement gives no extra Fame. Fame expands awareness for shared campaign arrivals. The first two invited Junior explorers remain a guided introduction.':'Fame combines existing Commander achievements with new one-time field evidence. Fame determines how many arriving explorers know your colony. Appeal and spare beds determine their allocation. Repeat readings do not award more Fame.'};
+ // The legacy fieldReadings shape is consumed as radiation indices by older UI.
+ // Actual MOLA records belong to FieldDiscovery's dataset ledger instead.
+ return {score,label:medals.filter(m=>m.earned).at(-1)?.name||'New expedition',awards,medals,fieldReadings:[],nextMedal:next?{...next,remaining:next.threshold-score}:null,
+  explanation:S.junior?'Fame is a game score for colony achievements. It expands awareness for shared campaign arrivals. The first two invited Junior explorers remain a guided introduction. NASA dataset records are kept separately in the discovery ledger; scanning does not create Fame.':'Fame is a game score for colony achievements. It determines how many arriving explorers know your colony. Appeal and spare beds determine their allocation. NASA dataset records are kept separately in the discovery ledger; scanning does not create Fame.'};
 }
-function recordSurvey(data){
- const condition=data?.condition,t=Number.isInteger(data?.c)&&Number.isInteger(data?.r)?tileAt(data.c,data.r):null;
- if(S.over||S.junior?.recovery)return {ok:false,recorded:false,reward:0,message:'Return to an active mission before recording evidence.'};
- if(!t||!['open','rock','shelter'].includes(condition)||data.kind!=='radiation'||data.source!=='simulation'||!Number.isFinite(data.exposureIndex)||data.exposureIndex<0)return {ok:false,recorded:false,reward:0,message:'A valid simulated surface reading is needed.'};
- if(window.Blackout?.isActive())return Blackout.recordFieldReading(data);
- const records=state().surveys;
- if(records[condition])return {ok:true,recorded:false,reward:0,message:'You already recorded '+condition+' ground. Compare a different condition; repeated readings do not add Fame.'};
- records[condition]={kind:'radiation',condition,c:data.c,r:data.r,sol:S.sol,exposureIndex:data.exposureIndex,source:'simulation'};
- let reward=award('surface-'+condition,'Recorded '+condition+' radiation model',3);
- if(records.open&&records.rock)reward+=award('compare-rock','Compared open ground with rock cover',4);
- if(records.open&&records.shelter)reward+=award('compare-shelter','Compared open ground with a shelter',4);
- render();notify();return {ok:true,recorded:true,reward,message:'Recorded '+condition+' ground: '+data.exposureIndex+' on the game exposure index. +'+reward+' Fame. This is a simulation, not a measured astronaut dose.'};
+function recordSurvey(){
+ state();
+ return {ok:false,recorded:false,reward:0,message:'Radiation model readings are retired. Use Walk on Mars to scan an actual NASA terrain dataset record in the discovery ledger.'};
 }
-const originalRoverStep=roverStep;
-roverStep=function(){
- const trip=S.rover,done=trip?.done;originalRoverStep();
- if(trip&&!done&&trip.done){
-  const type=tileAt(trip.c,trip.r)?.type;
-  const names={plain:'open plain',ice:'likely-ice terrain',lava:'possible lava-tube terrain',rock:'rocky terrain'};
-  if(names[type])award('rover-'+type,'Surveyed '+names[type],3);
- }
-};
 window.MissionSystems={boostInfo,activateBoost,fameInfo,recordSurvey,wantsTechnician,solarMultiplier,finishDay,milestone};
 state();notify();
 })();

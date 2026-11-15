@@ -21,13 +21,13 @@ panels.Earth.append($('signal'),$('timewrap'));
 const scienceLinks=document.createElement('div');scienceLinks.className='actionlist';scienceLinks.append($('btnScience'),$('btnData'),$('spaceButton'),$('btnCredits'));panels.science.append(scienceLinks);
 panels.chronicle.append($('btnJournal'));
 oldHeader.remove();oldAside.remove();document.body.append(top,rail,shell,out,$('camctl'),$('fphud'));
-const lenses=document.createElement('nav');lenses.id='lenses';lenses.setAttribute('aria-label','Map lenses');lenses.innerHTML='<span>Read the map</span>'+['territory','sunlight','air','ice','caves'].map(t=>`<button data-lens="${t}">${t}</button>`).join('')+'<small id="lensNote">Colony boundaries</small>';document.body.append(lenses);
+const lenses=document.createElement('nav');lenses.id='lenses';lenses.setAttribute('aria-label','Map lenses');lenses.innerHTML='<span>Read the map</span>'+['territory','sunlight','air'].map(t=>`<button data-lens="${t}">${t}</button>`).join('')+'<small id="lensNote">Colony boundaries</small>';document.body.append(lenses);
 const toast=document.createElement('div');toast.id='notice';toast.setAttribute('role','status');document.body.append(toast);
 function notice(msg){toast.textContent=msg;toast.classList.add('visible');clearTimeout(strategy.noticeTimer);strategy.noticeTimer=setTimeout(()=>toast.classList.remove('visible'),5500);}
 function sound(){if(!strategy.sound)return;try{const a=strategy.audio||(strategy.audio=new AudioContext()),o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.frequency.setValueAtTime(420,a.currentTime);g.gain.setValueAtTime(strategy.volume,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+.12);o.start();o.stop(a.currentTime+.12);}catch{}}
 function openTab(t){shell.hidden=false;if(strategy.tab!==t)shell.scrollTop=0;strategy.tab=t;Object.entries(panels).forEach(([k,d])=>d.hidden=k!==t);rail.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===t)));updateStrategy();}
 rail.onclick=e=>{const b=e.target.closest('[data-tab]');if(b){if(strategy.tab===b.dataset.tab&&!shell.hidden){shell.hidden=true;}else{shell.hidden=false;openTab(b.dataset.tab);}sound();}};
-function setLens(name){strategy.lens=name;lenses.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lens===name)));if(!R3)return;if(strategy.lensMesh){R3.scene.remove(strategy.lensMesh);strategy.lensMesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});}const g=new THREE.Group();strategy.lensMesh=g;R3.scene.add(g);if(name!=='territory'){for(let i=0;i<8;i++){const ts=S.tiles.filter(t=>name==='sunlight'?Math.min(7,Math.floor(t.sun*8))===i:name==='air'?Math.min(7,Math.floor((t.air-.5)/1.1*8))===i:name==='ice'?i===0&&t.type==='ice':i===0&&t.type==='lava');if(ts.length)g.add(hexFill(ts,name==='ice'?0x9ddbeb:name==='caves'?0xe9b589:new THREE.Color().setHSL(.58-i*.065,.65,.50).getHex(),.50,.15));}}$('lensNote').textContent=({territory:'Colony boundaries',sunlight:'30–100% · simplified latitude model',air:'50–160% · simplified height model',ice:'Likely ice · latitude rule, not a surveyed deposit',caves:'Volcano regions · not mapped cave entrances'})[name];}
+function setLens(name){if(!['territory','sunlight','air'].includes(name))name='territory';strategy.lens=name;lenses.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lens===name)));if(!R3)return;if(strategy.lensMesh){R3.scene.remove(strategy.lensMesh);strategy.lensMesh.traverse(o=>{o.geometry?.dispose();o.material?.dispose();});}const g=new THREE.Group();strategy.lensMesh=g;R3.scene.add(g);if(name!=='territory'){for(let i=0;i<8;i++){const ts=S.tiles.filter(t=>name==='sunlight'?Math.min(7,Math.floor(t.sun*8))===i:name==='air'?Math.min(7,Math.floor((t.air-.5)/1.1*8))===i:name==='ice'?i===0&&t.type==='ice':i===0&&t.type==='lava');if(ts.length)g.add(hexFill(ts,name==='ice'?0x9ddbeb:name==='caves'?0xe9b589:new THREE.Color().setHSL(.58-i*.065,.65,.50).getHex(),.50,.15));}}$('lensNote').textContent=({territory:'Colony boundaries',sunlight:'30–100% · simplified latitude model',air:'50–160% · simplified height model',ice:'Likely ice · latitude rule, not a surveyed deposit',caves:'Volcano regions · not mapped cave entrances'})[name];}
 lenses.onclick=e=>{const b=e.target.closest('[data-lens]');if(b)setLens(b.dataset.lens);};
 const originalRender=render;render=function(){originalRender();updateStrategy();};
 function stat(label,value,net,detail){return `<button class="resource" data-resource="${label}" title="${esc(detail)}"><span>${label}</span><b>${value}</b><small>${net}</small></button>`;}
@@ -67,6 +67,19 @@ function validateRockFinds(state){
   if(!record(entry)||!fields(entry,['kind','amount','sol','rewarded'])||limit===null||!Number.isFinite(entry.amount)||entry.amount<0||entry.amount>limit||!Number.isSafeInteger(entry.sol)||entry.sol<0||entry.sol>state.sol||typeof entry.rewarded!=='boolean'||entry.rewarded!==(entry.amount>0))fail();
  }
 }
+function validateRockEvidence(state){
+ if(state.rockEvidence===undefined)return;
+ const fail=()=>{throw Error('This save has invalid rock evidence.');};
+ const record=value=>{if(!value||typeof value!=='object'||Array.isArray(value))return false;const p=Object.getPrototypeOf(value);return p===null||Object.getPrototypeOf(p)===null;};
+ const fields=(value,keys)=>Reflect.ownKeys(value).length===keys.length&&keys.every(key=>Object.prototype.hasOwnProperty.call(value,key));
+ const ledger=state.rockEvidence;
+ if(!record(ledger)||!fields(ledger,['version','entries'])||ledger.version!==1||!record(ledger.entries)||Reflect.ownKeys(ledger.entries).length>500)fail();
+ for(const id of Reflect.ownKeys(ledger.entries)){
+  if(typeof id!=='string'||!/^[A-Za-z0-9][A-Za-z0-9:._/-]{0,127}$/.test(id)||['__proto__','constructor','prototype'].includes(id))fail();
+  const entry=ledger.entries[id];
+  if(!record(entry)||!fields(entry,['sourceId','sol','c','r'])||entry.sourceId!=='mola'||!Number.isSafeInteger(entry.sol)||entry.sol<0||entry.sol>state.sol||!Number.isInteger(entry.c)||entry.c<0||entry.c>=COLS||!Number.isInteger(entry.r)||entry.r<0||entry.r>=ROWS)fail();
+ }
+}
 function validateMission(data){
  if(!data||![1,SAVE_VERSION].includes(data.version))throw Error('This save version is not supported. Your current mission is unchanged.');
  const s=data.state;
@@ -87,7 +100,7 @@ function validateMission(data){
   for(const a of c.arrivals)if(!Array.isArray(a.names)||!Array.isArray(a.seats)||a.names.length!==a.seats.length||!a.names.every(n=>typeof n==='string')||!a.seats.every(n=>Number.isInteger(n)&&n>=0&&n<=100)||!Number.isFinite(a.waiting))throw Error('This save has invalid arrival records.');
  }
  if(s.fieldDiscoveries&&(s.fieldDiscoveries.version!==1||!s.fieldDiscoveries.entries||typeof s.fieldDiscoveries.entries!=='object'||Object.keys(s.fieldDiscoveries.entries).length>20))throw Error('This save has invalid discoveries.');
- validateRockFinds(s);if(s.junior?.checkpoint)validateRockFinds(s.junior.checkpoint);
+ validateRockFinds(s);validateRockEvidence(s);if(s.junior?.checkpoint){validateRockFinds(s.junior.checkpoint);validateRockEvidence(s.junior.checkpoint);}
  return data;
 }
 function saveMission(){
@@ -105,6 +118,11 @@ function applyMission(data){
  ME={...data.me};DF=DIFFS[data.diff];
  if(data.state.junior){const checkpoint=data.state.junior.checkpoint;Junior.restore({version:1,state:data.state,rngState:data.rngState},{render:false,checkpoint:false});if(checkpoint)S.junior.checkpoint=checkpoint;else Junior.checkpoint();}
  else{S=JSON.parse(JSON.stringify(data.state));rng=mulberry(data.rngState??S.seed);S.tiles.forEach(t=>delete t.build);S.builds.forEach(b=>{tileAt(b.c,b.r).build=b;});}
+ S.tiles.forEach(t=>{if(t.type==='ice'||t.type==='lava')t.type='plain';});
+ S.junior?.checkpoint?.tiles?.forEach(t=>{if(t.type==='ice'||t.type==='lava')t.type='plain';});
+ if(S.storm?.ev){const ref=STORMS.find(e=>e.sol===S.storm.ev.sol)||STORMS[0];S.storm.ev={...ref};}
+ S.journal=(S.journal||[]).filter(e=>!e.src||e.src==='Game rule'||/MOLA|Horizons|DONKI/.test(e.src));
+ if(S.operations?.history)S.operations.history=[];
  DEF.reactor.cost=S.tech.reactor?14:24;strategy.history=Array.isArray(data.history)?data.history.slice(-200):[];
  S.speed=0;buildSel=null;modalQ=[];modalOpen=false;$('overlay').style.display='none';S.eco=compute();
  if(R3)buildWorld();buildMenu();render();setLens(strategy.lens);document.dispatchEvent(new CustomEvent('blackout:update'));document.dispatchEvent(new CustomEvent('strategy:loaded'));

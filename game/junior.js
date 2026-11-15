@@ -8,11 +8,12 @@ let nextMode=(window.__MARS_MODE__==='commander'||new URLSearchParams(location.s
 const active=()=>!!S?.junior;
 const cost=type=>COSTS[type]??DEF[type]?.cost??0;
 const ready=type=>S.builds.filter(b=>b.type===type&&b.done&&b.on);
-const science={solar:'Sunlight follows latitude on this NASA-based map. Dust blocks sunlight, so batteries matter.',moxie:'The NASA MOLA height map changes air thickness here. Lower ground gives our oxygen machine more gas to use.',green:'Plants need light and time. NASA grows plants in sealed space gardens; these four-day harvests are a game shortcut.',ice:'NASA demonstrated 98% recovery of collected water on the space station. Our processor recycles used water; on a likely-ice tile it also extracts new water. Game recovery rates are simplified, and ice tiles are not surveyed deposits.',shield:'Mars has thin air and no global magnetic shield. NASA measured radiation on Mars; our shelter sizes are game numbers.'};
+const science={solar:'Solar generation follows a latitude-based game rule. Panel output and the dust penalty are authored game quantities, not imported NASA measurements.',moxie:'The global map uses NASA MOLA elevation records. The formula connecting elevation to oxygen production is a game rule, not a measured machine output.',green:'Greenhouse growth, food output and water demand are game quantities. This game does not import plant growth measurements.',ice:'The Water Processor supplies 4 game water units per day on any clear tile and recycles used water. Its throughput and recovery percentages are game rules, not measured deposits or NASA water-system performance.',shield:'Each basic shelter holds 6 crew in this game. Capacity and protection are authored rules; no cave location or radiation protection measurement is inferred from the map.'};
 function info(type){
- const lines={solar:'Makes up to 5 power in sunlight.',moxie:'Makes 4 × local air thickness. Uses 4 power.',green:'Makes 4 food after 4 powered days, or 6 with advanced water recycling. Uses 2 power and 0.5 water before recycling.',ice:'Recovers 95% of crew water and 90% of plant water. On likely ice, also extracts 4 water/day. Uses 2 power and 1 operator.',shield:'Shelters 6 people; a cave shelters 14.',habitat:'Adds 8 beds for new explorers.',battery:'Stores 40 spare power for dark days.',rover:'Two explorers survey nearby ground and return in 4 days.',mine:'Makes 1 part each day. Uses 2 power.',dome:'A shared place to relax. Uses 3 power.',reactor:'Makes 14 power, including during dust storms.'};
- return {name:type==='ice'?'Water Processor':DEF[type]?.name||type,source:type==='ice'?'NASA: water recovery on the space station':FACTS[type]?.s,url:type==='ice'?'https://www.nasa.gov/missions/station/iss-research/nasa-achieves-water-recovery-milestone-on-international-space-station/':FACTS[type]?.u,cost:cost(type),days:Math.ceil((WORK[type]||4)/4),benefit:lines[type]||'',why:science[type]||FACTS[type]?.t||''};
+ const lines={solar:'Makes up to 5 game power units in sunlight.',moxie:'Makes 4 × the local game air factor. Uses 4 power.',green:'Makes 4 food after 4 powered days, or 6 with a Water Processor. Uses 2 power and 0.5 water before recycling.',ice:'Supplies 4 water/day on any clear tile. Recovers 95% of crew water and 90% of plant water as game rules. Uses 2 power and 1 operator.',shield:'Shelters 6 people; upgraded shelters hold 10.',habitat:'Adds 8 beds for new explorers.',battery:'Stores 40 spare power for dark days.',rover:'Two explorers survey nearby ground and return in 4 days.',mine:'Makes 1 part each day. Uses 2 power.',dome:'A shared place to relax. Uses 3 power.',reactor:'Makes 14 power, including during dust storms.'};
+ return {name:type==='ice'?'Water Processor':DEF[type]?.name||type,source:'Game rule',url:'',cost:cost(type),days:Math.ceil((WORK[type]||4)/4),benefit:lines[type]||'',why:science[type]||'Building capacities, outputs and costs are authored game rules, not imported NASA measurements.'};
 }
+
 function unlocked(){
  const p=S.junior.phase;
  S.unlocked={solar:true};
@@ -42,7 +43,7 @@ function validateCapture(envelope){
  if(data.junior.version>2||!Number.isInteger(data.junior.phase)||data.junior.phase<0||data.junior.phase>7||data.pop<0||data.sol<1)throw Error('Unsupported Junior checkpoint rules.');
  const occupied=new Set();
  for(const b of data.builds){const key=b.c+','+b.r;if(!DEF[b.type]||!Number.isInteger(b.c)||!Number.isInteger(b.r)||b.c<0||b.c>=COLS||b.r<0||b.r>=ROWS||occupied.has(key))throw Error('Invalid checkpoint buildings.');occupied.add(key);}
- for(let i=0;i<data.tiles.length;i++){const t=data.tiles[i];if(!t||t.c!==i%COLS||t.r!==Math.floor(i/COLS)||!Number.isFinite(t.sun)||!Number.isFinite(t.air)||!Number.isFinite(t.elev))throw Error('Invalid checkpoint terrain.');}
+ for(let i=0;i<data.tiles.length;i++){const t=data.tiles[i];if(!t||t.c!==i%COLS||t.r!==Math.floor(i/COLS)||!['plain','ice','lava','rock'].includes(t.type)||!Number.isFinite(t.sun)||!Number.isFinite(t.air)||!Number.isFinite(t.elev))throw Error('Invalid checkpoint terrain.');}
  if(data.blackout)window.Blackout?.validateState(data.blackout);
  return true;
 }
@@ -52,7 +53,7 @@ function restore(envelope,options={}){
  const next=JSON.parse(JSON.stringify(data));
  if(!Object.prototype.hasOwnProperty.call(next,'water'))next.water=64; // pre-water Junior saves
  S=next;rng=mulberry(storedRng??S.seed);delete S._rngState;
- S.tiles.forEach(t=>delete t.build);S.builds.forEach(b=>{tileAt(b.c,b.r).build=b;});
+ S.tiles.forEach(t=>{delete t.build;if(t.type==='ice'||t.type==='lava')t.type='plain';});S.builds.forEach(b=>{tileAt(b.c,b.r).build=b;});
  S.speed=0;buildSel=null;modalQ=[];modalOpen=false;$('overlay').style.display='none';
  if(options.checkpoint!==false)S.junior.checkpoint=S.blackout?.initial?.state?JSON.parse(JSON.stringify(S.blackout.initial.state)):snapshot();
  if(options.render!==false){if(R3){if(R3.fp)toggleWalk();buildWorld();}buildMenu();render();}
@@ -118,7 +119,7 @@ function juniorCompute(){
   if(b.type==='solar')gen+=5*(level?1.5:1)*t.sun*S.panelClean*dust*(window.MissionSystems?.solarMultiplier()||1);
   if(b.type==='battery')store+=40*(level?2:1);
   if(b.type==='habitat')beds+=level?12:8;
-  if(b.type==='shield')shelter+=(t.type==='lava'?14:6)+(level?4:0);
+  if(b.type==='shield')shelter+=6+(level?4:0);
   if(d.worker)candidates.push(b);
  }
  const crew=allocateCrew(candidates,sheltering),machines=candidates.filter(b=>b.staffed);
@@ -136,13 +137,13 @@ function juniorCompute(){
  const waterRecovery=processors.length?.95:.75,plantRecovery=processors.length?.9:.5;
  const waterCrewUse=S.pop,waterPlantUse=greens.length*.5,waterUse=waterCrewUse+waterPlantUse;
  const waterRecovered=waterCrewUse*waterRecovery+waterPlantUse*plantRecovery;
- const waterExtracted=processors.reduce((n,b)=>n+(tileAt(b.c,b.r).type==='ice'?4*((b.lvl||1)>1?1.5:1):0),0);
- const waterp=waterRecovered+waterExtracted,waterNet=waterp-waterUse;
+ const waterSupplied=processors.reduce((n,b)=>n+4*((b.lvl||1)>1?1.5:1),0),waterExtracted=0;
+ const waterp=waterRecovered+waterSupplied,waterNet=waterp-waterUse;
  const watered=S.water>0&&processors.length>0;
  const o2p=on('moxie').reduce((n,b)=>n+4*tileAt(b.c,b.r).air*((b.lvl||1)>1?1.5:1),0);
  const foodp=S.water<=0?0:ripe.reduce((n,b)=>n+4+(watered?2:0)+((b.lvl||1)>1?2:0),0);
  cover=on('dome').length*8;
- const result={away,reserved:crew.explorers,gen,demand,store,shelter,staffed:crew.operators,idle:crew.builders,constructionWork:crew.constructionWork,crew,shut,unstaffed:sheltering?0:candidates.length-machines.length,o2p,foodp,waterp,waterUse,waterNet,waterRecovered,waterExtracted,waterRecovery,waterCrewUse,waterPlantUse,metalp:0,partsp:on('mine').length,beds,cover,noise:0,domes:on('dome').length,greens:ripe.length,seedlings:greens.length-ripe.length,dry:watered?0:ripe.length,sheltering,dust};
+ const result={away,reserved:crew.explorers,gen,demand,store,shelter,staffed:crew.operators,idle:crew.builders,constructionWork:crew.constructionWork,crew,shut,unstaffed:sheltering?0:candidates.length-machines.length,o2p,foodp,waterp,waterUse,waterNet,waterRecovered,waterSupplied,waterExtracted,waterRecovery,waterCrewUse,waterPlantUse,metalp:0,partsp:on('mine').length,beds,cover,noise:0,domes:on('dome').length,greens:ripe.length,seedlings:greens.length-ripe.length,dry:watered?0:ripe.length,sheltering,dust};
  result.appeal=appealFor(result);S.appeal=result.appeal.score;
  return result;
 }
@@ -177,13 +178,13 @@ function objective(){
  ['Grow food for everyone','Recycle your water, then keep greenhouses powered for four days. Your crew need '+S.pop+' food each day.','build'],
  ['Welcome two explorers',canInvite().reason,'crew'],
  ['Prepare for the dust storm',S.dust?.active?'Dust dims solar panels. Stored power keeps air and food machines running.':'Build a battery and store spare power. Dust arrives in '+Math.max(0,(S.dust?.arrive||S.sol)-S.sol)+' days.','build'],
- ['Protect the crew from radiation',S.storm?.active?'Everyone is taking cover. Stored air and food keep them safe.':'Build enough soil shelter for '+S.pop+' people. Radiation arrives in '+Math.max(0,(S.storm?.arrive||S.sol)-S.sol)+' days.','build'],
+ ['Complete a shelter safety drill',S.storm?.active?'Everyone is taking cover. Stored air and food keep them safe.':'Build enough soil shelter for '+S.pop+' people. The game drill starts in '+Math.max(0,(S.storm?.arrive||S.sol)-S.sol)+' days.','build'],
  ['Explore and keep the town supplied',e.shelter<S.pop?'Add enough shelter for everyone, then send a rover to nearby ground.':'Send a rover to nearby ground. Keep making enough air and food while your explorers are away.',e.shelter<S.pop?'build':'explore'],
  ['Mars is becoming home','You grew food, welcomed explorers, prepared for storms and surveyed Mars. Keep building or start a Commander mission.','next']
  ];
  const row=goals[Math.min(j.phase,7)];
  if(S.panelClean<.75&&j.phase>=4&&!S.storm?.active)return {title:'Brush dust off the panels',detail:e.crew.resting+e.crew.builders+e.crew.cleaners<1?'Free one crew member by switching off an optional machine, then clean the panels.':'Dust is reducing your power. Cleaning pauses construction for one day.',action:'clean',phase:j.phase};
- if(j.phase===2&&!ready('ice').some(b=>b.powered))return {title:'Recycle your water',detail:'Build a Water Processor on any clear tile and power it. On likely ice it also extracts new water.',action:'build',phase:j.phase};
+ if(j.phase===2&&!ready('ice').some(b=>b.powered))return {title:'Recycle your water',detail:'Build a Water Processor on any clear tile and power it. It supplies 4 game water units per day and recycles used water.',action:'build',phase:j.phase};
  if(e.unstaffed>0)return {title:'Give the crew room to work',detail:e.unstaffed+' machine'+(e.unstaffed===1?' needs':'s need')+' an operator. Switch off optional machines or prepare for more explorers.',action:'build',phase:j.phase};
  if(e.shut>0&&j.phase<4)return {title:'Give your machines enough power',detail:e.shut+' machine'+(e.shut===1?' is':'s are')+' waiting for power. Add solar panels or switch something off.',action:'build',phase:j.phase};
  return {title:row[0],detail:row[1],action:row[2],phase:j.phase};
@@ -202,8 +203,8 @@ function progress(){
  }
  if(!done)return;
  j.phase++;S.goal=Math.min(j.phase,GOALS.length-1);unlocked();S.parts+=3;if(window.MissionSystems)MissionSystems.milestone(j.phase);else S.fame+=3;
- if(j.phase===4){S.dust={arrive:S.sol+5,active:false,end:S.sol+8,len:3,bad:false,imp0:S.imports};log('Dust forecast: five days to fill a battery. The storm will last three days.','info');}
- if(j.phase===5){S.storm={arrive:S.sol+5,active:false,end:S.sol+6,choice:'shelter',ev:STORMS[0]};log('Radiation practice alert: five days to build shelter. This scenario uses NASA science, not a live forecast.','info');}
+ if(j.phase===4){S.dust={arrive:S.sol+5,active:false,end:S.sol+8,len:3,bad:false,imp0:S.imports};log('Game dust challenge: five days to fill a battery. The authored challenge lasts three days.','info');}
+ if(j.phase===5){S.storm={arrive:S.sol+5,active:false,end:S.sol+6,choice:'shelter',ev:{date:'Game drill',lvl:1,meas:'No radiation measurement',text:'Authored shelter-readiness exercise.',src:'Game rule',url:''}};log('Shelter drill: five days to build shelter. This is an authored game exercise, not a NASA event.','info');}
  if(j.phase===7){j.completed=true;S.indep=100;log('Mission complete: your town makes its own air and food, protects its crew and explores Mars.','good');}
  S.say=objective().detail;log('Discovery complete. '+objective().title+'. +3 parts.','good');checkpoint();buildMenu();
 }
@@ -212,7 +213,7 @@ function recover(){
  if(!active()||!S.junior.checkpoint)return false;
  const old=S.junior,stored=old.checkpoint,failures=old.failures+1;
  if(shortMission())return window.Blackout.action('retry').ok;
- restore({state:stored,rngState:stored._rngState},{render:false,checkpoint:false});S.junior.failures=failures;S.junior.recovery=null;S.junior.checkpoint=stored;
+ restore({state:stored,rngState:stored._rngState},{render:false,checkpoint:false});S.junior.failures=failures;S.junior.recovery=null;stored.tiles.forEach(t=>{if(t.type==='ice'||t.type==='lava')t.type='plain';});S.junior.checkpoint=stored;
  if(R3)buildWorld();log('Checkpoint restored. Progress since this checkpoint was undone; try a different plan.','info');buildMenu();render();return true;
 }
 function nextDay(){
@@ -240,10 +241,10 @@ tickSol=function(){
   if(compute().shelter<S.pop){S.parts=Math.max(0,S.parts-2);log('Too few sheltered spaces. The crew retreat to the landing ship; work pauses for two days and transport uses 2 parts.','bad');}
   else log('Shelters ready. Everyone takes cover for one day; stored air and food keep the town safe.','good');
  }
- if(S.storm?.active&&S.sol>=S.storm.end){S.storm=null;j.radiationDone=true;log('Radiation practice finished. The crew are back at work.','good');}
+ if(S.storm?.active&&S.sol>=S.storm.end){S.storm=null;j.radiationDone=true;log('Shelter drill finished. The crew are back at work.','good');}
  let e=compute();
  if(S.cleaning>0&&!e.sheltering&&e.crew.cleaners>0){S.cleaning--;if(!S.cleaning){S.panelClean=1;log('Panels clean. Solar power is restored.','good');}}
- else if(!e.sheltering){const job=S.builds.find(b=>!b.done);if(job){job.progress+=e.constructionWork;if(job.progress>=(WORK[job.type]||8)){job.done=true;job.on=true;job.age=0;S.tiles.forEach(t=>{if(hdist(t,job)<=2&&!t.owner)t.seen=true;});log(info(job.type).name+' is ready.','good');const f=FACTS[job.type];if(f&&!S.seenFacts[job.type]){S.seenFacts[job.type]=true;S.journal.push({title:info(job.type).name,why:science[job.type]||f.t,src:job.type==='ice'?'NASA: water recovery on the space station':f.s,u:job.type==='ice'?'https://www.nasa.gov/missions/station/iss-research/nasa-achieves-water-recovery-milestone-on-international-space-station/':f.u});}}}}
+ else if(!e.sheltering){const job=S.builds.find(b=>!b.done);if(job){job.progress+=e.constructionWork;if(job.progress>=(WORK[job.type]||8)){job.done=true;job.on=true;job.age=0;S.tiles.forEach(t=>{if(hdist(t,job)<=2&&!t.owner)t.seen=true;});log(info(job.type).name+' is ready.','good');const f=FACTS[job.type];if(f&&!S.seenFacts[job.type]){S.seenFacts[job.type]=true;S.journal.push({title:info(job.type).name,why:info(job.type).why,src:'Game rule',u:''});}}}}
  e=compute();for(const b of S.builds)if(b.type==='green'&&b.done&&b.powered)b.age=(b.age||0)+1;
  if(S.dust?.active)S.panelClean=Math.max(.7,S.panelClean-.025);
  e=S.eco=compute();S.battery=Math.max(0,Math.min(e.store,S.battery+e.gen-e.demand));
@@ -252,7 +253,7 @@ tickSol=function(){
  if(S.rover){roverStep();if(S.rover?.done)j.discovered=true;}
  if(S.o2<=0)shortage('The air reserve ran out. Build oxygen and power earlier.');
  else if(S.food<=0)shortage('The food reserve ran out. Start and power your greenhouses earlier.');
- else if(S.water<=0)shortage('The water reserve ran out. Power a Water Processor to recover more water, or build one on likely ice for new water.');
+ else if(S.water<=0)shortage('The water reserve ran out. Power a Water Processor to supply and recycle water. It works on any clear tile.');
  S.appeal=appealFor(e).score;S.peak=Math.max(S.peak,S.pop);
  if(shortMission())window.Blackout.afterDay(e);
  else if(!j.recovery)progress();
@@ -270,7 +271,7 @@ tryBuild=function(type,t){
  if(!t.seen)return 'Explore this ground with your rover first.';
  if(t.build)return 'There is already something here.';
  if(t.type==='rock')return 'Choose a clear tile.';
- // Junior water processors recycle on any clear tile; extraction needs likely ice.
+ // Water supply is a uniform game rule, independent of generated tile classifications.
  if(S.builds.some(b=>!b.done))return 'Let the crew finish this building first.';
  if(S.parts<cost(type))return 'This needs '+cost(type)+' parts. The next supply shuttle arrives in '+(S.junior.nextSupply-S.sol)+' days.';
  S.parts-=cost(type);const b={type,c:t.c,r:t.r,done:false,on:true,progress:0,juniorCost:cost(type)};S.builds.push(b);t.build=b;log('Building '+info(type).name+'. '+cost(type)+' parts spent.','info');render();return null;
@@ -298,7 +299,7 @@ buildingPanel=function(b){
  if(shortMission()){document.dispatchEvent(new CustomEvent('blackout:systems',{detail:{type:b.type,c:b.c,r:b.r}}));return;}
  Strategy.openTab('buildings');let panel=$('selection');if(!panel){panel=document.createElement('section');panel.id='selection';document.querySelector('[data-panel="buildings"]').prepend(panel);}
  const d=info(b.type),f=FACTS[b.type];
- panel.innerHTML='<h2>'+esc(d.name)+'</h2><p>'+esc(d.benefit)+'</p><p>'+(b.done?b.on?'Automatic crew assignment.':'Switched off.':'Building: '+Math.floor(b.progress)+' / '+(WORK[b.type]||8)+' work.')+'</p>'+(f?'<details><summary>Why does this matter?</summary><p>'+esc(d.why)+'</p>'+link(d.source||f.s,d.url||f.u)+'</details>':'')+'<div class="actionlist">'+(!b.done?'<button id="juniorCancel">Cancel and refund '+(b.juniorCost??cost(b.type))+' parts</button>':DEF[b.type].use?'<button id="juniorToggle">'+(b.on?'Switch off':'Switch on')+'</button>':'')+'</div>';
+ panel.innerHTML='<h2>'+esc(d.name)+'</h2><p>'+esc(d.benefit)+'</p><p>'+(b.done?b.on?'Automatic crew assignment.':'Switched off.':'Building: '+Math.floor(b.progress)+' / '+(WORK[b.type]||8)+' work.')+'</p>'+(f?'<details><summary>Why does this matter?</summary><p>'+esc(d.why)+'</p>'+(d.url?link(d.source,d.url):'<small>'+esc(d.source)+'</small>')+'</details>':'')+'<div class="actionlist">'+(!b.done?'<button id="juniorCancel">Cancel and refund '+(b.juniorCost??cost(b.type))+' parts</button>':DEF[b.type].use?'<button id="juniorToggle">'+(b.on?'Switch off':'Switch on')+'</button>':'')+'</div>';
  $('juniorCancel')?.addEventListener('click',()=>{cancel(b);panel.remove();});$('juniorToggle')?.addEventListener('click',()=>{toggle(b);buildingPanel(b);render();});$('machineCare')?.remove();
 };
 function update(){

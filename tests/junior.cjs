@@ -1,14 +1,7 @@
-const {chromium}=require('playwright');
-const assert=require('node:assert/strict');
-const fs=require('node:fs');
-const path=require('node:path');
-(async()=>{
- const browser=await chromium.launch({channel:'chrome',headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
- try{
-  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
-  page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(process.env.GAME_URL||'http://127.0.0.1:8765');await page.waitForFunction(()=>window.Junior&&window.G&&AresWorld.pending===0);
-  const result=await page.evaluate(()=>{
+/* Actual Junior simulation rules; browser presentation is checked through CUA. */
+const {engine}=require('./engine-harness.cjs');
+const e=engine();
+const result=e.run(`(function(){
    const advance=()=>{tickSol();if(window.Campaign?.data().pending)Campaign.settle(Date.now()+10001);};let checks=0;const check=(v,m)=>{if(!v)throw Error(m);checks++;};
    // This checks real rules through public actions; rendering is unrelated to the
    // multi-campaign numerical test and is suppressed to keep the test quick.
@@ -71,7 +64,7 @@ const path=require('node:path');
    oxygen.condition=0;oxygen.method='push';check(compute().o2p===working,'Junior removes wear and production-method complexity from actual rules');
    S.junior.phase=3;S.unlocked.moxie=true;check(!Junior.canInvite().ok,'Arrivals wait when food and air capacity are not ready');
    const lower=S.tiles.filter(t=>t.seen&&!t.owner&&!t.build).sort((a,b)=>b.air-a.air)[0];const high=S.tiles.filter(t=>t.seen&&!t.owner&&!t.build).sort((a,b)=>a.air-b.air)[0];
-   oxygen.c=lower.c;oxygen.r=lower.r;const lowAir=compute().o2p;oxygen.c=high.c;oxygen.r=high.r;check(lowAir>=compute().o2p,'NASA height-derived air density changes real production');
+   oxygen.c=lower.c;oxygen.r=lower.r;const lowAir=compute().o2p;oxygen.c=high.c;oxygen.r=high.r;check(lowAir>=compute().o2p,'Elevation-based game rule changes production without claiming measured air density');
    Junior.start('junior',0,812);S.junior.phase=5;S.storm={arrive:2,active:false,end:3,choice:'shelter',ev:STORMS[0]};const transportParts=S.parts;advance();
    check(S.parts===transportParts-2&&S.storm.active&&S.storm.end===4,'Missing radiation shelter costs transport parts and two days of work');
    check(compute().o2p===0&&compute().foodp===0,'Taking cover uses reserves and stops outdoor production');
@@ -81,10 +74,10 @@ const path=require('node:path');
    const dryTile=S.tiles.find(t=>t.seen&&!t.owner&&!t.build&&t.type==='plain');S.unlocked.ice=true;
    check(!tryBuild('ice',dryTile),'Water processor can recycle on a non-ice site');
    while(!dryTile.build.done)advance();
-   const recycled=compute();check(recycled.waterRecovery===.95&&recycled.waterExtracted===0&&recycled.waterp<=recycled.waterUse,'Advanced recycler respects the actual water throughput');
+   const recycled=compute();check(recycled.waterRecovery===.95&&recycled.waterExtracted===0&&recycled.waterSupplied===4,'Processor supplies four authored water units on a normal tile');
    const waterBefore=S.water,netBefore=recycled.waterNet;advance();check(Math.abs(S.water-waterBefore-netBefore)<1e-8,'Stored water follows the reported net water ledger');
-   dryTile.type='ice';const extracted=compute();check(extracted.waterExtracted===4&&Math.abs(extracted.waterNet-(recycled.waterNet+4))<1e-8,'Only an ice-site processor adds newly extracted water');
-   dryTile.type='plain';S.water=.1;S.junior.nextSupply=999;S.o2=100;S.food=100;advance();check(/water reserve/.test(S.junior.recovery),'Depleted water causes a recoverable setback');
+   dryTile.type='ice';const extracted=compute();check(extracted.waterExtracted===0&&extracted.waterSupplied===4&&Math.abs(extracted.waterNet-recycled.waterNet)<1e-8,'Legacy ice labels never change the water supply');
+   dryTile.type='plain';dryTile.build.on=false;S.water=.1;S.junior.nextSupply=999;S.o2=100;S.food=100;advance();check(/water reserve/.test(S.junior.recovery),'Depleted water causes a recoverable setback');
    Junior.start('junior',0,812);const rosterStart=Junior.crewRoles();check(rosterStart.resting===6&&rosterStart.operators===0,'Initial head count is not multiplied into workers');
    S.unlocked.solar=true;place('solar');const construction=Junior.crewRoles();check(construction.builders===2&&construction.constructionWork===4&&construction.resting===4,'Two real builders provide four work per day');
    const nextJob=S.builds.find(b=>!b.done),progressBefore=nextJob.progress;advance();check(nextJob.progress-progressBefore===4,'Construction consumes the reported real crew capacity');
@@ -99,9 +92,8 @@ const path=require('node:path');
    const commanderMetal=S.metal;S.unlocked.moxie=true;check(!tryBuild('moxie',choose('moxie'))&&S.metal===commanderMetal-DEF.moxie.metal,'Commander retains its original metal economy');
    const commanderDay=S.sol;advance();check(S.sol===commanderDay+1,'Commander simulation still advances');
    return {checks,campaigns:rows};
-  });
-  await page.reload();await page.waitForFunction(()=>window.Junior&&window.Strategy);
-  const persistence=await page.evaluate(()=>{
+})()`);
+result.persistence=e.run(`(function(){
    Junior.start('junior',1,901);Junior.nextDay();Strategy.saveMission();
    const saved=JSON.parse(localStorage.getItem('mars-colony-save'));
    if(!saved.state.junior?.checkpoint)throw Error('Junior checkpoint missing from save');
@@ -110,9 +102,6 @@ const path=require('node:path');
    delete saved.state.junior;localStorage.setItem('mars-colony-save',JSON.stringify(saved));Strategy.loadMission();
    if(Junior.isActive())throw Error('Legacy save incorrectly converted to Junior');
    return {juniorRestore:true,legacyPreserved:true,savedBytes:JSON.stringify(saved).length};
-  });
-  result.persistence=persistence;result.checks+=3;
-  assert.deepEqual(errors,[]);fs.mkdirSync(path.join(__dirname,'../research'),{recursive:true});fs.writeFileSync(path.join(__dirname,'../research/junior-balance.json'),JSON.stringify(result,null,2));
-  console.log(JSON.stringify(result,null,2));
- }finally{await browser.close();}
-})().catch(e=>{console.error(e);process.exitCode=1;});
+})()`);
+result.checks+=3;
+console.log(JSON.stringify({...result,campaigns:result.campaigns.map(c=>({site:c.site,day:c.day,completed:c.completed,water:c.water,crew:c.crew}))},null,2));

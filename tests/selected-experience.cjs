@@ -15,19 +15,9 @@ function fixture({seen=false,storageDenied=false,offline=false}={}){
   context.window.SelectedExperience.decorateWelcome({querySelector:s=>nodes[s],style:{setProperty(){}}});
   return{context,events,video,button,status,dialog,begin,get starts(){return starts},get focusCount(){return focusCount}};
 }
-for(const via of ['ended','skip','cancel']){
-  const f=fixture();f.begin.onclick();eq(f.dialog.open,true);eq(f.starts,0);eq(f.context.S.speed,0);
-  if(via==='ended')f.events.ended();else if(via==='skip')f.button.onclick();else f.events.cancel({preventDefault(){}});
-  eq(f.dialog.open,false);eq(f.starts,1);eq(f.video.paused,true);eq(f.context.S.speed,2);eq(f.context.modalOpen,true);
-  f.events.ended();f.button.onclick();eq(f.starts,1); // stale events cannot launch twice
-  f.begin.onclick();eq(f.starts,2);eq(f.dialog.open,false); // once per session
+for(const opts of [{},{storageDenied:true},{offline:true},{seen:true}]){
+ const f=fixture(opts);f.begin.onclick();eq(f.starts,1);eq(f.dialog.open,false);eq(f.video.paused,true);
+ f.context.window.SelectedExperience.showFilm();eq(f.dialog.open,false);
+ eq(f.context.window.SelectedExperience.available,false);
 }
-{
-  const f=fixture({storageDenied:true});f.begin.onclick();f.video.error={message:'network'};f.events.error();
-  assert.match(f.status.textContent,/still play/);checks++;f.button.onclick();eq(f.starts,1);
-}
-for(const opts of [{seen:true},{offline:true}]){const f=fixture(opts);f.begin.onclick();eq(f.starts,1);eq(f.dialog.open,false);}
-{
-  const f=fixture();f.context.window.SelectedExperience.showFilm();f.events.ended();eq(f.starts,0);eq(f.focusCount,1);
-}
-console.log(`${checks} selected-release lifecycle checks passed`);
+console.log(`${checks} selected-release immediate-play checks passed`);

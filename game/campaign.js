@@ -34,11 +34,9 @@ compute=function(){
  if(!S.junior&&!Number.isFinite(S.water))S.water=120;
  const original=S.builds,ordered=original.slice();
  if(!S.junior)ordered.sort((a,b)=>({pod:0,solar:1,reactor:2,moxie:3,ice:4,green:5,shield:6,habitat:6,battery:6,mine:9,dome:10}[a.type]??8)-({pod:0,solar:1,reactor:2,moxie:3,ice:4,green:5,shield:6,habitat:6,battery:6,mine:9,dome:10}[b.type]??8));
- const temp=[],w=R.weather(S.sol);let result;
+ const temp=[];let result;
  try{
   S.builds=ordered;
-  // Solar transmittance is a game scenario; tau is shown separately as evidence.
-  if(w?.active)for(const t of S.tiles){temp.push([t,t.sun]);t.sun*=w.solar;}
   if(!S.junior&&ordered.some(b=>!b.done)){
    const optional=ordered.filter(b=>b.done&&b.on&&['mine','dome'].includes(b.type));
    const workers=ordered.filter(b=>b.done&&b.on&&DEF[b.type].worker).length;
@@ -58,17 +56,8 @@ function afterDay(){
   d.dryDays=S.water<=0?d.dryDays+1:0;if(d.dryDays===1)event('alert',{title:'Water exhausted',text:'Restore powered water processing within three days or the crew must evacuate.'});if(d.dryDays>=3)failure('Water unavailable for three days.');
  }
  S.appeal=R.quality(S,e).score;
- const w=R.weather(S.sol);
- if(S.sol===290)event('alert',{title:'Extreme survival begins on day 300',text:'Game scenario: day 300 and the escalating difficulty are our design, not a NASA historical date or forecast. Prepare batteries, reserves, shelters and backup power.'});
- if(w?.active){
-  if((S.sol-300)%30===0){event('alert',{title:'Extreme dust · level '+w.cycle,text:'Game scenario inspired by the 2018 Opportunity storm: '+w.duration+' days, '+Math.round(w.solar*1000)/10+'% of normal solar output. These durations and losses are game rules, not recorded NASA values.'});}
-  if(w.cold){S.battery=Math.max(0,S.battery-S.pop*.4*w.maintenance);S.parts=Math.max(0,S.parts-.25*w.maintenance);}
-  if(w.radiation&&e.shelter<S.pop){d.unsafeDays++;if(d.unsafeDays>=2){const lost=Math.min(S.pop,Math.ceil((S.pop-e.shelter)*.25*w.maintenance));S.pop-=lost;log(lost+' unsheltered crew evacuated after the radiation alert.','bad');}}
-  else d.unsafeDays=0;
-  if(w.radiation&&(S.sol-300)%30===4)event('alert',{title:'Solar-particle alert',text:'Curiosity measured an 8,100 microgray event dose on 20 May 2024. Shelter capacity protects crew in this game. Add shelter before the next day.'});
-  if(S.pop<=0)failure('The last crew evacuated during extreme weather.');
-  if(S.junior?.recovery){S.junior.recovery=null;failure('Essential supplies failed during extreme survival.');}
- }
+ // Clear obsolete escalation counters when continuing a pre-audit save.
+ d.unsafeDays=0;
  // A new, distant completed district earns a single expansion reward.
  for(const b of S.builds)if(b.done&&['habitat','mine','ice'].includes(b.type)&&hdist(b,S.builds[0])>=4){const key=Math.floor(b.c/3)+':'+Math.floor(b.r/3);if(!d.districts.includes(key)){d.districts.push(key);S.parts+=6;addFame(5,'Expanded into a new district.');log('New district connected: +6 parts and +5 Fame. Expansion reveals nearby land.','good');}}
  if(S.junior&&S.junior.completed&&S.sol%10===0)queueWave();

@@ -11,7 +11,7 @@
 <link rel="icon" href="data:,">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DEAD RECKONING: BLACKOUT</title>
-<meta name="description" content="A strategy game for ages 7 to 12. Run the first town on Mars, on a real map of the planet, with real recorded NASA solar storms.">
+<meta name="description" content="A strategy game for ages 7 to 12. Run the first town on Mars, using NASA MOLA terrain, JPL Horizons timing and historical DONKI event records.">
 <meta name="generator" content="AI-assisted implementation with Claude and OpenAI Codex from the team's design. See AI_USE.md.">
 <style>
 @font-face{font-family:'Cinzel';font-weight:600;font-display:swap;src:url(assets/fonts/cinzel-latin-600-normal.woff2) format('woff2')}
@@ -157,11 +157,8 @@ body.fp #camctl [data-a="in"],body.fp #camctl [data-a="out"],body.fp #camctl [da
     <div id="timebar"><div class="win" style="left:0"></div><div class="conj" id="conjband"></div><div class="win" style="right:0"></div><div class="cur" id="cur"></div></div>
     <div id="timelabels"><span>Ships can launch</span><span>Sun blocks radio</span><span>Ships can launch</span></div>
     <div id="ttip" role="tooltip">
-      <p>Hello, explorer! In case you were wondering how time is flying by so fast on Mars while it's relatively slow on your end, the answer is: you're hovering 6.6 meters above Sagittarius A*, the supermassive black hole at the center of our galaxy.</p>
-      <p>Einstein's general relativity says strong gravity slows down time. Your clock is compared to Mars's like this:</p>
-      <div class="eq">your time = Mars time &times; &radic;(1 &minus; r<sub>s</sub>/r)</div>
-      <p>Here <i>r<sub>s</sub></i> is the black hole's event horizon (about 12.7 million km) and <i>r</i> is how far you are from its center. You're so close to the edge that the square root comes out to about 1/44,000, so your clock runs 44,000 times slower than the clocks on Mars. One minute for you is one month on Mars.</p>
-      <p><i>Real fact: this works on a tiny scale too. Mars has weaker gravity than Earth, so clocks there really do run 477 millionths of a second faster every day.</i></p>
+      <p>Time is compressed for this game. Use the bottom time controls to pause or choose speeds 1–5. Press Space to pause or resume.</p>
+      <p>The Earth link uses a dated NASA/JPL Horizons record of one-way light time. Game days, supply schedules and the radio-pause exercise are teaching rules, not real elapsed mission time.</p>
     </div>
   </div>
   <div class="speed" id="speed">
@@ -259,47 +256,101 @@ const CONJ_START = 373;   // solar conjunction falls about halfway between launc
 const CONJ_LEN = 14;      // radio blackout lasts about two weeks
 const SOL_MS = 2000;      // 1 real minute = about 30 sols = about 1 Earth month
 
-// Curated real events. Embedded, not live. Each entry names its source.
-// DONKI entries are Solar Energetic Particle (SEP) records from NASA's DONKI
-// catalog (M2M_CATALOG). They were measured by spacecraft near Earth.
-// The game calendar replays real space weather: Sol 1 is 20 November 2023 and each sol is one calendar day.
-// Storm days and strengths come from NASA DONKI Solar Energetic Particle (SEP) records (fetched from api.nasa.gov),
-// keeping events that reached the >10 MeV proton channel (level 2) or the >100 MeV channel (level 3).
+// Imported NASA DONKI SEP records, archived in research/donki-sep-may-2024.json.
+// These GOES/SOHO records describe observations near Earth, not Mars exposure.
+// Mission sols, levels, warning time, duration and consequences are authored rules;
+// the real record timestamp remains visible separately from the game schedule.
 const STORM_LOOP=230;
 const STORMS = [
-  { sol:45,  lvl:2, date:'January 3, 2024',  meas:'Protons above 10 MeV, measured near Earth.', text:'Spacecraft near Earth detected a proton storm from the Sun on this day.', src:'NASA DONKI, 2024-01-03T20:05:00-SEP-001', url:'https://ccmc.gsfc.nasa.gov/tools/DONKI/' },
-  { sol:71,  lvl:2, date:'January 29, 2024', meas:'Protons above 10 MeV, measured near Earth.', text:'Five separate instruments recorded this proton storm on the same day.', src:'NASA DONKI, 2024-01-29T05:11:00-SEP-001', url:'https://ccmc.gsfc.nasa.gov/tools/DONKI/' },
-  { sol:85,  lvl:3, date:'February 12, 2024', meas:'Protons above 100 MeV, measured near Earth.', text:'The first storm on this list to reach the higher proton energy level. Protons this fast can pass through thin walls, which is why shelters are buried.', src:'NASA DONKI, 2024-02-12T10:15:00-SEP-001', url:'https://ccmc.gsfc.nasa.gov/tools/DONKI/' },
-  { sol:117, lvl:2, date:'March 15, 2024', meas:'Protons above 10 MeV, measured near Earth.', text:'A proton storm that carried on into the next day.', src:'NASA DONKI, 2024-03-15T20:50:00-SEP-001', url:'https://ccmc.gsfc.nasa.gov/tools/DONKI/' },
-  { sol:125, lvl:2, date:'March 23, 2024', meas:'Protons above 10 MeV, measured near Earth.', text:'Only eight days after the last one. Solar storms often come in bunches when the Sun is active.', src:'NASA DONKI, 2024-03-23T08:15:00-SEP-001', url:'https://ccmc.gsfc.nasa.gov/tools/DONKI/' },
-  { sol:174, lvl:3, date:'May 11, 2024', meas:'Protons above 100 MeV, measured near Earth.', text:'Detected by the GOES satellite an hour after an X5.8 solar flare. The same week, Earth saw its strongest solar storm in 20 years.', src:'NASA DONKI, 2024-05-11T02:10:00-SEP-001', url:'https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/SEP/30714/1' },
-  { sol:183, lvl:3, date:'May 20, 2024', meas:'8,100 micrograys, measured on Mars.', text:'NASA\'s Curiosity rover measured the biggest radiation spike of its 12 years on Mars, like getting 30 chest X-rays at once. Its cameras filled with white specks from the particles.', src:'NASA/JPL, Curiosity RAD instrument', url:'https://www.nasa.gov/?p=670127' }
+  {
+    "sol": 45,
+    "lvl": 2,
+    "date": "2024-05-10T12:59Z",
+    "meas": "SOHO: COSTEP 15.8-39.8 MeV; observation near Earth, not a Mars dose.",
+    "text": "NASA DONKI records this solar energetic-particle event at the stated timestamp. Training timing, severity and effects are game rules.",
+    "src": "NASA DONKI, 2024-05-10T12:59:00-SEP-001",
+    "url": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30675/-1"
+  },
+  {
+    "sol": 71,
+    "lvl": 2,
+    "date": "2024-05-10T13:02Z",
+    "meas": "SOHO: COSTEP 28.2-50.1 MeV; observation near Earth, not a Mars dose.",
+    "text": "NASA DONKI records this solar energetic-particle event at the stated timestamp. Training timing, severity and effects are game rules.",
+    "src": "NASA DONKI, 2024-05-10T13:02:00-SEP-001",
+    "url": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30676/-1"
+  },
+  {
+    "sol": 85,
+    "lvl": 3,
+    "date": "2024-05-10T13:35Z",
+    "meas": "GOES-P: SEISS >10 MeV; observation near Earth, not a Mars dose.",
+    "text": "NASA DONKI records this solar energetic-particle event at the stated timestamp. Training timing, severity and effects are game rules.",
+    "src": "NASA DONKI, 2024-05-10T13:35:00-SEP-001",
+    "url": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30677/-1"
+  },
+  {
+    "sol": 117,
+    "lvl": 2,
+    "date": "2024-05-11T02:10Z",
+    "meas": "GOES-P: SEISS >100 MeV; observation near Earth, not a Mars dose.",
+    "text": "NASA DONKI records this solar energetic-particle event at the stated timestamp. Training timing, severity and effects are game rules.",
+    "src": "NASA DONKI, 2024-05-11T02:10:00-SEP-001",
+    "url": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30714/-1"
+  },
+  {
+    "sol": 125,
+    "lvl": 2,
+    "date": "2024-05-13T14:00Z",
+    "meas": "GOES-P: SEISS >10 MeV; observation near Earth, not a Mars dose.",
+    "text": "NASA DONKI records this solar energetic-particle event at the stated timestamp. Training timing, severity and effects are game rules.",
+    "src": "NASA DONKI, 2024-05-13T14:00:00-SEP-001",
+    "url": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30817/-1"
+  },
+  {
+    "sol": 174,
+    "lvl": 3,
+    "date": "2024-05-13T18:07Z",
+    "meas": "SOHO: COSTEP 15.8-39.8 MeV; observation near Earth, not a Mars dose.",
+    "text": "NASA DONKI records this solar energetic-particle event at the stated timestamp. Training timing, severity and effects are game rules.",
+    "src": "NASA DONKI, 2024-05-13T18:07:00-SEP-001",
+    "url": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30824/-1"
+  },
+  {
+    "sol": 183,
+    "lvl": 3,
+    "date": "2024-05-13T18:07Z",
+    "meas": "SOHO: COSTEP 28.2-50.1 MeV; observation near Earth, not a Mars dose.",
+    "text": "NASA DONKI records this solar energetic-particle event at the stated timestamp. Training timing, severity and effects are game rules.",
+    "src": "NASA DONKI, 2024-05-13T18:07:00-SEP-002",
+    "url": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30825/-1"
+  }
 ];
 
 const link=(name,url)=>url?`<a href="${url}" target="_blank" rel="noopener">${name}</a>`:name;
 const FACTS = {
-  sol:    { t:'A sol is one Mars day. It lasts 24 hours and 39 minutes, a little longer than a day on Earth.', s:'NASA', u:'https://www.giss.nasa.gov/tools/mars24/help/notes.html' },
-  moxie:  { t:'A real machine called MOXIE rode on the Perseverance rover and made oxygen from Mars air. At its best it made 12 grams an hour, more than 98% pure.', s:'NASA MOXIE experiment', u:'https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-oxygen-generating-experiment-moxie-completes-mars-mission/' },
-  solar:  { t:'Dust is the enemy of solar panels on Mars. Dust on its panels ended the InSight lander\'s mission.', s:'NASA InSight mission', u:'https://www.nasa.gov/missions/insight/nasa-retires-insight-mars-lander-mission-after-years-of-science/' },
-  ice:    { t:'Mars has water ice buried under the soil. NASA\'s SWIM project maps where it is close enough to dig up.', s:'NASA SWIM project', u:'https://swim.psi.edu' },
-  green:  { t:'Mars soil contains salts called perchlorates that are harmful to people. Soil must be washed, or plants grown in water instead.', s:'NASA Phoenix Mars lander', u:'https://science.nasa.gov/mission/mars-phoenix/' },
-  shield: { t:'Mars has no magnetic shield and very thin air. Curiosity measured about 0.64 millisieverts of radiation a day on the surface. Piling Mars soil (regolith) over a habitat blocks much of it.', s:'NASA Curiosity RAD', u:'https://www.swri.org/press-release/swri-scientists-publish-first-radiation-measurements-surface-mars' },
-  lava:   { t:'Lava tubes are natural caves left by old lava flows. Scientists have mapped over a thousand possible cave openings on Mars. A cave roof is a ready-made radiation shield.', s:'USGS Mars Global Cave Candidate Catalog', u:'https://www.usgs.gov/center-news/caves-mars' },
-  mine:   { t:'Mars is red because its soil is full of iron oxide, which is rust. Future crews could make iron and other metals from the soil instead of shipping them from Earth.', s:'NASA', u:'https://www.nasa.gov/solar-system/what-is-mars-grades-5-8/' },
-  habitat:{ t:'In 2023 and 2024, four NASA volunteers lived for 378 days inside Mars Dune Alpha, a 3D-printed practice habitat in Houston about the size of a small house. The mission was called CHAPEA. A second crew finished the same 378-day stay in October 2026.', s:'NASA CHAPEA', u:'https://www.nasa.gov/humans-in-space/chapea/' },
-  dust:   { t:'In 2018 a dust storm covered all of Mars. The solar-powered Opportunity rover went silent and never woke up.', s:'NASA Opportunity mission', u:'https://science.nasa.gov/mission/mer-opportunity/' },
-  conj:   { t:'About every 26 months the Sun sits between Earth and Mars. For about two weeks, radio signals get scrambled and mission teams stop sending commands.', s:'NASA Mars solar conjunction', u:'https://www.jpl.nasa.gov/news/nasas-mars-fleet-will-still-conduct-science-while-lying-low/' },
-  delay:  { t:'Radio signals travel at the speed of light and still take about 3 to 23 minutes to cross between Earth and Mars. Nobody on Earth can help in real time.', s:'NASA', u:'https://www.nasa.gov/podcasts/houston-we-have-a-podcast/chapea-2-audio-log-3/' },
-  clock:  { t:'Clocks on Mars tick 477 millionths of a second faster each day than clocks on Earth.', s:'NIST, Ashby and Patla', u:'https://tf.nist.gov/general/pdf/3349.pdf' },
-  reactor:{ t:'Curiosity and Perseverance run on nuclear power sources, so dust storms do not stop them.', s:'NASA Mars rovers', u:'https://svs.gsfc.nasa.gov/30983' }
+  sol:    { t:'The game clock advances a mission day. NASA/JPL Horizons records have their own UTC dates; accelerated play time is not the time of a live observation.', s:'NASA/JPL Horizons · dated calculation', u:'https://ssd.jpl.nasa.gov/horizons/' },
+  moxie:  { t:'MOLA supplies the elevation under this building. It does not measure this extractor’s output. Air production and its terrain modifier are game rules.', s:'NASA MOLA · elevation dataset', u:'https://trek.nasa.gov/mars/' },
+  solar:  { t:'The map has latitude and longitude coordinates and MOLA elevations. Its panel-output percentage is a game rule, not an imported sunlight measurement.', s:'NASA MOLA · elevation dataset', u:'https://trek.nasa.gov/mars/' },
+  ice:    { t:'MOLA records elevation, not buried water. The water processor has a game production rate; this map does not identify a measured ice deposit.', s:'NASA MOLA · dataset scope', u:'https://trek.nasa.gov/mars/' },
+  green:  { t:'An elevation sample does not identify soil chemistry or safe growing conditions. Greenhouse harvest amounts and growth time are game rules.', s:'NASA MOLA · dataset scope', u:'https://trek.nasa.gov/mars/' },
+  shield: { t:'NASA DONKI records name an event, time and observing instruments. An Earth-observed event is not a Mars dose measurement. Shelter capacity is a game rule.', s:'NASA CCMC DONKI · event catalog', u:'https://ccmc.gsfc.nasa.gov/tools/DONKI/' },
+  lava:   { t:'The imported MOLA samples describe surface elevation. They cannot establish that a cave exists here or that its interior is safe.', s:'NASA MOLA · dataset scope', u:'https://trek.nasa.gov/mars/' },
+  mine:   { t:'This map’s elevations come from MOLA. Elevation does not identify the mineral composition of a rock; metal production is a game rule.', s:'NASA MOLA · elevation dataset', u:'https://trek.nasa.gov/mars/' },
+  habitat:{ t:'MOLA locates this habitat on the terrain. The building, crew, beds and quality-of-life score belong to the game, not to the dataset.', s:'NASA MOLA · elevation dataset', u:'https://trek.nasa.gov/mars/' },
+  dust:   { t:'DONKI catalogs solar events. Its event counts do not measure Mars dust, wind or local visibility. Our dust effects are game rules and artwork.', s:'NASA CCMC DONKI · dataset scope', u:'https://ccmc.gsfc.nasa.gov/tools/DONKI/' },
+  conj:   { t:'Horizons supplies dated distance and one-way light-time calculations. The scheduled radio pause in this mission is a game scenario, not an outage in that dataset.', s:'NASA/JPL Horizons · dated calculation', u:'https://ssd.jpl.nasa.gov/horizons/' },
+  delay:  { t:'The saved Horizons row for 20 November 2023 gives an Earth–Mars one-way light time of 20.98606 minutes. It is a dated calculation, not today’s live signal delay.', s:'NASA/JPL Horizons · imported row', u:'https://ssd.jpl.nasa.gov/horizons/' },
+  clock:  { t:'NASA/JPL Horizons calculates Earth–Mars distance and one-way light time for dated records. The game uses a saved table of those calculations; its accelerated clock is a play setting.', s:'NASA/JPL Horizons · imported calculation', u:'https://ssd.jpl.nasa.gov/horizons/' },
+  reactor:{ t:'None of the imported MOLA, Horizons or DONKI records determines a colony reactor’s power. This building’s output and cost are game rules.', s:'NASA datasets · scope check', u:'https://ssd.jpl.nasa.gov/horizons/' }
 };
 
 const DEF = {
   pod:    { name:'Landing Pod', desc:'Where it all began. Makes 3 power, shelters 3 and has beds for 8.' },
   solar:  { name:'Solar Panel',       cost:6,  metal:0,  work:8,  power:5,  line:'up to +5 power', desc:'Makes power from sunlight. Makes less far from the equator. Dust storms block most of it.' },
   moxie:  { name:'Oxygen Extractor',  cost:8,  metal:4,  work:12, use:4, o2:3, worker:1, line:'about +3 air, uses 4 power', desc:'Pulls oxygen out of Mars air. Makes more on low ground where the air is thicker. Eats a lot of power.' },
-  shield: { name:'Regolith Shield',   cost:0,  metal:6,  work:16, shelter:6, line:'Shelters 6 (14 in a cave)', desc:'A shelter under piled Mars soil. It needs no parts from Earth, only metal frames made here. Build it on a lava tube to protect many more.' },
-  green:  { name:'Greenhouse',        cost:6,  metal:4,  work:14, use:2, food:5, worker:1, line:'+5 food after 20 sols (3 without water), uses 2 power', desc:'Grows food, but seedlings take 20 sols before the first harvest. Without water from an Ice Melter it grows only 3 instead of 5.' },
+  shield: { name:'Regolith Shield',   cost:0,  metal:6,  work:16, shelter:6, line:'Shelters 6 · game capacity', desc:'A shelter under piled Mars soil. It needs no parts from Earth, only metal frames made here. Capacity is a colony game rule, not a measured cave property.' },
+  green:  { name:'Greenhouse',        cost:6,  metal:4,  work:14, use:2, food:5, worker:1, line:'+5 food after 20 sols (3 without water), uses 2 power', desc:'Grows food, but seedlings take 20 sols before the first harvest. Without a Water Processor it grows only 3 instead of 5.' },
   ice:    { name:'Water Processor',        cost:6,  metal:4,  work:12, use:2, o2:4, worker:1, line:'+4 air, +4 water, waters 2 farms', desc:'Water recovery and local processing. Place on a clear tile. Powered processing adds 4 stored water per day in Commander; crew use 0.25 each. These rates are game units.' },
   mine:   { name:'Regolith Mine',     cost:4,  metal:0,  work:10, use:2, worker:1, line:'+1 metal each sol, uses 2 power', desc:'Digs up Mars soil and smelts metal from it. It is dusty and noisy: colonists are unhappy if it is within 2 tiles of where they sleep.' },
   habitat:{ name:'Habitat',           cost:4,  metal:10, work:14, line:'Beds for 8 colonists', desc:'Homes for 8 more colonists. Without enough beds, people are crowded and unhappy.' },
@@ -348,7 +399,7 @@ const GOALS = [
   { text:'Earn the Bronze fame medal. Handle a crisis well!', unlock:[], done:s=>s.fame>=20,
     say:'Earth remembers colonies that are ready when things go wrong. Stock up before storms.' },
   { text:'Fill Independence, house 10 crew and earn a gold crisis grade.', unlock:['reactor'], done:s=>false,
-    say:'Final goal: sustain 10 crew, fill Independence and handle a crisis safely. Earth crates reduce Independence. After victory you can continue into extreme survival beyond day 300.' }
+    say:'Final goal: sustain 10 crew, fill Independence and handle a crisis safely. Earth crates reduce Independence. After victory you can continue growing your colony.' }
 ];
 
 /* ---------------- STATE ---------------- */
@@ -368,13 +419,13 @@ const groundY=(x,z)=>demAt(-180+360*(x-X0)/PW, 90-180*(z-Z0)/PH)*HSCALE;
 const tileY=t=>groundY(tx(t),tz(t));
 // Landing sites the player can choose. Coordinates are real.
 const SITES=[
-  {name:'Arcadia Planitia',lat:40,lon:-160,blurb:'Icy northern plains. Real mission planners like this region for its buried ice. The Sun is weaker this far north.'},
-  {name:'Jezero Crater',lat:18.4,lon:77.5,blurb:'Where the Perseverance rover landed in 2021. Sunny, but the ice is a long trek north.'},
-  {name:'Hellas Basin',lat:-40,lon:68,blurb:'The deepest basin on Mars. Thick air makes oxygen easy, but huge dust storms often start here.',dust:1.6},
-  {name:'Arsia Mons',lat:-7,lon:-123,blurb:'High on a giant volcano, beside real lava tube skylights. Great shelter, very thin air.'}
+  {name:'Arcadia Planitia',lat:40,lon:-160,blurb:'Compare the northern plain’s mapped MOLA elevation and latitude.'},
+  {name:'Jezero Crater',lat:18.4,lon:77.5,blurb:'Investigate the MOLA terrain record near Jezero.'},
+  {name:'Hellas Basin',lat:-40,lon:68,blurb:'Compare this low basin with higher terrain in the MOLA dataset.'},
+  {name:'Arsia Mons',lat:-7,lon:-123,blurb:'Compare this volcanic region’s mapped elevation with the plains.'}
 ];
 // Lava tube tiles sit on the big volcano regions where known cave candidates cluster (approximate).
-const CAVES=[[-9,-120.5],[-10,-126],[1.5,-113],[11,-104.5],[21,-132],[24,-124],[25,147],[-6,-117]];
+const CAVES=[]; // No cave dataset is imported; never generate mapped cave claims.
 let S = null, rng = Math.random;
 function mulberry(a){const next=function(){a|=0;a=a+0x6D2B79F5|0;next.state=a;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};next.state=a;return next;}
 const ri = (a,b)=>a+Math.floor(rng()*(b-a+1));
@@ -397,11 +448,10 @@ function newGame(seed,site){
     t.elev=elevKm(demAt(lonOf(t),latOf(t)));                      // km above or below the Mars 'sea level'
     t.sun=Math.max(0.3,Math.cos(latOf(t)*Math.PI/180));           // sunlight falls off toward the poles
     t.air=Math.max(0.5,Math.min(1.6,Math.exp(-t.elev/11.1)));     // air thins with height (scale height about 11 km)
-    const la=latOf(t);   // ice rule of thumb: shallow ice is common far from the equator (to be replaced by SWIM maps)
-    if(((la>=38||la<=-45)&&hash(c,r)<0.5)||Math.abs(la)>=70) t.type='ice';
+    // MOLA measures elevation, not ice deposits or cave entrances.
     S.tiles.push(t); }
   const nearest=(lat,lon)=>{ let b=null,bd=1e9; for(const t of S.tiles){ const d=(latOf(t)-lat)**2+(lonOf(t)-lon)**2; if(d<bd){bd=d;b=t;} } return b; };
-  CAVES.forEach(([la,lo])=>{ nearest(la,lo).type='lava'; });
+  // No synthetic ice/cave locations are assigned.
   const start=nearest(site.lat,site.lon); start.type='plain';
   S.tiles.forEach(t=>{ if(hdist(t,start)<=3) t.seen=true; });
   const pod={type:'pod',c:start.c,r:start.r,done:true,on:true,progress:0}; S.builds.push(pod); start.build=pod;
@@ -441,7 +491,7 @@ function compute(){
     if(b.type==='pod'){gen+=3;shelter+=3;beds+=8;homes.push(b);}
     if(b.type==='habitat'){beds+=L?12:8;homes.push(b);}
     if(b.type==='mine'||b.type==='reactor') loud.push(b);
-    if(d.shelter) shelter += (t.type==='lava'?14:d.shelter)+(L?4:0)+(S.tech.water?3:0);
+    if(d.shelter) shelter += d.shelter+(L?4:0)+(S.tech.water?3:0);
     if(d.store) store+=d.store*(L?2:1)*output(b);
     if(b.type==='solar') gen+=d.power*(L?1.5:1)*dust*t.sun*S.panelClean*output(b);
     if(d.worker){ if(b.on&&hands>0){b.staffed=true;hands--;staffed++;} }
@@ -467,7 +517,7 @@ function compute(){
 
 function log(msg,kind){ S.log.unshift({sol:S.sol,msg,kind}); if(S.log.length>60)S.log.pop(); }
 function say(msg){ S.say=msg; }
-function fact(key){ if(S.seenFacts[key])return ''; S.seenFacts[key]=true; const f=FACTS[key]; return `<div class="real"><b>Real fact</b>${f.t}<br><small>Source: ${link(f.s,f.u)}</small></div>`; }
+function fact(key){ if(S.seenFacts[key])return ''; S.seenFacts[key]=true; const f=FACTS[key]; return `<div class="real"><b>Dataset note</b>${f.t}<br><small>Source: ${link(f.s,f.u)}</small></div>`; }
 function addFame(n,why){ const before=medalCount(); S.fame+=n; const after=medalCount();
   if(after>before){ log('New medal: '+MEDALS[after-1].name+'. '+why,'good'); } }
 const medalCount=()=>MEDALS.filter(m=>S.fame>=m.at).length;
@@ -563,10 +613,9 @@ function finishBuild(b){
   const first=count(b.type)===1;
   let msg=DEF[b.type].name+' finished.';
   if(first){ addFame(2,'A new invention on Mars.');
-    const key=b.type==='shield'&&tileAt(b.c,b.r).type==='lava'?'lava':b.type;
+    const key=b.type;
     if(FACTS[key]&&!S.seenFacts[key]) modal({title:DEF[b.type].name+' built',html:`<p>${DEF[b.type].desc}</p>`+fact(key),buttons:[{label:'Got it',primary:true}]});
   }
-  if(b.type==='shield'&&tileAt(b.c,b.r).type==='lava'&&!S.seenFacts.lava) modal({title:'Shelter in a lava tube',html:'<p>You built inside a natural cave. It shelters 14 colonists instead of 6.</p>'+fact('lava'),buttons:[{label:'Got it',primary:true}]});
   log(msg,'info');
 }
 
@@ -727,8 +776,8 @@ function startRover(t){
 function roverStep(){ const R=S.rover; if(!R) return;
   if(!R.done&&S.sol>=R.arrive){ R.done=true; const tgt=tileAt(R.c,R.r); let ice=0,cave=0;
     S.tiles.forEach(t=>{ if(hdist(t,tgt)<=2){ if(!t.seen&&!t.owner){ if(t.type==='ice')ice++; if(t.type==='lava')cave++; t.seen=true; } } });
-    log(`The rover reached ${coord(tgt)} and claimed the land around it.`+(ice?` It found ${ice} tiles of buried ice!`:'')+(cave?' It found a lava tube cave!':''),ice||cave?'good':'info');
-    if(cave&&!S.seenFacts.lava) modal({title:'The rover found a cave',html:'<p>A shelter built on this tile protects 14 colonists instead of 6.</p>'+fact('lava'),buttons:[{label:'Great',primary:true}]}); }
+    log(`The rover reached ${coord(tgt)} and claimed the land around it.`,ice||cave?'good':'info');
+  }
   if(S.sol>=R.back){ S.rover=null; log('The rover crew are home safe.','info'); } }
 function labStep(){
   if(S.sol<S.nextLab||S.over||(S.storm&&S.storm.active)) return;
@@ -739,17 +788,17 @@ function labStep(){
     buttons:[...pick.map(k=>({label:RESEARCH[k].name+'<small>'+RESEARCH[k].fx+'</small>',cls:'choice',fn:take(k)})),{label:'Send 8 parts instead<small>Build more now, but no upgrade.</small>',cls:'choice',fn:()=>{S.parts+=8;log('Earth will send 8 parts instead of new technology.','info');}}]});
 }
 const RESEARCH={
-  moxie:{name:'Better oxygen extractors',fx:'Every extractor makes 30% more air.',fact:'MOXIE ran 16 times on Mars between 2021 and 2023 and made 122 grams of oxygen in all, proving the idea works. Bigger versions are the next step.',src:'NASA MOXIE experiment',u:'https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-oxygen-generating-experiment-moxie-completes-mars-mission/'},
-  dust:{name:'Electric dust shield',fx:'Dust settles on solar panels half as fast.',fact:'NASA\'s Electrodynamic Dust Shield uses electric fields to lift dust off surfaces. In March 2025 it cleared lunar dust from glass and radiator panels on the Moon.',src:'NASA Electrodynamic Dust Shield',u:'https://www.nasa.gov/image-article/nasas-dust-shield-successfully-repels-lunar-regolith-on-moon/'},
-  water:{name:'Deeper shelters',fx:'Every shelter holds 3 more colonists.',fact:'After the May 2024 solar storm, the scientist in charge of Curiosity\'s radiation detector said cliffsides or lava tubes would give astronauts extra shielding from such an event.',src:'NASA/JPL',u:'https://www.nasa.gov/?p=670127'},
-  lights:{name:'LED grow lights',fx:'New crops are ready in 12 sols instead of 20.',fact:'On the International Space Station, NASA\'s Veggie garden has grown red romaine lettuce under red, blue and green LED lights since 2014.',src:'NASA Veggie',u:'https://www.nasa.gov/missions/station/veggie-plant-growth-system-activated-on-international-space-station/'},
-  reactor:{name:'Kilopower reactor design',fx:'Nuclear reactors cost 14 parts instead of 24.',fact:'In March 2018 NASA finished testing a small fission reactor called KRUSTY as part of the Kilopower project. The technology could power outposts on the Moon and Mars.',src:'NASA Kilopower',u:'https://www.nasa.gov/directorates/stmd/tech-demo-missions-program/kilopower-hmqzw/'}
+  moxie:{name:'Better oxygen extractors',fx:'Every extractor makes 30% more air.',fact:'Authored upgrade: this 30% production bonus is a game rule, not a NASA machine-performance measurement.',src:'Game rule',u:''},
+  dust:{name:'Panel dust control',fx:'Dust settles on solar panels half as fast.',fact:'Authored upgrade: halving panel wear from dust is a game rule. The imported datasets do not measure this device or its cleaning performance.',src:'Game rule',u:''},
+  water:{name:'Expanded shelters',fx:'Every shelter holds 3 more colonists.',fact:'Authored upgrade: three extra shelter spaces are a game capacity, not a measured protection rating.',src:'Game rule',u:''},
+  lights:{name:'Improved grow lights',fx:'New crops are ready in 12 sols instead of 20.',fact:'Authored upgrade: growth time is set for this game. No crop-growth dataset is imported.',src:'Game rule',u:''},
+  reactor:{name:'Efficient reactor assembly',fx:'Nuclear reactors cost 14 parts instead of 24.',fact:'Authored upgrade: the reduced construction cost is a game rule, not a NASA reactor cost or design specification.',src:'Game rule',u:''}
 };
 function upCost(b){ return {parts:Math.ceil(DEF[b.type].cost/2), metal:6}; }
 function upgrade(b){ if(window.ColonySystems?.hasRepair(b))return 'Finish or cancel this repair before upgrading.'; const c=upCost(b); if((b.lvl||1)>1||!UPG[b.type]) return 'Already upgraded.';
   if(S.parts<c.parts||S.metal<c.metal) return `Not enough to upgrade. It needs ${c.parts} parts and ${c.metal} metal.`;
   S.parts-=c.parts; S.metal-=c.metal; b.lvl=2; b.offUntil=S.sol+4; b.solid=null; log(DEF[b.type].name+' is being upgraded. It is out of action for 4 sols.','info'); return null; }
-function buildingPanel(b){ const d=DEF[b.type], t=tileAt(b.c,b.r), up=UPG[b.type], L=b.lvl||1, key=b.type==='shield'&&t.type==='lava'?'lava':b.type, f=FACTS[key];
+function buildingPanel(b){ const d=DEF[b.type], t=tileAt(b.c,b.r), up=UPG[b.type], L=b.lvl||1, key=b.type, f=FACTS[key];
   let now='';
   if(b.type==='solar') now=`Here it makes <b>${fmt(5*(L>1?1.5:1)*t.sun*S.panelClean)} power</b> (sunlight ${Math.round(t.sun*100)}%, panels ${Math.round(S.panelClean*100)}% clean).`;
   if(b.type==='moxie') now=`Here it makes <b>${fmt(3*t.air*(L>1?1.5:1)*(S.tech.moxie?1.3:1))} air</b> each sol (air thickness ${Math.round(t.air*100)}%).`;
@@ -759,17 +808,17 @@ function buildingPanel(b){ const d=DEF[b.type], t=tileAt(b.c,b.r), up=UPG[b.type
   const btns=[]; if(b.type!=='pod'&&(d.use||d.worker)) btns.push({label:b.on?'Switch off<small>Frees its worker and power.</small>':'Switch on',cls:'choice',fn:()=>{toggle(b);render();}});
   if(up&&L<2){ const c=upCost(b), can=S.parts>=c.parts&&S.metal>=c.metal; btns.push({label:`Upgrade to level 2${can?'':' (cannot afford yet)'}<small>${up.txt}. Costs ${c.parts} parts and ${c.metal} metal. Out of action for 4 sols.</small>`,cls:'choice',fn:()=>{const e=upgrade(b); if(e)log(e,'info'); render();}}); }
   btns.push({label:'Close',primary:true});
-  modal({title:d.name+(L>1?' (level 2)':''),html:`<p>${d.desc}</p><p><b>Status:</b> ${st} ${now}</p><p><small>${coord(t)} &middot; ${t.elev>=0?'+':''}${t.elev.toFixed(1)} km high</small></p>`+(f?`<div class="real"><b>Real fact</b>${f.t}<br><small>Source: ${link(f.s,f.u)}</small></div>`:''),buttons:btns}); }
+  modal({title:d.name+(L>1?' (level 2)':''),html:`<p>${d.desc}</p><p><b>Status:</b> ${st} ${now}</p><p><small>${coord(t)} &middot; ${t.elev>=0?'+':''}${t.elev.toFixed(1)} km high</small></p>`+(f?`<div class="real"><b>Dataset note</b>${f.t}<br><small>Source: ${link(f.s,f.u)}</small></div>`:''),buttons:btns}); }
 function cleanPanels(){ if(S.cleaning||S.over||!count('solar')) return; S.cleaning=2; log('Every free colonist is out brushing dust off the panels. Building pauses for 2 sols.','info'); render(); }
 
 function endGame(kind){
   S.over=kind; setSpeed(0);
   const rows=S.grades.map(g=>`<tr><td>Sol ${g.sol}</td><td>${g.what}</td><td><b>${g.grade}</b></td></tr>`).join('')||'<tr><td colspan="3">No crises faced yet.</td></tr>';
   let lesson='';
-  if(kind==='win') lesson='Your colony made its own air and food, grew to at least ten people and earned a gold crisis grade. That is what "living off the land" means. NASA calls it in-situ resource utilization.';
-  else if(S.cause==='oxygen') lesson=`You ran out of oxygen on Sol ${S.sol}. Real missions carry backup oxygen for exactly this, and they test air machines like MOXIE long before people arrive.`;
-  else if(S.cause==='food') lesson=`The food ran out on Sol ${S.sol}. Real mission plans pack extra food and start growing plants early, because a crop takes weeks before anyone can eat it.`;
-  else lesson=`The last colonists left on Sol ${S.sol}. A real outpost needs every system working together: power for air, air for people, people to run the machines.`;
+  if(kind==='win') lesson='Your colony met the game goals: it made its own air and food, grew to at least ten people and earned a gold crisis grade. These are game achievements, not a prediction of a real mission’s safety.';
+  else if(S.cause==='oxygen') lesson=`You ran out of oxygen on Sol ${S.sol}. In this game, tanks and working air production give you more time to respond to a shortage.`;
+  else if(S.cause==='food') lesson=`The food ran out on Sol ${S.sol}. In this game, reserve food and working greenhouses help avoid a shortage while crops grow.`;
+  else lesson=`The last colonists left on Sol ${S.sol}. In this game, the colony needs its resource systems and crew working together.`;
   modal({title:kind==='win'?'Mission Report: Mars is home':'Mission Report',
     html:`<p><b>${kind==='win'?'You built a colony that can live on its own.':'The colony had to be abandoned.'}</b></p>
       <table><tr><td>Sols on Mars</td><td>${S.sol} (about ${Math.round(S.sol*1.0275/30.44)} Earth months)</td></tr>
@@ -779,86 +828,58 @@ function endGame(kind){
       <tr><td>Sent home by radiation</td><td>${S.lostRad}</td></tr>
       <tr><td>Mission Control problems solved</td><td>${S.answers.right} of ${S.answers.right+S.answers.wrong}</td></tr></table>
       <h3 style="margin-top:10px">Crises</h3><table>${rows}</table>
-      <div class="real"><b>In the real world</b>${lesson}</div>
-      <p><small>Real data in this game: solar storm events from NASA DONKI and the Curiosity RAD instrument. See "Data sources" for the full list.</small></p>`,
-    buttons:[...(window.Classroom?.connected?[{label:'Classroom results',primary:true,fn:()=>Classroom.open()},{label:'Leave room · restore solo colony',fn:()=>{Classroom.leave();return false;}}]:[{label:'Play again',primary:true,fn:()=>pickSite()}]),...(kind==='win'&&window.Campaign?[{label:'Continue · extreme survival',fn:()=>{S.over=null;Campaign.data().champion=true;S.speed=0;log('Campaign won. Continue toward extreme survival from day 300.','good');}}]:[]),{label:'Data sources',fn:()=>showData()}]});
+      <div class="real"><b>Your game result</b>${lesson}</div>
+      <p><small>Real data in this game: NASA MOLA elevation, JPL Horizons calculations and DONKI event records. See "Data sources" for the full list.</small></p>`,
+    buttons:[...(window.Classroom?.connected?[{label:'Classroom results',primary:true,fn:()=>Classroom.open()},{label:'Leave room · restore solo colony',fn:()=>{Classroom.leave();return false;}}]:[{label:'Play again',primary:true,fn:()=>pickSite()}]),...(kind==='win'&&window.Campaign?[{label:'Continue colony',fn:()=>{S.over=null;Campaign.data().champion=true;S.speed=0;log('Campaign won. Continue managing and growing your colony.','good');}}]:[]),{label:'Data sources',fn:()=>showData()}]});
 }
 
 function siteStats(i){ const st=SITES[i]; let best=null,bd=1e9; const probe={c:0,r:0};
   for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++){ probe.c=c;probe.r=r; const d=(latOf(probe)-st.lat)**2+(lonOf(probe)-st.lon)**2; if(d<bd){bd=d;best={c,r};} }
   const el=elevKm(demAt(st.lon,st.lat)); return {el,sun:Math.max(0.3,Math.cos(st.lat*Math.PI/180)),air:Math.max(0.5,Math.min(1.6,Math.exp(-el/11.1))),iceRows:Math.max(0,Math.ceil((Math.min(Math.abs(38-st.lat),Math.abs(-45-st.lat)))/4.4)),cave:CAVES.some(([la,lo])=>Math.abs(la-st.lat)<12&&Math.abs(lo-st.lon)<12)}; }
 function pickSite(){
-  const word=(v,a,b)=>v>=a?'Strong':v>=b?'Medium':'Weak';
-  modal({title:'Choose your landing site',html:`<p>These are four real places on Mars. No site is perfect. Read the numbers and decide what your colony can live without.</p>
-    <table><tr><th>Site</th><th>Sunlight</th><th>Air thickness</th><th>Ice</th><th>Caves</th></tr>
-    <tr><td><small><i>Why it matters</i></small></td><td><small>Power from solar panels</small></td><td><small>Oxygen from extractors</small></td><td><small>Water for farms, extra oxygen</small></td><td><small>Big shelters for solar storms</small></td></tr>${SITES.map((st,i)=>{const q=siteStats(i);return `<tr><td><b>${st.name}</b><br><small>${q.el>=0?'+':''}${q.el.toFixed(1)} km</small></td><td>${Math.round(q.sun*100)}% (${word(q.sun,0.9,0.75)})</td><td>${Math.round(q.air*100)}% (${word(q.air,1.2,0.85)})</td><td>${st.lat>=38||st.lat<=-45?'Next door':q.iceRows<=2?'Close':'Far: '+q.iceRows+' tiles'}</td><td>${q.cave?'Next door':'None near'}</td></tr>`}).join('')}</table>
-    <div class="real"><b>Real data</b>Heights come from the MOLA laser altimeter on NASA's Mars Global Surveyor. Sunlight depends on how far the site is from the equator. Air gets thinner the higher you go, just like on Earth's mountains.</div>`,
-    buttons:SITES.map((st,i)=>({label:`${st.name}<small>${st.blurb}</small>`,cls:'choice',fn:()=>{newGame(null,i);setSpeed(0);buildMenu();render();}}))});
+ modal({title:'Choose your landing site',html:`<p>Compare locations using NASA MOLA terrain data. Elevations are approximate values from our resampled global grid.</p>
+ <table><tr><th>Site</th><th>Latitude</th><th>Longitude</th><th>MOLA elevation</th></tr>${SITES.map((st,i)=>{const q=siteStats(i);return `<tr><td>${st.name}</td><td>${st.lat}°</td><td>${st.lon}°</td><td>${q.el.toFixed(1)} km</td></tr>`}).join('')}</table>
+ <p>Building output and supplies follow game rules. This map does not identify ice deposits or cave entrances.</p>`,buttons:SITES.map((st,i)=>({label:`${st.name}<small>${st.blurb}</small>`,cls:'choice',fn:()=>{newGame(null,i);setSpeed(0);buildMenu();render();}}))});
 }
-const U_MARS='https://www.nasa.gov/solar-system/what-is-mars-grades-5-8/',U_MOXIE='https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-oxygen-generating-experiment-moxie-completes-mars-mission/',U_QF='https://www.jpl.nasa.gov/news/press_kits/ingenuity/landing/quick_facts/',U_INSIGHT='https://www.nasa.gov/missions/insight/nasa-retires-insight-mars-lander-mission-after-years-of-science/',U_SWIM='https://swim.psi.edu',U_PHX='https://science.nasa.gov/mission/mars-phoenix/',U_STORM='https://www.nasa.gov/?p=670127',U_RAD='https://www.swri.org/press-release/swri-scientists-publish-first-radiation-measurements-surface-mars',U_DELAY='https://www.nasa.gov/podcasts/houston-we-have-a-podcast/chapea-2-audio-log-3/',U_CONJ='https://www.jpl.nasa.gov/news/nasas-mars-fleet-will-still-conduct-science-while-lying-low/',U_CHAPEA='https://www.nasa.gov/humans-in-space/chapea/';
-/* ---------------- MISSION SCHOOL (reading before the game) ---------------- */
+const U_MOLA='https://trek.nasa.gov/mars/',U_HORIZONS='https://ssd.jpl.nasa.gov/horizons/',U_DONKI='https://ccmc.gsfc.nasa.gov/tools/DONKI/';
+/* ---------------- MISSION SCHOOL (imported dataset reading) ---------------- */
 let ACAD={right:0,done:false};
-const SVGW='width="100%" viewBox="0 0 560 150" style="display:block;margin:6px 0 4px;background:#2a1b13;border:1px solid rgba(224,168,78,.3);border-radius:4px"';
-const TX=(x,y,t,c,s)=>`<text x="${x}" y="${y}" fill="${c||'#f1e4c8'}" font-size="${s||13}" font-family="Atkinson Hyperlegible,sans-serif" text-anchor="middle">${t}</text>`;
-const dots=(x0,x1,y0,y1,n,seed)=>{let o='',a=seed;for(let i=0;i<n;i++){a=(a*9301+49297)%233280;const x=x0+(a/233280)*(x1-x0);a=(a*9301+49297)%233280;const y=y0+(a/233280)*(y1-y0);o+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="#9fd3e6"/>`;}return o;};
+const SVGW='width="100%" viewBox="0 0 560 150" style="display:block;margin:6px 0 4px;background:#101f30;border:1px solid #45647b;border-radius:4px"';
+const TX=(x,y,t,c,s)=>`<text x="${x}" y="${y}" fill="${c||'#d7edfa'}" font-size="${s||13}" font-family="Atkinson Hyperlegible,sans-serif" text-anchor="middle">${t}</text>`;
 const ACADEMY=[
- { title:'Mission School 1 of 6: Air',
-   svg:`<svg ${SVGW}><path d="M0 130 L120 130 L210 30 L300 130 L360 130 Q430 150 500 130 L560 130 L560 150 L0 150Z" fill="#a0623a"/>${dots(185,235,22,60,4,7)}${dots(380,480,60,128,26,3)}${TX(210,18,'Volcano top: thin air')}${TX(430,52,'Deep basin: thick air')}${TX(70,110,'Each dot is a bit of gas','#bda98b',12)}</svg>`,
-   html:`<p>Mars has air, but you could not breathe it. It is more than 95% carbon dioxide, the gas you breathe <i>out</i>. It is also very thin. The air presses down with less than 1% of the push of Earth's air.</p>
-   <p>An <b>oxygen extractor</b> works like MOXIE, a real machine that rode on NASA's Perseverance rover. It gulps in Mars air and splits the carbon dioxide to pull out oxygen.</p>
-   <p>Here is the key idea: <b>thicker air means more gas in every gulp, so the extractor makes more oxygen.</b> Air is thickest in deep, low places like the Hellas Basin. It is thinnest on top of giant volcanoes. In this game, a tile's <b>air thickness</b> tells you how well an extractor will work there.</p>`,
-   q:'Where would an oxygen extractor make the most oxygen?',
-   opts:['On top of a tall volcano','At the bottom of a deep basin','It makes the same amount everywhere'], ok:1,
-   why:'Low places have thicker air, so every gulp holds more carbon dioxide to split into oxygen.' },
- { title:'Mission School 2 of 6: Sunlight and power',
-   svg:`<svg ${SVGW}><circle cx="60" cy="75" r="34" fill="#e8c04a"/>${TX(60,130,'Sun')}<circle cx="430" cy="75" r="62" fill="#b4502c"/><line x1="100" y1="75" x2="366" y2="75" stroke="#e8c04a" stroke-width="3"/><line x1="100" y1="35" x2="395" y2="25" stroke="#e8c04a" stroke-width="3"/>${TX(250,68,'straight on: strong')}${TX(250,22,'low angle: weak')}${TX(430,80,'equator','#fff3da',12)}${TX(430,22,'far north','#fff3da',12)}</svg>`,
-   html:`<p>Mars is about one and a half times farther from the Sun than Earth. Its sunlight is less than half as strong as ours.</p>
-   <p>Near the <b>equator</b>, the Sun climbs high and shines straight down on solar panels. Far north or far south, the Sun stays low in the sky. Its light hits at a slant and spreads out, so panels make less power. In this game, a tile's <b>sunlight</b> tells you how well a solar panel will work there.</p>
-   <p>Dust is the other enemy. It settles on panels a little every day. NASA's InSight lander shut down in 2022 when dust covered its panels. Keep your panels clean.</p>`,
-   q:'Where do solar panels make the most power?',
-   opts:['Near the equator','Near the north pole','It does not matter where'], ok:0,
-   why:'Near the equator the Sun shines more directly, so each panel catches more light.' },
- { title:'Mission School 3 of 6: Water and ice',
-   svg:`<svg ${SVGW}><circle cx="280" cy="75" r="68" fill="#b4502c"/><path d="M226 33 A68 68 0 0 1 334 33Z" fill="#d9ecf1"/><path d="M226 117 A68 68 0 0 0 334 117Z" fill="#d9ecf1"/><line x1="212" y1="75" x2="348" y2="75" stroke="#fff3da" stroke-dasharray="4 4"/>${TX(130,40,'Cold: ice stays frozen')}${TX(130,80,'Equator: ice escapes as gas')}${TX(130,122,'Cold: ice stays frozen')}${TX(450,80,'Ice and sunlight are a trade-off','#bda98b',12)}</svg>`,
-   html:`<p>People need water to drink and plants need it to grow. Water can even be split into oxygen to breathe. Mars has plenty of water, but almost all of it is frozen.</p>
-   <p>Near the equator, ice close to the surface turns straight into gas and drifts away. So buried ice is found mostly <b>far north and far south</b>, where the ground stays cold. NASA's SWIM project maps where ice is close enough to dig up.</p>
-   <p>Notice the trade-off: the farther from the equator you land, the more ice you find, but the weaker your sunlight. No landing site has everything.</p>`,
-   q:'A colony near the equator gets lots of sunlight. What will it struggle to find?',
-   opts:['Rocks','Ice','Carbon dioxide'], ok:1,
-   why:'Shallow ice does not last near the warm equator, so equator colonies must travel far to find it.' },
- { title:'Mission School 4 of 6: Radiation',
-   svg:`<svg ${SVGW}><circle cx="40" cy="75" r="26" fill="#e8c04a"/>${[30,55,80,105,130].map(y=>`<line x1="80" y1="${y}" x2="300" y2="${y}" stroke="#ff7d5e" stroke-width="2" stroke-dasharray="6 5"/>`).join('')}<path d="M300 140 Q400 20 500 140Z" fill="#a0623a"/><rect x="380" y="105" width="40" height="35" fill="#e9e6df"/>${TX(400,98,'shelter','#24140e',12)}${TX(190,20,'fast particles from a solar storm')}${TX(400,60,'thick soil','#fff3da',12)}</svg>`,
-   html:`<p>On Earth, a magnetic field and a thick blanket of air block most radiation from space. Mars lost its magnetic field long ago, and its air is thin. So radiation reaches the ground.</p>
-   <p>On an ordinary day, NASA's Curiosity rover measures a small, steady amount. During a <b>solar storm</b>, the Sun throws out a burst of very fast particles. On May 20, 2024, Curiosity measured its biggest burst in 12 years: like 30 chest X-rays at once.</p>
-   <p>Glass domes and spacesuits do not stop these particles. A thick pile of Mars soil (called <b>regolith</b>) or the rock roof of a cave does. That is why shelters are buried, and why a <b>cave</b> near your landing site is so valuable.</p>`,
-   q:'A solar storm is coming. Where is the safest place to wait?',
-   opts:['Inside a glass dome','Outside in a spacesuit','Under a thick pile of Mars soil'], ok:2,
-   why:'Thick soil or rock absorbs the fast particles. Glass and suits are too thin.' },
- { title:'Mission School 5 of 6: Far from home',
-   svg:`<svg ${SVGW}><circle cx="60" cy="75" r="22" fill="#4f8fd6"/>${TX(60,125,'Earth')}<circle cx="500" cy="75" r="16" fill="#b4502c"/>${TX(500,125,'Mars')}<line x1="90" y1="75" x2="478" y2="75" stroke="#bda98b" stroke-width="2" stroke-dasharray="8 6"/>${TX(285,62,'a cargo ship takes many months')}${TX(285,100,'a radio message takes 3 to 23 minutes','#bda98b',12)}</svg>`,
-   html:`<p>Earth is very far away. A cargo ship takes many months to reach Mars, and the best launch chances come only once every 26 months. Every part your colony uses has to make that trip.</p>
-   <p>Radio messages take 3 to 23 minutes each way, so nobody on Earth can help in an emergency. And about every 26 months the Sun sits between Earth and Mars, and the radio goes quiet for about two weeks.</p>
-   <p>That is why mission planners want colonies to make their own air, water, food and walls from what is already on Mars. NASA calls this <b>in-situ resource utilization</b>. In plain words: living off the land.</p>`,
-   q:'Why build shelters from Mars soil instead of shipping walls from Earth?',
-   opts:['Mars soil is already there, so nothing has to fly from Earth','Mars soil is softer','Walls from Earth would melt'], ok:0,
-   why:'Anything made from Mars materials saves a long, costly trip from Earth. In this game, that is why a soil shield costs no parts at all, only metal mined on Mars.' },
- { title:'Mission School 6 of 6: People',
-   svg:`<svg ${SVGW}><rect x="40" y="60" width="150" height="70" rx="34" fill="#e9e6df"/>${TX(115,100,'8 beds','#24140e',14)}${[0,1,2,3,4,5,6,7,8,9,10,11].map(i=>`<circle cx="${250+i*24}" cy="${i<8?95:60}" r="9" fill="${i<8?'#57c4a0':'#ff7d5e'}"/>`).join('')}${TX(340,130,'8 colonists fit')}${TX(490,40,'4 have nowhere to sleep','#ff7d5e',12)}</svg>`,
-   html:`<p>More colonists means more hands to run machines. That sounds like pure good news, but it is not. Every colonist breathes air, eats food, needs a bed, needs room in the storm shelter, and wants something to do after work.</p>
-   <p>NASA studies this on Earth. In a mission called <b>CHAPEA</b>, four volunteers lived for 378 days inside a 3D-printed practice habitat about the size of a small house. Scientists watched how they coped with tight space, limited food and slow messages.</p>
-   <p>In this game, three colonies share every ship of new colonists. A happier, safer colony gets a bigger share, but never the whole ship. If your colony grows faster than its beds, air and food, people become unhappy and move to a rival. <b>Growing is a choice, not always the right one.</b></p>`,
-   q:'A ship is about to bring 6 new colonists, but your colony has only 2 empty beds and just enough air. What is the wise move?',
-   opts:['Take them all anyway','Close the landing pad until there are more beds and air','Switch off the oxygen extractors to save power'], ok:1,
-   why:'New colonists who arrive before the colony is ready make everyone crowded and short of air. Closing the pad has a cost too: rivals get those colonists. A good commander builds first, then grows.' }
+ { title:'Mission School 1 of 6: Read the terrain',
+   svg:`<svg ${SVGW}><path d="M0 115 L120 115 L210 40 L300 115 L360 115 L420 140 L500 115 L560 115" fill="none" stroke="#8ec9eb" stroke-width="3"/>${TX(210,25,'Higher elevation')}${TX(420,95,'Lower elevation')}${TX(80,65,'MOLA heights')}</svg>`,
+   html:`<p>The ground on the world map comes from <b>MOLA elevation data</b> collected by NASA’s Mars Global Surveyor. Elevation tells us how high or low a place is compared with the dataset’s reference level.</p><p>Select a location to compare its latitude, longitude and elevation. The game resamples the data and stretches heights for display, so its close-up rocks are not a survey of real individual rocks.</p>`,
+   q:'What does the MOLA elevation record tell us?',opts:['How high or low the mapped ground is','Which rock contains drinking water','How many colonists live there'],ok:0,
+   why:'Elevation is a height value. It does not identify a mineral, a water deposit or a colony.' },
+ { title:'Mission School 2 of 6: Keep the location',
+   svg:`<svg ${SVGW}>${[60,120,180,240,300,360,420,480].map(x=>`<line x1="${x}" y1="30" x2="${x}" y2="120" stroke="#34516a"/>`).join('')}${[30,60,90,120].map(y=>`<line x1="60" y1="${y}" x2="480" y2="${y}" stroke="#34516a"/>`).join('')}<circle cx="300" cy="60" r="7" fill="#91d6fb"/>${TX(385,45,'latitude + longitude')}${TX(280,143,'A value belongs to a location')}</svg>`,
+   html:`<p>Every MOLA sample belongs to a location. <b>Latitude and longitude</b> tell us which place a height describes. Comparing a number without its location can lead to the wrong conclusion.</p><p>In Walk on Mars, the survey tool saves the terrain record for the selected place. The drawn rock is a target for looking up the mapped location; it is not evidence of that rock’s chemistry.</p>`,
+   q:'What should you save with an elevation?',opts:['Only its colour','Its location and source','A guess about hidden minerals'],ok:1,
+   why:'Keep the coordinates and source so someone else can trace the same mapped record.' },
+ { title:'Mission School 3 of 6: Check what data can tell you',
+   svg:`<svg ${SVGW}>${TX(145,50,'MOLA record',null,18)}${TX(145,85,'Location + elevation')}<line x1="270" y1="25" x2="270" y2="125" stroke="#45647b"/>${TX(410,50,'Not in this record',null,18)}${TX(410,85,'Water, minerals or shelter safety')}</svg>`,
+   html:`<p>A height map answers a height question. It does <b>not</b> reveal which minerals are in a rock, how much buried water exists, or whether a cave is safe.</p><p>Air, water, food, power, beds and building costs keep this game playable. Their amounts are <b>game rules</b>, separate from the NASA records. A good investigation distinguishes a recorded value from a rule or a guess.</p>`,
+   q:'A low place appears on MOLA. What can we conclude from that alone?',opts:['It contains ice','It is a safe cave','Its mapped elevation is low'],ok:2,
+   why:'The elevation supports a height comparison. It does not establish water, chemistry or cave safety.' },
+ { title:'Mission School 4 of 6: Read a dated signal time',
+   svg:`<svg ${SVGW}><circle cx="65" cy="75" r="22" fill="#4f8fd6"/><circle cx="495" cy="75" r="18" fill="#b96d4e"/><line x1="95" y1="75" x2="465" y2="75" stroke="#91d6fb" stroke-width="2"/>${TX(65,120,'Earth')}${TX(495,120,'Mars')}${TX(280,50,'20 Nov 2023: 20.98606 minutes')}${TX(280,108,'One way · Horizons calculation')}</svg>`,
+   html:`<p>NASA/JPL <b>Horizons</b> calculates planetary positions, distance and light time. Our saved row for <b>20 November 2023</b> gives a one-way Earth–Mars light time of <b>20.98606 minutes</b>.</p><p>One way means one trip. A reply also has to travel back. Read the date: this is a saved calculation for that date, not a live reading for today. The fast game clock is a separate play setting.</p>`,
+   q:'Does a one-way time include a reply?',opts:['No, the reply needs its own trip','Yes, the reply is already included','It is the time to build a habitat'],ok:0,
+   why:'One-way light time is for one journey. A request and reply involve both outward and return journeys.' },
+ { title:'Mission School 5 of 6: Read a space-weather record',
+   svg:`<svg ${SVGW}>${TX(280,35,'NASA CCMC · DONKI',null,20)}${TX(280,70,'Event type · time · observing instrument')}${TX(280,110,'Check where the observation was made')}</svg>`,
+   html:`<p>NASA’s <b>DONKI</b> catalog records solar events with identifiers, timestamps and observing instruments. The space-weather panel shows the records and the date they were saved.</p><p>An energetic-particle record observed near Earth does <b>not</b> prove that the same event reached Mars. Counts of flares or eruptions do not give your astronaut’s radiation dose. The game’s storm consequences and shelter capacity are authored rules.</p>`,
+   q:'Does an Earth-observed particle event prove a Mars radiation dose?',opts:['Yes, everywhere gets the same dose','No, it does not measure the dose on Mars','Yes, if the event has a large number'],ok:1,
+   why:'The place and instrument matter. An event catalog is not a personal radiation dosimeter on Mars.' },
+ { title:'Mission School 6 of 6: Test your explanation',
+   svg:`<svg ${SVGW}>${TX(95,75,'Predict',null,20)}${TX(220,75,'Test',null,20)}${TX(350,75,'Compare',null,20)}${TX(480,75,'Explain',null,20)}${TX(280,120,'Keep the same starting conditions')}</svg>`,
+   html:`<p>Inspect the NASA records, then make a prediction. In Blackout, compare two runs with the same starting conditions and one different preparation.</p><p>Explain your result using the record’s source, date, location and units. Separate those records from the game’s resource rules. A result from this game is evidence about the game, not proof that a real crew would survive.</p>`,
+   q:'What makes a useful two-futures comparison?',opts:['Change everything at once','Hide the source and the date','Keep the same start and change one decision'],ok:2,
+   why:'Changing one decision helps you explain which preparation changed the outcome. Keep the records and game rules distinct.' }
 ];
-const LSRC=[
- [['NASA: What is Mars?',U_MARS],['NASA: MOXIE completes its mission',U_MOXIE]],
- [['NASA/JPL: Mars quick facts',U_QF],['NASA: InSight retires',U_INSIGHT]],
- [['SWIM: Subsurface Water Ice Mapping',U_SWIM],['NASA: Phoenix Mars lander',U_PHX]],
- [['NASA: Mars during the May 2024 solar storm',U_STORM],['SwRI: first radiation measurements on Mars',U_RAD]],
- [['NASA podcast: the CHAPEA crew on delays and blackout',U_DELAY],['NASA/JPL: Mars solar conjunction',U_CONJ]],
- [['NASA: CHAPEA',U_CHAPEA]] ];
-ACADEMY.forEach((L,i)=>{ L.html+=`<p><small>Sources: ${LSRC[i].map(([n,u])=>link(n,u)).join(' &middot; ')}</small></p>`; });
+const LSRC=[[["NASA MOLA terrain data",U_MOLA]],[["NASA MOLA terrain data",U_MOLA]],[["NASA MOLA dataset scope",U_MOLA]],[["NASA/JPL Horizons",U_HORIZONS]],[["NASA CCMC DONKI",U_DONKI]],[["NASA MOLA",U_MOLA],["NASA/JPL Horizons",U_HORIZONS],["NASA CCMC DONKI",U_DONKI]]];
+ACADEMY.forEach((L,i)=>{L.html+=`<p><small>Dataset source: ${LSRC[i].map(([n,u])=>link(n,u)).join(' &middot; ')}. Quiz parts are a game reward.</small></p>`;});
 function setup(skip){
   modal({title:'Your colony',html:`<p><b>Name your colony.</b> The name is written across your land on the map.</p><input id="cname" maxlength="14" value="${esc(ME.name)}">
     <p><b>Pick a flag.</b></p><div class="avpick">${['rocket','star','peak','leaf'].map(k=>`<button class="${ME.av===k?'sel':''}" onclick="pickAv('${k}',this)" aria-label="${k} flag">${avatar(k,ME.css,44)}</button>`).join('')}</div>
@@ -880,64 +901,46 @@ const GROW=20; const growT=()=>window.Junior?.isActive()?4:S&&S.tech&&S.tech.lig
 function revealIce(){ const pod=S.builds[0]; let best=null,bd=1e9; for(const t of S.tiles) if(t.type==='ice'){ const d=hdist(t,pod); if(d<bd){bd=d;best=t;} }
   if(best) S.tiles.forEach(t=>{ if(hdist(t,best)<=1) t.seen=true; }); return best; }
 const PROBLEMS=[
- { id:'dust', when:()=>S.panelClean<0.8&&!S.cleaning&&count('solar')>0, title:'Power is dropping',
-   html:()=>`<p>Your solar panels make only ${Math.round(S.panelClean*100)}% of the power they made when they were new. The sky is clear. What is the best fix?</p>`,
-   opts:[{t:'Send a team out to brush the dust off',ok:true,fx:()=>{S.panelClean=1;return 'The team brushed the panels clean. Power is back to full.';}},
-         {t:'Build more solar panels',fx:()=>'More panels cost parts and get dusty too. The old panels are still dirty.'},
-         {t:'Wait for the Sun to get brighter',fx:()=>'The Sun did not change. The panels are still dusty.'}],
-   why:'Fine Mars dust settles on everything, a little every sol. On NASA\'s Spirit and Opportunity rovers, power slowly dropped until a gust of wind blew the panels clean. Dust on its panels ended the InSight lander\'s mission in 2022. You can press "Clean panels" at any time.', src:'NASA Spirit, Opportunity and InSight missions', u:'https://www.jpl.nasa.gov/edu/resources/teachable-moment/mars-rover-mission-comes-to-an-end-but-science-legacy-live-on/' },
- { id:'ice', when:()=>S.sol>=20&&!S.tiles.some(t=>t.seen&&t.type==='ice'), title:'Where is the ice?',
-   html:()=>'<p>A scout is ready to search for buried ice. Where should she look?</p>',
-   opts:[{t:'Closer to the equator, where it is warmer',fx:()=>'She found nothing. Near the equator, shallow ice turns into gas and escapes.'},
-         {t:'Farther north or south, where the ground stays frozen',ok:true,fx:()=>{revealIce();return 'She found ice! It is now marked on your map, ready for an Ice Melter. Next time, send the rover toward the poles.';}},
-         {t:'On top of the nearest volcano',fx:()=>'She found nothing but rock.'}],
-   why:'Near the equator, ice close to the surface turns straight into gas and drifts away. Far from the equator the ground stays cold enough to keep ice frozen just under the surface.', src:'NASA SWIM project', u:'https://swim.psi.edu' },
- { id:'drill', when:()=>S.storm&&!S.storm.active, title:'Storm drill',
-   html:()=>'<p>A solar storm warning just came in. The colonists ask: where is the safest place to wait it out?</p>',
-   opts:[{t:'Inside the glass greenhouse',fx:()=>{S.drill=false;return 'Glass does not stop fast particles from the Sun. Some colonists will hide in the wrong place.';}},
-         {t:'Outside in a spacesuit',fx:()=>{S.drill=false;return 'Spacesuits block very little of this radiation. Some colonists will hide in the wrong place.';}},
-         {t:'Under the thick soil shield',ok:true,fx:()=>{S.drill=true;return 'Everyone knows the drill now. From now on, colonists caught outside a shelter in a storm get sick half as often.';}}],
-   why:'Fast particles from solar storms pass through glass, thin walls and spacesuits. A few meters of Mars soil, or a cave roof, blocks much of them.', src:'NASA/JPL', u:'https://www.nasa.gov/?p=670127' },
- { id:'soil', when:()=>count('green')>0, title:'A farming question',
-   html:()=>'<p>A farmer wants to plant potatoes straight into Mars soil to save time. What do you tell her?</p>',
-   opts:[{t:'Go ahead, the soil is free',fx:()=>{S.blight=S.sol+25;return 'The plants took up harmful salts from the soil. For the next 25 sols, half of every harvest must be thrown away.';}},
-         {t:'Wash the soil first, or grow the plants in water',ok:true,fx:()=>{addFame(4,'Safe farming on Mars.');return 'The harvest is safe to eat. Earth is impressed.';}},
-         {t:'Cover the soil with ice first',fx:()=>{S.blight=S.sol+25;return 'Ice does not remove the harmful salts. For the next 25 sols, half of every harvest must be thrown away.';}}],
-   why:'In 2008, NASA\'s Phoenix lander found salts called perchlorates in Mars soil. They are harmful to people. Mars farmers will need to wash the soil, or grow plants in water instead (called hydroponics).', src:'NASA Phoenix Mars Lander', u:'https://science.nasa.gov/mission/mars-phoenix/' },
- { id:'isru', when:()=>S.sol>=40, title:'What should Earth send?',
-   html:()=>'<p>The next cargo ship has room for one more thing. Both choices weigh the same.</p>',
-   opts:[{t:'Two tonnes of drinking water',fx:()=>{S.o2+=25;return 'The water arrived. Engineers split some of it into 25 air. Then it was gone.';}},
-         {t:'A drill that digs up buried ice',ok:true,fx:()=>{S.parts+=10;revealIce();return 'The drill can be used again and again. It counts as 10 parts, and its first scan marked the nearest ice on your map.';}}],
-   why:'Water is heavy, and every tonne has to fly from Earth. A drill keeps making water from Mars ice for years. Using what is already on Mars is called in-situ resource utilization.', src:'NASA in-situ resource utilization', u:'https://www.nasa.gov/missions/mars-2020-perseverance/perseverance-rover/nasas-oxygen-generating-experiment-moxie-completes-mars-mission/' },
- { id:'thin', when:()=>count('moxie')>0&&S.sol>=30, title:'A puzzle from Colony Ares',
-   html:()=>'<p>Colony Ares built an oxygen extractor high on the side of a volcano. It makes much less oxygen than their extractor in a low valley. Why?</p>',
-   opts:[{t:'The air is thinner up high, so each gulp holds less carbon dioxide',ok:true,fx:()=>{S.parts+=5;return 'Correct. Colony Ares thanks you with 5 spare parts.';}},
-         {t:'It is too cold up there for machines',fx:()=>'Cold matters a little, but it is not the main reason. Colony Ares sends no thanks.'},
-         {t:'The volcano is erupting',fx:()=>'There is no eruption. Colony Ares sends no thanks.'}],
-   why:'An extractor like MOXIE splits carbon dioxide from the air. On high ground the air is thinner, so there is less gas to work with. Hover any tile to see its air thickness.', src:'NASA MOXIE experiment', u:'https://science.nasa.gov/mission/mars-2020-perseverance/science-instruments/' },
- { id:'sun', when:()=>Math.abs(S.site.lat)>25&&count('solar')>0&&S.sol>=55, title:'Why less power?',
-   html:()=>'<p>The team at Jezero Crater says their solar panels make more power than ours, even though both are clean. Why?</p>',
-   opts:[{t:'We are farther from the equator, so sunlight hits our panels at a slant',ok:true,fx:()=>{S.parts+=4;return 'Correct. The Jezero team sends 4 spare parts as a thank-you for the good answer.';}},
-         {t:'Jezero is closer to Earth',fx:()=>'All of Mars is the same distance from Earth. That is not it.'},
-         {t:'Our panels are upside down',fx:()=>'They are the right way up. That is not it.'}],
-   why:'Near the equator the Sun shines more directly, so each panel catches more light. A nuclear reactor makes the same power anywhere.', src:'Our own model, from basic geometry' },
- { id:'radio', when:()=>S.sol>=70&&!inBlackout(), title:'Emergency!',
-   html:()=>'<p>A colonist\'s spacesuit has a slow leak while she is outside. Should the team radio Earth and wait for instructions?</p>',
-   opts:[{t:'Yes, Earth will answer in a few seconds',fx:()=>{S.o2=Math.max(0,S.o2-15);return 'The message took many minutes each way. While the team waited, 15 air leaked away.';}},
-         {t:'No, bring her inside and fix it here right away',ok:true,fx:()=>{addFame(4,'Quick thinking in an emergency.');return 'She is safe inside in minutes. When Earth hears about it, they are impressed.';}}],
-   why:()=>`Radio waves travel at the speed of light, but Mars is so far away that a message takes about 3 to 23 minutes each way. Right now it takes about ${Math.round(signalDelay())} minutes. Mars crews must solve emergencies themselves.`, src:'NASA Houston We Have a Podcast (CHAPEA)', u:'https://www.nasa.gov/podcasts/houston-we-have-a-podcast/chapea-2-audio-log-3/' },
- { id:'dustprep', when:()=>S.dust&&!S.dust.active, title:'Dust storm coming',
-   html:()=>'<p>The dust storm will cut solar power to about a third. Which machine should you switch off first?</p>',
-   opts:[{t:'An oxygen extractor',fx:()=>{const m=S.builds.find(b=>b.done&&b.type==='moxie'&&b.on); if(m)m.on=false; return 'Rova switched an extractor off. Now the colony makes less air. Click it on the map to switch it back on.';}},
-         {t:'The recreation dome',ok:true,fx:()=>{S.builds.forEach(b=>{if(b.done&&b.type==='dome')b.on=false;}); addFame(3,'Needs before wants.'); return 'Rova switched off any recreation domes. Colonists grumble a bit, but everyone can breathe.';}},
-         {t:'A greenhouse',fx:()=>{S.blight=Math.max(S.blight,S.sol+15); return 'The plants got no light and many died. Harvests are halved for 15 sols.';}}],
-   why:'Needs come before wants. Air, water, food and shelter keep people alive. Comfort can wait until the storm passes.', src:'NASA crew health research', u:'https://www.nasa.gov/humans-in-space/chapea/' },
- { id:'dose', when:()=>count('shield')>0&&S.sol>=90, title:'Everyday radiation',
-   html:()=>'<p>Even with no storm, a small amount of radiation reaches the Mars surface every day. A geologist works outside a lot. How can she lower her dose?</p>',
-   opts:[{t:'Spend as much time as she can under the soil shield',ok:true,fx:()=>{S.appeal=Math.min(100,S.appeal+6);return 'Good plan. The crew feel safer.';}},
-         {t:'Drink more water',fx:()=>'Drinking water does not block radiation.'},
-         {t:'Stand in the sunshine',fx:()=>'Sunshine does not protect against radiation. Much of it comes from the Sun.'}],
-   why:'On an ordinary day, NASA\'s Curiosity rover measures about 0.64 millisieverts of radiation on the surface. That is small each day, but it adds up over months. Crews would sleep and work under shielding as much as possible.', src:'Southwest Research Institute (Curiosity RAD team)', u:'https://www.swri.org/press-release/swri-scientists-publish-first-radiation-measurements-surface-mars' }
+ { id:'data-height',when:()=>S.sol>=10,title:'Read the terrain record',
+   html:()=>'<p>A terrain record has latitude, longitude and elevation. What does its elevation value describe?</p>',
+   opts:[{t:'Mapped ground height',ok:true,fx:()=>{S.parts+=5;return 'Correct. Game reward: 5 parts.';}},{t:'Water hidden in the rock',fx:()=>'Elevation does not measure buried water.'},{t:'A safe radiation dose',fx:()=>'Elevation is not a radiation measurement.'}],
+   why:'MOLA is an elevation dataset. Its values describe mapped height, not composition or exposure.',src:'NASA MOLA elevation data',u:U_MOLA},
+ { id:'data-location',when:()=>S.sol>=20,title:'Keep the coordinates',
+   html:()=>'<p>You want a teammate to inspect the same MOLA record. What should you share with the elevation?</p>',
+   opts:[{t:'Latitude, longitude and source',ok:true,fx:()=>{addFame(4,'Recorded the location and source.');return 'Correct. Game reward: 4 Fame.';}},{t:'Only the drawing of the rock',fx:()=>'The artwork does not identify a dataset location.'},{t:'Only your colony name',fx:()=>'The colony name is part of the game, not a MOLA coordinate.'}],
+   why:'A value must remain connected to the place and dataset it describes.',src:'NASA MOLA elevation data',u:U_MOLA},
+ { id:'data-scope',when:()=>S.sol>=30,title:'What can the height prove?',
+   html:()=>'<p>A scanner shows a low elevation. Does that prove water or a mineral deposit is present?</p>',
+   opts:[{t:'Yes, every low place has water',fx:()=>'That conclusion is not supported by elevation.'},{t:'No, we would need the relevant measurements',ok:true,fx:()=>{S.parts+=5;return 'Correct. Game reward: 5 parts.';}},{t:'Yes, if the rock looks blue',fx:()=>'The rock artwork is not a composition measurement.'}],
+   why:'MOLA supplies heights. It does not identify this rock or measure local water.',src:'NASA MOLA dataset scope',u:U_MOLA},
+ { id:'data-date',when:()=>S.sol>=40,title:'Check the date',
+   html:()=>'<p>A saved Horizons record is dated 20 November 2023. What does its signal-time value describe?</p>',
+   opts:[{t:'The calculation for that date',ok:true,fx:()=>{addFame(4,'Checked the dated record.');return 'Correct. Game reward: 4 Fame.';}},{t:'A live value for today',fx:()=>'The record is saved and dated, not live.'},{t:'Every day forever',fx:()=>'Other dates have their own calculations.'}],
+   why:'The imported Horizons table contains dated calculations. Its saved values must not be called live observations.',src:'NASA/JPL Horizons',u:U_HORIZONS},
+ { id:'data-one-way',when:()=>S.sol>=55,title:'A reply takes another trip',
+   html:()=>'<p>Our 20 November 2023 Horizons row lists 20.98606 minutes of one-way light time. Is a reply included?</p>',
+   opts:[{t:'Yes, that is the whole conversation',fx:()=>'One-way means one trip, not a round trip.'},{t:'No, a reply also travels back',ok:true,fx:()=>{S.parts+=4;return 'Correct. Game reward: 4 parts.';}}],
+   why:'One-way light time describes one journey. Sending a request and receiving a reply requires travel in both directions.',src:'NASA/JPL Horizons · imported dated row',u:U_HORIZONS},
+ { id:'data-instrument',when:()=>S.storm&&!S.storm.active,title:'Read the storm source',
+   html:()=>'<p>A DONKI particle record was measured near Earth. Can it tell us the radiation dose at our Mars colony?</p>',
+   opts:[{t:'Yes, copy the Earth event into a Mars dose',fx:()=>'The record does not measure a dose at the Mars colony.'},{t:'No, check the observing place and instrument',ok:true,fx:()=>{S.drill=true;addFame(4,'Checked the observing location.');return 'Correct. Game reward: 4 Fame and the colony drill bonus.';}}],
+   why:'The DONKI record identifies a solar event and observing instruments. Its Earth observations do not establish a Mars dose. The drill bonus is an authored rule.',src:'NASA CCMC DONKI',u:U_DONKI},
+ { id:'data-counts',when:()=>S.sol>=70,title:'A quiet catalog',
+   html:()=>'<p>A saved DONKI interval contains zero energetic-particle records. What can you conclude?</p>',
+   opts:[{t:'There is no radiation anywhere',fx:()=>'Missing catalog events do not establish radiation safety.'},{t:'There are zero returned records for that interval',ok:true,fx:()=>{addFame(4,'Read the catalog carefully.');return 'Correct. Game reward: 4 Fame.';}}],
+   why:'A catalog count describes returned entries for a stated time window. It is not a measurement of all radiation.',src:'NASA CCMC DONKI event catalog',u:U_DONKI},
+ { id:'data-units',when:()=>S.sol>=85,title:'Check the units',
+   html:()=>'<p>A Horizons field is in minutes and a terrain elevation is in kilometres. Can you compare the numbers as if they measured the same thing?</p>',
+   opts:[{t:'Yes, just choose the larger number',fx:()=>'Minutes and kilometres describe different quantities.'},{t:'No, read what each quantity and unit means',ok:true,fx:()=>{S.parts+=4;return 'Correct. Game reward: 4 parts.';}}],
+   why:'Horizons light time and MOLA elevation are different quantities. Keep units with every value.',src:'NASA/JPL Horizons and NASA MOLA',u:U_HORIZONS},
+ { id:'data-model',when:()=>S.sol>=100,title:'Record or game rule?',
+   html:()=>'<p>Which item is part of the imported NASA data rather than an authored colony rule?</p>',
+   opts:[{t:'The number of beds in our habitat',fx:()=>'Habitat capacity is a game rule.'},{t:'The Fame reward for a quiz',fx:()=>'Fame is a game score.'},{t:'A dated Horizons distance',ok:true,fx:()=>{addFame(4,'Distinguished a record from a game rule.');return 'Correct. Game reward: 4 Fame.';}}],
+   why:'Horizons supplies a calculated distance for a date. Beds, Fame and production rates are game design.',src:'NASA/JPL Horizons',u:U_HORIZONS},
+ { id:'data-comparison',when:()=>S.sol>=115,title:'Two futures, one decision',
+   html:()=>'<p>You want to compare two preparations. How should the two game runs begin?</p>',
+   opts:[{t:'With the same conditions and one changed decision',ok:true,fx:()=>{addFame(4,'Made a controlled comparison.');return 'Correct. Game reward: 4 Fame.';}},{t:'With different resources and different events',fx:()=>'Several changes make the reason for the result harder to identify.'}],
+   why:'This is the game’s comparison method. NASA records keep their own dates, coordinates and units; a game result does not establish real mission safety.',src:'Game experiment using NASA data references',u:U_HORIZONS}
 ];
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rng()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function problemStep(){
@@ -1050,7 +1053,7 @@ function render(){
   $('banner').innerHTML=f;
   document.querySelectorAll('.bbtn').forEach(b=>{b.style.display=S.unlocked[b.dataset.t]?'':'none';b.classList.toggle('sel',buildSel===b.dataset.t);b.classList.toggle('poor',S.parts<DEF[b.dataset.t].cost||S.metal<DEF[b.dataset.t].metal)});
   syncScene();
-  $('camhelp').textContent=R3&&R3.fp?'W A S D to walk; Shift to run. Click to look, or drag. Esc frees the mouse. Back to map exits. Aim at a rock and press F to scan. E records a dosimeter reading.':'Drag to move the map. Scroll to zoom.';
+  $('camhelp').textContent=R3&&R3.fp?'W A S D to walk; Shift to run. Click to look, or drag. Esc frees the mouse. Back to map exits. Aim at a rock and press F to scan. E also scans a terrain target.':'Drag to move the map. Scroll to zoom.';
   $('buildhint').textContent=buildSel?DEF[buildSel].desc+' Click a tile to place it. Press Esc to cancel.':(S.cleaning?'Builders are cleaning panels. Building resumes soon.':'Free colonists do the building. Click any building on the map to read about it, switch it off or upgrade it.');
 }
 
@@ -1066,44 +1069,37 @@ function showScience(){
   if(window.Junior?.isActive()){
     modal({title:'The science behind Junior missions',keepOpen:true,html:`
       <p>Choose a place, watch the result, and discover why it matters.</p>
-      <h3>Real observations</h3><p>NASA's MOLA instrument measured Mars's height. Lower ground feeds our air-thickness model, so it changes oxygen output. Real latitude feeds the sunlight model. MOXIE demonstrated making oxygen from Mars air.</p>
+      <h3>Imported terrain records</h3><p>NASA MOLA supplies mapped elevations. The formulas that turn elevation into oxygen output and latitude into panel output are authored game rules, not imported atmosphere or sunlight measurements. Inspect the dataset record in the discovery ledger.</p>
       <h3>Training rules</h3><p>Buildings use Parts, crews share jobs automatically, and crops grow after four powered days. Supply shuttles bring eight Parts and twelve water every eight days. A powered Water Processor recovers more used water, and only an ice-site processor extracts new water. These amounts and times are invented for learning.</p>
       <p>You invite explorers only when air, water, food, beds and crew capacity are ready. Dust and radiation practice alerts give five days of warning. They are scripted lessons, not live NASA forecasts or predicted radiation doses. A shortage pauses the mission so you can retry a checkpoint.</p>
       <h3>Read the map carefully</h3><p>Ice colours follow latitude, not surveyed deposits. Cave tiles mark volcanic regions, not confirmed entrances. Detailed sand, buildings and the fictional human mission adviser are artwork.</p>`,buttons:[{label:'Data sources',fn:showData},{label:'Close',primary:true}]});return;
   }
   modal({title:'The science behind the game',html:`
-   <p>This game is <b>based on real data</b>. It is not a full simulation. Numbers are made smaller and rounder so they are easy to follow.</p>
-   <table><tr><th>Real (from NASA and partners)</th><td>Making oxygen from Mars air (MOXIE). Radiation on the surface and in solar storms (Curiosity RAD, DONKI). Buried water ice. Lava tube caves. Dust storms that block sunlight. The radio delay and the two-week blackout when the Sun is in the way. The 26-month gap between launch chances.</td></tr>
+   <p><b>NASA datasets and game rules have different roles.</b> The imported terrain, dated signal-time calculations and space-weather catalog can be inspected. The colony economy is an authored teaching model.</p>
+   <table><tr><th>Imported NASA data and calculations</th><td>MOLA-derived global elevation, NASA/JPL Horizons distance and one-way light time, and archived NASA CCMC DONKI records. DONKI Earth events are not Mars exposure measurements.</td></tr>
    <tr><th>Partly real</th><td>Colonist happiness. Real crews need comfort and things to do, but the happiness score is our invention.</td></tr>
    <tr><th>Made up for the game</th><td>Fame medals, the rival colonies and their territory, part and metal costs, upgrades, rover trip times, crew shuttles every 10 sols and supplies every 30 sols, crates that land in 6 sols, and how much air or food each machine makes.</td></tr></table>
-   <div class="real"><b>Real numbers</b>
-   A sol is 24 h 39 min. MOXIE made up to 12 g of oxygen an hour. Curiosity measures about 0.64 millisieverts of radiation a day; on May 20, 2024 a solar storm delivered 8,100 micrograys at once. Radio signals take about 3 to 23 minutes. Mars clocks run 477 millionths of a second a day faster than Earth clocks.</div>
+   <div class="real"><b>Traceable dataset values</b>
+   The imported Horizons table contains dated Earth–Mars distances and one-way light times. MOLA supplies the global elevation samples. DONKI supplies named event records and timestamps. Resource units, crew capacity and production rates are game rules.</div>
    <h3>How colonists are shared out</h3><p>Every 10 days, an available shuttle brings ten explorers shared among open colonies after a ten-second countdown. Fame determines how many know each colony. Internal quality of life determines Appeal, which weights their choices. Empty beds cap arrivals; unplaced explorers wait in orbit. Supply deliveries arrive every 30 days. These population rules are game design, not NASA measurements. Junior starts with guided two-person invitations before shared campaign waves.</p>
-   <h3>The radio blackout</h3><p>The blackout is real: about every 26 months the Sun sits between Earth and Mars. Its timing in this game (sol 373) is the game's own. It is not placed on the real calendar date.</p>
-   <p><small>Hover over the time bar at the top for one more piece of real physics.</small></p>`,
+   <h3>The radio exercise</h3><p>The scheduled radio pause and stopped deliveries are authored mission events. Their timing (sol 373) is a game rule, not an outage record imported from NASA. Horizons supplies the separate dated light-time calculations.</p><p>No automatic day-300 weather escalation is active. Remaining storms are labeled reference scenarios with authored consequences.</p>
+   <p><small>Use the bottom controls for game speed. Data sources identify imported records and published background separately.</small></p>`,
    buttons:[{label:'Close',primary:true}]});
 }
 function showData(){
-  modal({title:'Data sources',html:`
-   <h3>NASA inputs and game-created elements</h3>
-   <table><thead><tr><th>Label</th><th>Elements in this game</th></tr></thead><tbody>
-   <tr><td><b>NASA observations / calculations</b></td><td>MOLA global height samples, the NASA global Mars image, cached JPL Horizons distance/light-time calculations, and DONKI event records. Resampling, display exaggeration and conversion into game time are our implementation.</td></tr>
-   <tr><td><b>Simplified game models</b></td><td>Air thickness and sunlight formulas; oxygen, water, food and power production; resource units; starting reserves; building costs and capacities; harvest and construction times; solar boost percentages; dosimeter indices 100 / 96 / 30. NASA research supports the lessons, not these exact game outputs.</td></tr>
-   <tr><td><b>Fictional content / game rules</b></td><td>Individual rocks and their +3 Parts / +5 Water / +5 Air rewards; hidden air cartridges; colonists, buildings, artwork and dust particles; Appeal, Fame, immigration, countdowns, leaderboard and council rewards; the Blackout story and day-nine goal; day-300 storms and their increasing damage.</td></tr>
-   <tr><td><b>Not imported</b></td><td>SWIM ice probabilities are not used to place deposits. Ice tiles use a latitude estimate; caves and close-up rocks are illustrative. OSDR and RadLab datasets are not integrated.</td></tr>
-   </tbody></table>
-   <p><b>Rock water:</b> NASA confirms buried water ice on Mars. Finding a specific rock and instantly receiving 5 Water is a fictional reward. It is not an assay, a surveyed deposit, or a modeled extraction yield. Hollow rocks do not supply breathable air; our air reward is an invented sealed supply cache.</p>
-
-   <p><b>Archived observations, saved inside the game.</b> These records support the science explanations. Earth-observed solar events do not prove a storm reached Mars.</p><p>${window.Junior?.isActive()?'Junior missions use scripted dust and radiation practice alerts, with five days to prepare. Their timing and consequences are invented training rules, not recorded Mars forecasts.':'Commander storm scenarios use the reference events below. After sol 230 the scenario list repeats and is labeled as a replay.'}</p>
-   <table>${STORMS.map(s=>`<tr><td>${s.date}</td><td>${s.meas}</td><td><a href="${s.url}" target="_blank" rel="noopener">${s.src}</a></td></tr>`).join('')}</table>
-   <p><b>Facts shown on cards</b></p>
-   <table>${Object.values(FACTS).map(f=>`<tr><td>${f.t}</td><td>${link(f.s,f.u)}</td></tr>`).join('')}</table>
-   <p><b>Upgrades and Mission Control problems</b></p><table>${Object.values(RESEARCH).map(f=>`<tr><td>${f.fact}</td><td>${link(f.src,f.u)}</td></tr>`).join('')}${PROBLEMS.map(q=>`<tr><td>${typeof q.why==='function'?q.why():q.why}</td><td>${link(q.src,q.u)}</td></tr>`).join('')}</table>
-   <p><b>The map</b> is the real shape of Mars: the ground is shaped by heights from the MOLA laser altimeter (NASA Mars Global Surveyor, served by <a href="https://trek.nasa.gov/mars/" target="_blank" rel="noopener">NASA Mars Trek</a>) and coloured with a real global image of Mars from <a href="https://github.com/nasa/NASA-3D-Resources" target="_blank" rel="noopener">NASA 3D Resources</a>, sharpened with MOLA shaded relief so craters and valleys show clearly. In Walk mode, the close-up regolith artwork and Blender rocks are illustrative, not surveyed geology. A button switches to the MOLA colour height map. Tile coordinates are real latitude and longitude. Heights are stretched so mountains show.</p><p><b>Real data that changes the game:</b> a tile's height sets how thick the air is (oxygen extractors), its latitude sets sunlight (solar panels) and ice, and sunlight and air outputs follow clearly simplified formulas. Commander storm scenarios reference archived DONKI records near Earth; the May 20, 2024 scenario also cites a Mars surface measurement. Junior practice storms use their own teaching schedule. Earth records are not evidence of a Mars impact.</p><p><b>Artwork and 3D models.</b> All current colony building types, the articulated suit, survey rover, crew shuttle and layered rocks were authored in Blender. The NASA MOLA map was rebuilt in Blender from the same height samples. Fine regolith colour is original Grok Imagine artwork, with Blender mineral normals. These local details are illustrative, not surveyed geology. The fictional human mission adviser is Grok Imagine artwork, visibly labeled in the interface. The older NASA Habitat Demonstration Unit, InSight, Perseverance and astronaut files remain packaged as legacy assets; current Ares vehicles and crew are original Blender designs. Agency logos, flags and mission patches were painted over on the NASA textures.</p><p><b>Not real yet.</b> Ice tiles follow a latitude rule of thumb, not the SWIM maps. Lava tube tiles mark volcano regions, not individual catalogued caves.</p>
-   <p><small>NASA data portals: <a href="https://ccmc.gsfc.nasa.gov/tools/DONKI/" target="_blank" rel="noopener">DONKI</a>, <a href="https://trek.nasa.gov/mars/" target="_blank" rel="noopener">Mars Trek</a>, <a href="https://api.nasa.gov/" target="_blank" rel="noopener">NASA Open APIs</a>.</small></p>
-   <p><b>Listed by the challenge, not used yet:</b> <a href="https://osdr.nasa.gov/bio/repo/" target="_blank" rel="noopener">OSDR</a> and <a href="https://visualization.osdr.nasa.gov/radlab/gui/data-api/" target="_blank" rel="noopener">RadLab</a>.</p>
-   <p><small>NASA does not endorse this game.</small></p>`,
-   buttons:[{label:'Close',primary:true}]});
+ modal({title:'NASA datasets used in this game',html:`
+ <h3>Trace each scientific record to its source</h3>
+ <table><thead><tr><th>NASA dataset</th><th>How it is used</th></tr></thead><tbody>
+ <tr><td>${link('Mars Global Surveyor MOLA','https://pds-geosciences.wustl.edu/missions/mgs/megdr.html')}</td><td>Global elevation grid, map terrain and individual target surveys. The bundled 360 × 180 grid is compressed to 8-bit heights. Survey cards give the nearest sample coordinate and approximate elevation. It cannot identify rock composition or water.</td></tr>
+ <tr><td>${link('NASA/JPL Horizons','https://ssd.jpl.nasa.gov/horizons/')}</td><td>Archived Earth–Mars distance and one-way light-time calculations. The dated samples control communication delay; game-time scaling is disclosed.</td></tr>
+ <tr><td>${link('NASA DONKI','https://ccmc.gsfc.nasa.gov/tools/DONKI/')}</td><td>Dated solar-event records and source identifiers. Earth-observed events are not Mars radiation measurements or forecasts. Hazard timings and consequences are game rules.</td></tr>
+ </tbody></table>
+ <h3>What the datasets do not measure</h3>
+ <p>No mineral, ice, air-cache or parts contents are assigned to scanned rocks. No synthetic ice deposits or cave sites are placed. Scans award no supplies. The former numerical dosimeter has been replaced with terrain records. Day-300 escalating storms have been removed.</p>
+ <p>Resources, building outputs, crew, Appeal, Fame, competition, scenario hazards and mission objectives are designed game rules. These are not NASA measurements. Generated artwork and close-up models illustrate the environment; the global map uses the imported elevation grid and NASA imagery.</p>
+ <p>SWIM ice probabilities, RadLab dose records and OSDR experiments are not imported and are not claimed as measured inputs.</p>
+ <h3>Historical event references</h3><table>${STORMS.map(s=>`<tr><td>${s.date}</td><td>${s.meas}</td><td>${link(s.src,s.url)}</td></tr>`).join('')}</table>
+ <p><small>NASA does not endorse this game. All scientific data inputs listed above originate from NASA missions or NASA/JPL services.</small></p>`,buttons:[{label:'Close',primary:true}]});
 }
 
 function showCredits(){
@@ -1326,7 +1322,7 @@ function walkStep(dt){const f=R3.fp;if(!f)return;dt=Math.max(0,Math.min(.1,Numbe
   const y=Math.max(standing,f.y+(reduced?0:Math.sin(f.step)*.008*Math.min(1,spd))),cp=Math.cos(f.pitch);
   R3.cam.position.set(f.x,y,f.z);R3.cam.lookAt(f.x+dx*cp,y+Math.sin(f.pitch),f.z+dz*cp);R3.target.set(f.x,0,f.z);
   const t=tileNear(f.x,f.z);if(t&&(t!==f.tile||f.boundary!==f.lastBoundary)){f.tile=t;f.lastBoundary=f.boundary;const b=t.build&&t.build.done?DEF[t.build.type].name:null;
-    $('fphud').innerHTML=`<b>${b||(t.type==='ice'?'Possible buried ice':t.type==='lava'?'Lava tube country':'Open ground')}</b> ${coord(t)} &middot; ${t.elev>=0?'+':''}${t.elev.toFixed(1)} km &middot; ${f.boundary||'F: aim at a rock to scan · E: dosimeter'}`;
+    $('fphud').innerHTML=`<b>${b||('Mapped terrain')}</b> ${coord(t)} &middot; ${t.elev>=0?'+':''}${t.elev.toFixed(1)} km &middot; ${f.boundary||'F: aim at a rock to scan · E: terrain scan'}`;
   }
   window.SurfaceSurvey?.update();
 }
@@ -1546,8 +1542,7 @@ function showTip(ev){ const tip=$('tip'); if(!hover){tip.style.display='none';re
   if(b){ const d=DEF[b.type]; h=`<b>${junior&&b.type==='ice'?'Water Processor':d.name}</b>`+(b.done?'':` <small>Being built: ${Math.round(b.progress/(junior?Junior.work(b.type):d.work)*100)}%. Click to cancel.</small>`);
     if(b.done&&b.type==='pod') h+='<small>Where it all began. +3 power, shelters 3, beds for 8.</small>';
     else if(b.done){ h+=`<small>${junior?Junior.info(b.type).benefit:d.line}${d.worker?', needs 1 worker':''}${(b.lvl||1)>1?' (level 2)':''}</small><small>Click for details and upgrades.</small>`; } }
-  else h=`<b>${t.type==='ice'?'Likely buried ice':t.type==='lava'?'Lava tube country':'Open ground'}</b>`
-    +(t.type==='ice'?'<small>A possible water-extraction site. This is a latitude estimate, not a surveyed ice deposit.</small>':t.type==='lava'?'<small>Caves cluster around the giant Tharsis and Elysium volcanoes. A shield here protects 14 colonists.</small>':'')
+  else h=`<b>${'Mapped terrain'}</b>`
     ;
   h+=`<small>${coord(t)} &middot; ${t.elev>=0?'+':''}${t.elev.toFixed(1)} km high</small><small>Sunlight ${Math.round(t.sun*100)}% &middot; Air thickness ${Math.round(t.air*100)}%</small>`;
   if(buildSel==='rover'){ const d=hdist(t,S.builds[0]); h+=`<small><b>${d<3?'Too close to explore.':d>10?'Too far for the rover.':`Trip: ${junior?'4 days':2*d+' sols'} there and back.`}</b></small>`; }
@@ -1620,8 +1615,8 @@ modal({title:'Mars Colony',html:`<p><b>You are the commander of the first town o
   <p>Six colonists just landed. They need <b>air</b>, <b>power</b>, <b>food</b> and <b>shelter</b> from radiation. Every choice costs something: power you spend on one thing cannot go to another.</p>
   <p>Keep people safe and happy and more will come from Earth. Colonists are your score, and every colonist costs air.</p>
   <p>Your goal: build a colony that can live <b>without help from Earth</b>.</p>${''}
-  <p>First, a short <b>Mission School</b>: six lessons on why air, sunlight, ice and shelter matter on Mars. Each one ends with a check question. Every right answer gives your colony 3 extra parts to build with.</p>
-  <div class="real"><b>Real fact</b>${FACTS.sol.t}<br><small>The solar storms in this game really happened. NASA recorded them.</small></div>`,
+  <p>First, a short <b>Mission School</b>: six lessons on terrain records, signal timing and space-weather evidence. Each one ends with a check question. Every right answer gives your colony 3 extra parts to build with.</p>
+  <div class="real"><b>Dataset note</b>${FACTS.sol.t}<br><small>NASA records and authored game rules are labeled separately.</small></div>`,
   buttons:[{label:'Set up your colony',primary:true,fn:()=>setup(false)},{label:'Skip Mission School (no extra parts)',fn:()=>setup(true)}]});
 requestAnimationFrame(frame);
 window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBLEMS,FACTS,RESEARCH,STORMS,SITES,GOALS,UPG,DEF,DIFFS,setDiff:i=>{DF=DIFFS[i];},upgrade,splitPool,get S(){return S},tickSol,tryBuild,compute,newGame,tileAt,hdist,orderCrate,count,cleanPanels,ACAD};

@@ -1,13 +1,7 @@
-const {chromium}=require('playwright');
-const assert=require('node:assert/strict');
-(async()=>{
- const browser=await chromium.launch({channel:'chrome',headless:true,args:['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']});
- try{
-  const page=await browser.newPage({viewport:{width:1440,height:900}}),errors=[];
-  page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(process.env.GAME_URL||'http://127.0.0.1:8765');
-  await page.waitForFunction(()=>window.MissionSystems&&window.Junior&&window.G&&window.AresWorld?.pending===0);
-  const result=await page.evaluate(()=>{
+/* Mission rules regression: real engine rules with DOM/rendering stubs only. */
+const {engine}=require('./engine-harness.cjs');
+const e=engine();
+const result=e.run(`(function(){
    let checks=0;const check=(v,m)=>{if(!v)throw Error(m);checks++;},near=(a,b)=>Math.abs(a-b)<1e-8;
    R3=null;render=()=>{};syncScene=()=>{};buildMenu=()=>{};modal=()=>{};
    const add=(type,extra={})=>{const t=S.tiles.find(t=>t.seen&&!t.owner&&!t.build&&t.type!=='rock');if(!t)throw Error('No test site');const b={type,c:t.c,r:t.r,done:true,on:true,age:4,...extra};S.builds.push(b);t.build=b;return b;};
@@ -39,25 +33,25 @@ const assert=require('node:assert/strict');
    reset();add('solar');for(let i=0;i<6;i++)add('moxie');check(!MissionSystems.activateBoost().ok&&/crew member/.test(MissionSystems.boostInfo().reason),'Alignment cannot borrow essential operators');
    S.builds.filter(b=>b.type==='moxie').slice(4).forEach(b=>b.on=false);const job=add('habitat',{done:false,progress:0});check(MissionSystems.activateBoost().ok,'Available builders can be reassigned');crew=Junior.crewRoles();check(crew.operators===4&&crew.technicians===1&&crew.builders===1&&crew.constructionWork===2&&sum(crew)===6,'Technician reduces actual construction capacity without double counting');tickSol();check(job.progress===2,'Building ledger uses the reduced work capacity');
    reset();const t=S.tiles.find(t=>!t.owner),reading=condition=>({kind:'radiation',c:t.c,r:t.r,sol:S.sol,condition,exposureIndex:condition==='open'?100:condition==='rock'?96:30,source:'simulation'});
-   check(!MissionSystems.recordSurvey({...reading('open'),source:'NASA-live'}).ok&&S.fame===0,'Unsupported real-data claim is rejected');
-   check(!MissionSystems.recordSurvey({...reading('open'),c:-100}).ok,'Invalid surface coordinate is rejected');
-   check(MissionSystems.recordSurvey(reading('open')).reward===3&&S.fame===3,'First valid open-ground evidence awards three Fame');
-   S.sol++;check(MissionSystems.recordSurvey(reading('open')).reward===0&&S.fame===3,'Repeating a condition on a different day cannot farm Fame');
-   check(MissionSystems.recordSurvey(reading('rock')).reward===7&&S.fame===10,'Rock observation and open-versus-rock comparison are distinct awards');
-   check(MissionSystems.recordSurvey(reading('shelter')).reward===7&&S.fame===17,'Shelter comparison rewards a new inference once');
-   check(MissionSystems.fameInfo().nextMedal.threshold===20&&MissionSystems.fameInfo().nextMedal.remaining===3,'Fame UI exposes actual medal threshold and progress');
-   const save=JSON.stringify({score:S.fame,state:S.missionSystems});S.missionSystems=null;const restored=JSON.parse(save);S.missionSystems=restored.state;S.fame=restored.score;check(MissionSystems.recordSurvey(reading('rock')).reward===0,'Saved evidence ledger prevents repeat rewards after restore');
+   for(const condition of ['open','rock','shelter'])check(!MissionSystems.recordSurvey(reading(condition)).ok&&S.fame===0,'Retired '+condition+' readings never award Fame');
+   check(!MissionSystems.recordSurvey({...reading('open'),source:'NASA-live'}).ok,'A source label cannot make a fabricated dose a measurement');
+   S.fame=31;S.missionSystems={version:1,surveys:{open:reading('open'),rock:reading('rock'),shelter:reading('shelter')},boost:null,awards:{'surface-open':{title:'Recorded open radiation model',points:3,sol:1},'surface-rock':{points:3,sol:1},'surface-shelter':{points:3,sol:1},'compare-rock':{points:4,sol:1},'compare-shelter':{points:4,sol:1},'rover-ice':{title:'Surveyed likely-ice terrain',points:3,sol:1},'rover-plain':{points:3,sol:1},'solar-alignment':{title:'Proved solar alignment',points:4,sol:1},'mission-1':{title:'First solar power',points:3,sol:1}}};
+   const migrated=MissionSystems.fameInfo();check(migrated.score===8&&S.fame===8,'Only recorded retired survey points are removed, preserving other achievements');
+   check(migrated.fieldReadings.length===0&&Object.keys(S.missionSystems.surveys).length===0,'Old exposure indices are absent from UI and saved survey state');
+   check(migrated.awards.length===2&&migrated.awards.every(a=>!/radiation|likely-ice/.test(a.title)),'Retired observation claims are not shown as achievements');
+   check(!/exposureIndex|96|100/.test(JSON.stringify(S.missionSystems)),'Exported mission-systems state contains no old numeric dose values');
+   check(S.missionSystems.version===2,'Legacy state is migrated to the dataset-only format');
+   MissionSystems.fameInfo();check(S.fame===8,'Repeated ledger reads never deduct retired points twice');
+   check(/scanning does not create Fame/.test(migrated.explanation),'Score copy no longer implies NASA measurements generate rewards');
+   S.missionSystems=JSON.parse(JSON.stringify(S.missionSystems));MissionSystems.fameInfo();check(S.fame===8,'Migrated state remains stable after save and restore');
    Junior.start('junior',0,812);MissionSystems.fameInfo();const pt=S.tiles.find(t=>t.seen&&!t.owner&&!t.build&&t.type!=='rock');tryBuild('solar',pt);tickSol();tickSol();
    check(S.fame===3&&S.missionSystems.awards['mission-1']?.points===3,'Completing a real mission phase awards and records its existing Fame');
-   const checkpointFame=S.fame;const rt=S.tiles[0];MissionSystems.recordSurvey({kind:'radiation',c:rt.c,r:rt.r,condition:'open',exposureIndex:100,source:'simulation'});check(S.fame===checkpointFame+3,'A new observation after checkpoint earns Fame');
-   Junior.recover();check(S.fame===checkpointFame&&!S.missionSystems.surveys.open,'Retry rolls back both Fame and evidence ledger');
-   const afterRetry=MissionSystems.recordSurvey({kind:'radiation',c:rt.c,r:rt.r,condition:'open',exposureIndex:100,source:'simulation'});check(afterRetry.reward===3&&S.fame===checkpointFame+3,'Replaying evidence after retry restores the same total, never accumulates');
-   const target=S.tiles.find(t=>!t.owner&&hdist(t,S.builds[0])===4);target.type='plain';S.rover={c:target.c,r:target.r,crew:2,start:S.sol-2,arrive:S.sol,back:S.sol+2,done:false};let fame=S.fame;roverStep();check(S.fame===fame+3,'First rover terrain kind earns finite evidence Fame');S.rover.done=false;roverStep();check(S.fame===fame+3,'Repeating rover survey of same terrain kind adds no Fame');
-   Junior.start('commander',0,812);S.fame=55;check(!MissionSystems.boostInfo().supported&&!MissionSystems.activateBoost().ok&&S.fame===55,'Commander timed alignment is honestly unsupported and preserves score');
-   const ct=S.tiles[0];const commanderBefore=S.fame;MissionSystems.recordSurvey({kind:'radiation',c:ct.c,r:ct.r,condition:'open',exposureIndex:100,source:'simulation'});check(S.fame===commanderBefore+3&&medalCount()===2,'Commander field evidence adds to the existing score and medals');
-   check(/30 watt-hours/.test(MissionSystems.boostInfo().evidence.text)&&/game rules/.test(MissionSystems.boostInfo().scienceNote),'Science UI separates measured InSight evidence from tuned bonus');
-   return {checks,boost:{cost:2,workDays:1,productionDays:3,multiplier:1.2,cooldown:8},fieldEvidenceCap:17};
-  });
-  assert.deepEqual(errors,[],'No browser runtime errors');console.log(JSON.stringify(result,null,2));
- }finally{await browser.close();}
-})().catch(e=>{console.error(e);process.exit(1);});
+   const checkpointFame=S.fame,rt=S.tiles[0];MissionSystems.recordSurvey({kind:'radiation',c:rt.c,r:rt.r,condition:'open',exposureIndex:100,source:'simulation'});check(S.fame===checkpointFame,'A retired survey cannot alter checkpoint Fame');
+   Junior.recover();check(S.fame===checkpointFame&&!S.missionSystems.surveys.open,'Retry preserves mission Fame without fabricated evidence');
+   const target=S.tiles.find(t=>!t.owner&&hdist(t,S.builds[0])===4);target.type='plain';S.rover={c:target.c,r:target.r,crew:2,start:S.sol-2,arrive:S.sol,back:S.sol+2,done:false};let fame=S.fame;roverStep();check(S.fame===fame,'Rover tile classification cannot create evidence Fame');
+   Junior.start('commander',0,812);S.fame=55;check(!MissionSystems.boostInfo().supported&&!MissionSystems.activateBoost().ok&&S.fame===55,'Commander timed alignment remains unsupported and preserves score');
+   const ct=S.tiles[0];MissionSystems.recordSurvey({kind:'radiation',c:ct.c,r:ct.r,condition:'open',exposureIndex:100,source:'simulation'});check(S.fame===55,'Commander also rejects retired simulated field evidence');
+   check(MissionSystems.boostInfo().evidence===null&&MissionSystems.boostInfo().sourceUrl===null&&/authored game rule/.test(MissionSystems.boostInfo().scienceNote),'Boost tuning is not attributed to an unrelated NASA article');
+   return {checks,boost:{cost:2,workDays:1,productionDays:3,multiplier:1.2,cooldown:8},fieldEvidenceCap:0};
+})()`);
+console.log(JSON.stringify(result,null,2));

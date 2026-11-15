@@ -5,14 +5,11 @@
 const VERSION=1,RULES='blackout-1',DATA='mola-horizons-20261114',HORIZON=9,STEP_MINUTES=20,HISTORY_KEY='blackout-attempts-v1';
 const SOURCE_ROWS=window.MARS_EPHEMERIS?.rows||[];
 const SOURCES=[
- {id:'horizons',title:'Earth–Mars light time',kind:'NASA/JPL calculation',url:'https://ssd.jpl.nasa.gov/horizons/',date:'2023-11-20',text:'The saved Horizons record gives one-way light time in minutes. We approximate the signal-only round trip by doubling it, before human reply time. Each day with a usable link adds 20 minutes to the teaching reply queue. Pausing this queue is a classroom shortcut, not stopped light or the length of a Martian day.'},
- {id:'conjunction',title:'Planning through solar conjunction',kind:'Historical NASA operations',url:'https://www.nasa.gov/solar-system/planets/mars/nasas-mars-fleet-will-still-conduct-science-while-lying-low/',date:'2023-11',text:'NASA paused Mars commanding during solar conjunction while preplanned science continued. Our scheduled radio pause is a training scenario. It does not turn off sunlight or cause the separately scheduled dust and radiation exercises.'},
- {id:'mola',title:'A map measured by a laser',kind:'NASA source plus model',url:'https://trek.nasa.gov/mars/',text:'MOLA elevation supplies the global map. Our height-to-air production formula and exaggerated local terrain are simplified models.'},
- {id:'rad',title:'Radiation is not temperature',kind:'Observation and teaching model',url:'https://science.nasa.gov/resource/radiation-measurements-on-mars/',text:'Curiosity RAD measures ionizing radiation. This mission compares a simulated relative exposure index: 100 outside and 30 at the shelter marker. These are not dose readings or NASA protection ratings.'},
- {id:'solar',title:'Pointing panels toward the Sun',kind:'Engineering principle plus game tuning',url:'https://www.nasa.gov/smallsat-institute/sst-soa/power-subsystems/',text:'Array orientation changes solar collection. The game charges 2 Parts and one technician day for a 20% boost lasting three production days; those quantities are game rules.'},
- {id:'water',title:'Reuse water, but do not create it',kind:'NASA principle plus game tuning',url:'https://www.nasa.gov/missions/station/iss-research/nasa-achieves-water-recovery-milestone-on-international-space-station/',text:'NASA demonstrated 98% recovery of collected water on the ISS. Our staffed processor recovers 95% of crew water; the simplified game still consumes fresh water.'}
+ {id:'mola',title:'MOLA terrain dataset',kind:'Imported NASA laser-altimeter elevation grid',url:'https://pds-geosciences.wustl.edu/missions/mgs/megdr.html',text:'The bundled 360 × 180 MOLA-derived grid supplies actual terrain records. The field task compares the nearest stored samples at two locations. Heights are approximate because the imported grid uses one-degree spacing and 8-bit quantization; a visual rock is not a chemical measurement.'},
+ {id:'horizons',title:'Earth–Mars light-time dataset',kind:'Imported NASA/JPL Horizons table',url:'https://ssd.jpl.nasa.gov/horizons/',date:'2023-11-20',text:'The saved Horizons row gives one-way light time in minutes. Doubling it estimates signal-only round trip, before human reply time. Game days and the scripted radio pause are gameplay timing, not additional NASA observations.'},
+ {id:'donki',title:'DONKI space-weather records',kind:'Imported NASA CCMC event catalogue',url:'https://ccmc.gsfc.nasa.gov/tools/DONKI/',date:window.DONKI_SNAPSHOT?.fetchedAt||'',text:'The bundled catalogue contains recorded solar flare, CME and particle-event data. These records do not measure radiation dose at this colony. Mission hazard timing, shelter capacity and resource rates are game rules, not measured outputs from this dataset.'}
 ];
-const STAGES={prediction:['One mission. Two futures.','Six crew are ready. Predict which preparation will help when dust reduces sunlight.'],preparation:['Make your preparation','Spend a limited budget before the quiet radio period. Both useful options have a cost.'],field:['Use evidence to choose shelter','Predict, compare two simulated readings, then choose where the crew will take cover.'],request:['Ask Earth, then plan locally','A radio reply takes time. Request advice, then run the outpost while it travels.'],running:['Keep the colony working','Advance deliberately. Watch reserves, production and the crew. Radio loss alone does not switch off the power.'],outcome:['Your first future','Review what happened, then change one preparation under exactly the same conditions.'],explain:['What caused the difference?','Use the two real simulation outcomes to explain what changed.'],transfer:['Try a new situation','A new machine needs power too. What would you check before switching it on?'],complete:['Mission evidence ready','You planned, observed, compared and explained. Your evidence stays on this device.' ]};
+const STAGES={prediction:['One mission. Two futures.','Six crew are ready. Predict which preparation will help when dust reduces sunlight.'],preparation:['Make your preparation','Spend a limited budget before the quiet radio period. Both useful options have a cost.'],field:['Compare two NASA terrain records','Predict whether the two terrain records differ, inspect their MOLA elevations, then choose a crew plan.'],request:['Ask Earth, then plan locally','A radio reply takes time. Request advice, then run the outpost while it travels.'],running:['Keep the colony working','Advance deliberately. Watch reserves, production and the crew. Radio loss alone does not switch off the power.'],outcome:['Your first future','Review what happened, then change one preparation under exactly the same conditions.'],explain:['What caused the difference?','Use the two real simulation outcomes to explain what changed.'],transfer:['Try a new situation','A new machine needs power too. What would you check before switching it on?'],complete:['Mission evidence ready','You planned, observed, compared and explained. Your evidence stays on this device.' ]};
 let internal=false,permitTick=false,lastError='',storageWarning='',dispatching=false,memoryHistory={},historyPending=false;
 const clone=v=>JSON.parse(JSON.stringify(v));
 const isActive=()=>!!S?.blackout&&S.blackout.version===VERSION;
@@ -65,7 +62,7 @@ function start(options={}){
   S.tiles.forEach(t=>{if(hdist(t,S.builds[0])<=5&&!t.owner)t.seen=true;});
   const source=SOURCE_ROWS.find(r=>r.date==='2023-11-20');
   if(!source||!Number.isFinite(source.minutes))throw Error('The verified Horizons light-time record is missing.');
-  const b=S.blackout={version:VERSION,rules:RULES,data:DATA,code:parsed.code,seed:parsed.seed,site:parsed.site,stage:'prediction',branch:'first',prediction:null,preparation:null,field:{prediction:null,readings:[],shelter:null},comms:{requested:false,elapsed:0,delivered:false,oneWayMinutes:source.minutes,roundTripMinutes:source.minutes*2,sourceDate:source.date},eventTape:{radioStart:3,radioEnd:6,dustStart:4,dustEnd:7,radiationStart:7,horizon:HORIZON},actions:[],timeline:[],firstOutcome:null,alternateOutcome:null,comparison:null,learning:{explanation:null,transfer:null},initial:null,returnState:null,replayQueue:null,rejections:[],helpUsed:0,retries:0,completed:false,storageWarning:'',tour:!!options.tour};
+  const b=S.blackout={version:VERSION,rules:RULES,data:DATA,code:parsed.code,seed:parsed.seed,site:parsed.site,stage:'prediction',branch:'first',prediction:null,preparation:null,field:{dataset:'mola',prediction:null,readings:[],shelter:null},comms:{requested:false,elapsed:0,delivered:false,oneWayMinutes:source.minutes,roundTripMinutes:source.minutes*2,sourceDate:source.date},eventTape:{radioStart:3,radioEnd:6,dustStart:4,dustEnd:7,radiationStart:7,horizon:HORIZON},actions:[],timeline:[],firstOutcome:null,alternateOutcome:null,comparison:null,learning:{explanation:null,transfer:null},initial:null,returnState:null,replayQueue:null,rejections:[],helpUsed:0,retries:0,completed:false,storageWarning:'',tour:!!options.tour};
   S.dust={arrive:b.eventTape.dustStart,active:false,end:b.eventTape.dustEnd,len:3,bad:false,imp0:0};
   S.storm={arrive:b.eventTape.radiationStart,active:false,end:8,choice:'shelter',ev:STORMS[0]};
   S.say=STAGES.prediction[1];S.eco=compute();lastError='';storageWarning='';
@@ -91,14 +88,35 @@ function prepare(value){
  if(error)return fail(error);
  b.preparation=value;b.stage='field';record('prepare',value);return okay();
 }
+function molaRecord(t){
+ if(!t||!Number.isInteger(t.c)||!Number.isInteger(t.r)||t.c<0||t.c>=COLS||t.r<0||t.r>=ROWS)return null;
+ const lat=latOf(t),lon=lonOf(t),x=((Math.floor((lon+180)/360*DW)%DW)+DW)%DW,y=Math.max(0,Math.min(DH-1,Math.floor((90-lat)/180*DH))),raw=DEM[y*DW+x];
+ return {sourceId:'mola',c:t.c,r:t.r,lat,lon,sampleLat:90-(y+.5)*180/DH,sampleLon:-180+(x+.5)*360/DW,raw,elevationKm:elevKm(raw),resolutionDeg:1,url:'https://pds-geosciences.wustl.edu/missions/mgs/megdr.html'};
+}
+function fieldSites(b=state()){
+ if(!b)return null;
+ const initial=b.initial?.state,builds=initial?.builds||S.builds,pod=builds[0],occupied=new Set(builds.map(t=>t.c+','+t.r));
+ const open=S.tiles.find(t=>!occupied.has(t.c+','+t.r)&&hdist(t,pod)===2)||S.tiles.find(t=>!occupied.has(t.c+','+t.r));
+ const shield=builds.find(t=>t.type==='shield')||pod;
+ return {open,shelter:tileAt(shield.c,shield.r)};
+}
+function fieldRecord(condition,t,method){return {...molaRecord(t),condition,kind:'elevation',source:'mola',label:condition==='open'?'Open plain terrain':'Shelter-site terrain',method,day:S.sol};}
+function refreshLegacyField(b){
+ if(!b?.field||b.field.dataset==='mola')return;
+ const sites=fieldSites(b),old=b.field.readings||[];
+ b.field.readings=old.map(r=>fieldRecord(r.condition,sites[r.condition],'dataset-recheck'));
+ if(old.length)b.field.legacyModelReplaced=true;
+ b.field.dataset='mola';
+}
 function recordFieldReading(data){
- const b=state();if(!b||b.stage!=='field'||!b.field.prediction)return {ok:false,recorded:false,reward:0,message:'Predict which location is better protected in the mission card first.'};
- if(!data||!['open','shelter'].includes(data.condition)||data.source!=='simulation'||data.kind!=='radiation'||!Number.isFinite(data.exposureIndex))return {ok:false,recorded:false,reward:0,message:'Compare open ground with the built shelter marker for this mission.'};
- const expected=data.condition==='open'?100:30;
- if(data.exposureIndex!==expected)return {ok:false,recorded:false,reward:0,message:'This reading does not match the mission teaching model.'};
- if(b.field.readings.some(r=>r.condition===data.condition))return {ok:true,recorded:false,reward:0,message:'This condition is already recorded. Repeated readings earn no extra Fame.'};
- b.field.readings.push({condition:data.condition,exposureIndex:data.exposureIndex,index:data.exposureIndex,label:data.condition==='open'?'Open ground':'Shelter marker',method:data.method||'first-person',source:'simulation',day:S.sol,c:data.c??null,r:data.r??null});
- record('observe',data.condition);okay();return {ok:true,recorded:true,reward:0,message:'Recorded '+data.condition+': '+data.exposureIndex+' simulated relative index. Now compare the evidence; this is not a measured dose.'};
+ const b=state();if(!b||b.stage!=='field'||!b.field.prediction)return {ok:false,recorded:false,reward:0,message:'Predict how the two terrain records compare in the mission card first.'};
+ refreshLegacyField(b);
+ if(!data||data.source!=='mola'||data.kind!=='elevation')return {ok:false,recorded:false,reward:0,message:'This mission accepts the imported MOLA terrain record, not simulated sensor values.'};
+ const sites=fieldSites(b),condition=['open','shelter'].find(k=>sites[k].c===data.c&&sites[k].r===data.r);
+ if(!condition)return {ok:false,recorded:false,reward:0,message:'Use the two marked mission locations. The mission card can open their exact MOLA records.'};
+ if(b.field.readings.some(r=>r.condition===condition))return {ok:true,recorded:false,reward:0,message:'This terrain record is already saved.'};
+ const reading=fieldRecord(condition,sites[condition],data.method||'first-person');b.field.readings.push(reading);
+ record('observe',condition);okay();return {ok:true,recorded:true,reward:0,message:'Recorded MOLA terrain elevation: '+reading.elevationKm.toFixed(2)+' km. Compare it with the other location.'};
 }
 function beforeDay(){if(!state())return true;return permitTick&&state().stage==='running';}
 function afterDay(e){
@@ -149,7 +167,7 @@ function beginComparison(value){
  const original=clone({...b,returnState:null,replayQueue:null,originalMeta:undefined}),actual=Junior.capture({omitBlackout:true}),initial=clone(b.initial);
  const queue=b.firstOutcome.actions.filter(a=>!['predict','prepare'].includes(a.type));
  Junior.restore(initial,{render:false,checkpoint:false});
- S.blackout={...clone(original),stage:'preparation',branch:'comparison',preparation:null,field:{prediction:null,readings:[],shelter:null},comms:{...original.comms,requested:false,elapsed:0,delivered:false,deliveredDay:null},actions:[],timeline:[],learning:{explanation:null,transfer:null},returnState:actual,originalMeta:original,replayQueue:clone(queue),rejections:[],firstOutcome:original.firstOutcome,alternateOutcome:null,comparison:null,completed:false};
+ S.blackout={...clone(original),stage:'preparation',branch:'comparison',preparation:null,field:{dataset:'mola',prediction:null,readings:[],shelter:null},comms:{...original.comms,requested:false,elapsed:0,delivered:false,deliveredDay:null},actions:[],timeline:[],learning:{explanation:null,transfer:null},returnState:actual,originalMeta:original,replayQueue:clone(queue),rejections:[],firstOutcome:original.firstOutcome,alternateOutcome:null,comparison:null,completed:false};
  S.junior.recovery=null;prepare(value);if(R3)buildWorld();return okay();
 }
 function replayNext(){
@@ -172,7 +190,7 @@ function award(key,title,points){
  m.awards[key]={key,title,points,sol:S.sol};addFame(points,title);
 }
 function perform(type,payload,replaying=false){
- const b=state(),value=val(payload);if(!b)return fail('Start the short blackout mission first.');
+ const b=state(),value=val(payload);if(!b)return fail('Start the short blackout mission first.');refreshLegacyField(b);
  if(b.branch==='comparison'&&!replaying){if(type==='next')return replayNext();if(type!=='restart')return fail('The alternative repeats your recorded actions. Choose Replay next step.');}
  if(type==='predict'){
   if(b.stage!=='prediction'||!['store','generate','same'].includes(value))return fail('Choose your prediction first.');
@@ -180,13 +198,13 @@ function perform(type,payload,replaying=false){
  }
  if(type==='prepare')return prepare(value);
  if(type==='predictField'){
-  if(b.stage!=='field'||b.field.prediction||!['open','shelter'].includes(value))return fail('Predict which location offers more protection.');
+  if(b.stage!=='field'||b.field.prediction||!['open','shelter','same'].includes(value))return fail('Predict which terrain record is lower, or whether they are the same at this resolution.');
   b.field.prediction=value;record(type,value);return okay();
  }
  if(type==='observe'){
-  if(!['open','shelter'].includes(value))return fail('Choose open ground or the shelter marker.');
-  const t=value==='shelter'?S.builds.find(x=>x.type==='shield'):S.tiles.find(t=>!t.build&&hdist(t,S.builds[0])===2);
-  const result=recordFieldReading({condition:value,exposureIndex:value==='open'?100:30,kind:'radiation',source:'simulation',method:'map',c:t?.c,r:t?.r});return result.ok?{ok:true}:fail(result.message);
+  if(!['open','shelter'].includes(value))return fail('Choose the open plain or shelter-site terrain record.');
+  const t=fieldSites(b)[value];
+  const result=recordFieldReading({condition:value,kind:'elevation',source:'mola',method:'map',c:t?.c,r:t?.r});return result.ok?{ok:true}:fail(result.message);
  }
  if(type==='shelter'){
   if(b.stage!=='field'||b.field.readings.length<2||!['shelter','ship','outside'].includes(value))return fail('Record both locations before choosing shelter.');
@@ -240,9 +258,9 @@ function choices(){
   case 'prediction':return [choice('predict','store','Stored power will help most','A battery can use spare power later.'),choice('predict','generate','More generation will help most','Alignment can improve solar output for a few days.'),choice('predict','same','They will have the same result','Make a prediction, then test it.')];
   case 'preparation':return [choice('prepare','battery','Build a battery','Two builders need two days. It stores surplus energy; it does not create power.',8),choice('prepare','align','Align the solar arrays','One technician works for one day. The next three days have a 20% generation bonus.',2),choice('prepare','wait','Keep the Parts','No preparation cost, but no added storage or generation.',0)];
   case 'field':{
-   if(!b.field.prediction)return [choice('predictField','shelter','Predict: shelter is safer','Then inspect both simulated readings.'),choice('predictField','open','Predict: open ground is safer','Then inspect both simulated readings.')];
-   if(b.field.readings.length<2)return ['open','shelter'].filter(c=>!b.field.readings.some(r=>r.condition===c)).map(c=>choice('observe',c,c==='open'?'Inspect open ground':'Inspect shelter marker','Map-based instrument reading; the first-person dosimeter is also available.'));
-   return [choice('shelter','shelter','Use the soil shelter','The model reading is lower. Crew pause work for one radiation-practice day.',0),choice('shelter','ship','Return to the landing ship','A safe backup: transport costs 2 Parts and pauses work for two days.',2)];
+   if(!b.field.prediction)return [choice('predictField','shelter','Predict: shelter site is lower','Then inspect both imported terrain records.'),choice('predictField','open','Predict: open plain is lower','Then inspect both imported terrain records.'),choice('predictField','same','Predict: same at this resolution','The imported grid may give both sites the same encoded elevation.')];
+   if(b.field.readings.length<2)return ['open','shelter'].filter(c=>!b.field.readings.some(r=>r.condition===c)).map(c=>choice('observe',c,c==='open'?'Inspect open plain terrain':'Inspect shelter-site terrain','Open the exact bundled MOLA sample at this location.'));
+   return [choice('shelter','shelter','Use the soil shelter','Terrain elevation alone does not establish protection. This crew plan pauses work for one game alert day.',0),choice('shelter','ship','Return to the landing ship','An alternate game plan: transport costs 2 Parts and pauses work for two days. These are gameplay costs.',2)];
   }
   case 'request':return [choice('request',null,'Request Earth advice','Time continues automatically while a reply travels. Use the bottom clock to pause or change speed.')];
   case 'running':return [...(S.panelClean<.8&&!S.cleaning?[choice('clean',null,'Book panel cleaning','Two free crew clean on the next day outside radiation shelter. Cleaning restores the light reaching the panels; it creates no new energy.',0)]:[]),choice('next',null,'Next day','Time advances automatically. Use Space to pause while planning.')];
@@ -255,21 +273,27 @@ function choices(){
 }
 function view(){
  const b=state();if(!b)return {active:false,version:VERSION,defaultCode:'DRB1-20261114-0',sources:clone(SOURCES)};
- const e=compute(),o=objective(),paused=S.sol>=b.eventTape.radioStart&&S.sol<b.eventTape.radioEnd,status=b.comms.delivered?'received':!b.comms.requested?'not requested':paused?'blackout':'travelling';
+ refreshLegacyField(b);const e=compute(),o=objective(),paused=S.sol>=b.eventTape.radioStart&&S.sol<b.eventTape.radioEnd,status=b.comms.delivered?'received':!b.comms.requested?'not requested':paused?'blackout':'travelling';
  const comms={...b.comms,status,label:({received:'Earth reply received','not requested':'Ready to send',blackout:'Radio quiet period',travelling:'Reply travelling'})[status],detail:paused?'Commands and replies are paused. Life support continues under its own rules.':b.comms.delivered?'Advice arrived after you made local decisions.':'One training day advances the radio clock by 20 minutes. This is a teaching conversion.',trainingRemaining:Math.max(0,Math.ceil((b.comms.roundTripMinutes-b.comms.elapsed)/STEP_MINUTES)),clockLabel:'20 radio minutes per training day'};
  return {active:true,version:VERSION,rules:RULES,data:DATA,code:b.code,tour:b.tour,stage:b.branch==='comparison'?'compare':b.stage,actualStage:b.stage,branch:b.branch,title:o.title,detail:o.detail,day:S.sol,horizon:HORIZON,progress:(S.sol-1)/(HORIZON-1),choices:choices(),canAdvance:b.stage==='running'||b.branch==='comparison',resources:{air:S.o2,water:S.water,food:S.food,power:e.gen,powerUsed:e.demand,storedPower:S.battery,storageCapacity:e.store,parts:S.parts,crew:S.pop,appeal:S.appeal,fame:S.fame},economy:compactEconomy(e),comms,prediction:b.prediction,preparation:b.preparation,field:clone(b.field),firstOutcome:b.firstOutcome?clone(b.firstOutcome):null,alternateOutcome:b.alternateOutcome?clone(b.alternateOutcome):null,comparison:b.comparison?clone(b.comparison):null,learning:clone(b.learning),score:b.firstOutcome?.score||null,firstAttempt:b.firstAttempt?clone(b.firstAttempt):null,attemptKind:b.attemptKind||'in progress',sources:clone(SOURCES),error:lastError,storageWarning,completed:b.completed,recovery:S.junior.recovery,eventTape:clone(b.eventTape)};
 }
 function exportRecord(){
- const b=state();if(!b)return null;
+ const b=state();if(!b)return null;refreshLegacyField(b);
  return {format:'dead-reckoning-learning-record',version:VERSION,code:b.code,rules:RULES,data:DATA,disclosure:'Local anonymous learning record. Simulated outcomes are not NASA observations. Automated play is not evidence of child learning.',prediction:b.prediction,field:clone(b.field),firstOutcome:clone(b.firstOutcome),alternateOutcome:clone(b.alternateOutcome),comparison:clone(b.comparison),learning:clone(b.learning),firstAttempt:clone(b.firstAttempt||null),helpUsed:b.helpUsed,retries:b.retries,sources:clone(SOURCES),childPilot:'Not yet conducted'};
 }
 function validateState(b){
  const parsed=normalizeCode(b?.code);
  if(!b||b.version!==VERSION||b.rules!==RULES||b.data!==DATA||!parsed||parsed.seed!==b.seed||parsed.site!==b.site||!STAGES[b.stage]||!['first','comparison'].includes(b.branch))throw Error('This blackout save uses unsupported mission rules.');
  if(!b.field||!Array.isArray(b.field.readings)||b.field.readings.length>2||!Array.isArray(b.actions)||b.actions.length>256||!Array.isArray(b.timeline)||b.timeline.length>HORIZON||!b.learning||!b.initial||b.initial.state?.blackout)throw Error('This blackout save has an invalid mission record.');
+ if(b.field.prediction!=null&&!['open','shelter','same'].includes(b.field.prediction))throw Error('This blackout save has an invalid terrain prediction.');
  if(!b.comms||!Number.isFinite(b.comms.elapsed)||b.comms.elapsed<0||!Number.isFinite(b.comms.oneWayMinutes)||b.comms.oneWayMinutes<=0||Math.abs(b.comms.roundTripMinutes-2*b.comms.oneWayMinutes)>1e-8)throw Error('This blackout save has invalid message timing.');
  const tape=b.eventTape;if(!tape||tape.radioStart!==3||tape.radioEnd!==6||tape.dustStart!==4||tape.dustEnd!==7||tape.radiationStart!==7||tape.horizon!==HORIZON)throw Error('This blackout save has a different event schedule.');
- for(const r of b.field.readings)if(!r||!['open','shelter'].includes(r.condition)||r.exposureIndex!==(r.condition==='open'?100:30))throw Error('This blackout save has an invalid teaching reading.');
+ for(const r of b.field.readings){
+  if(!r||!['open','shelter'].includes(r.condition))throw Error('This blackout save has an invalid terrain reading.');
+  if(b.field.dataset==='mola'){const expected=molaRecord(r);if(!expected||r.source!=='mola'||r.sourceId!=='mola'||r.kind!=='elevation'||r.url!==expected.url||!['lat','lon','sampleLat','sampleLon','raw','elevationKm','resolutionDeg'].every(k=>Number.isFinite(r[k])&&Math.abs(r[k]-expected[k])<1e-9))throw Error('This blackout save has an invalid terrain reading.');}
+  else if(r.exposureIndex!==(r.condition==='open'?100:30))throw Error('This blackout save has an invalid legacy reading.');
+ }
+ if(new Set(b.field.readings.map(r=>r.condition)).size!==b.field.readings.length)throw Error('This blackout save repeats a terrain reading.');
  const validActions=['predict','prepare','predictField','observe','shelter','request','next','clean'];
  for(const a of b.actions)if(!a||!validActions.includes(a.type)||!Number.isInteger(a.day)||a.day<1||a.day>HORIZON)throw Error('This blackout save has an invalid action record.');
  for(const result of [b.firstOutcome,b.alternateOutcome])if(result){for(const key of ['day','air','food','water','parts','battery','pop'])if(!Number.isFinite(result[key]))throw Error('This blackout save has an invalid outcome.');if(!Array.isArray(result.actions)||!Array.isArray(result.timeline)||!result.score)throw Error('This blackout save is missing outcome evidence.');}
@@ -283,8 +307,8 @@ function validateState(b){
  return true;
 }
 function restore(raw){
- validateState(raw?.state?.blackout);Junior.restore(raw);emit();return true;
+ validateState(raw?.state?.blackout);Junior.restore(raw);refreshLegacyField(state());emit();return true;
 }
-window.Blackout={isActive,start,view,action,objective,beforeDay,afterDay,recordFieldReading,allowsAction:()=>internal,snapshot:()=>Junior.capture(),restore,validateState,exportRecord,normalizeCode,version:VERSION,rules:RULES,data:DATA};
+window.Blackout={isActive,start,view,action,objective,beforeDay,afterDay,recordFieldReading,molaRecord,fieldSites,allowsAction:()=>internal,snapshot:()=>Junior.capture(),restore,validateState,exportRecord,normalizeCode,version:VERSION,rules:RULES,data:DATA};
 emit();
 })();
