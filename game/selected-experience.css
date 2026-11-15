@@ -59,3 +59,12 @@ body.ares #modal:has(.cinematic-welcome) .btns>button:disabled{opacity:.52;curso
 #surfaceSurvey{left:18px;right:auto;top:76px;bottom:auto;max-height:calc(100dvh - 350px);overflow:auto}
 @media(max-width:700px){#fieldScientist{left:-8px;right:auto;bottom:-25px;width:180px}#surfaceSurvey{top:70px;left:10px;width:235px;max-height:calc(100dvh - 330px)}}
 @media(max-height:500px){#fieldScientist{left:8px;bottom:-30px;width:150px}#surfaceSurvey{left:170px;right:auto;top:65px;width:260px;max-height:calc(100dvh - 85px)}}
+/* Opening film: keep Skip and native controls visible even on short screens. */
+#missionFilm .film-actions{display:flex;gap:8px;flex-shrink:0;align-items:center}
+#missionFilm video{aspect-ratio:16/9;max-height:calc(96dvh - 160px)}
+#missionFilm video:focus-visible{outline:3px solid #c4e8f3;outline-offset:-3px}
+#missionFilm #missionFilmSound{background:#17354b;color:#eaf5ff;border:1px solid #7195aa}
+@media(max-width:650px){#missionFilm header{flex-wrap:wrap}#missionFilm .film-actions{width:100%;justify-content:flex-end}#missionFilm video{max-height:calc(96dvh - 205px)}#missionFilmStatus{padding:8px 12px 12px}}
+@media(max-height:440px){#missionFilm header{flex-wrap:nowrap;padding:6px 10px}#missionFilm h2{font-size:16px}#missionFilm header p{display:none}#missionFilm .film-actions{width:auto}#missionFilm button{font-size:13px;padding:7px 10px}#missionFilm video{max-height:calc(96dvh - 98px)}#missionFilmStatus{padding:5px 10px;font-size:12px}}
+
+#missionFilm video:fullscreen{width:100vw;height:100vh;max-height:none;object-fit:contain;background:#000}

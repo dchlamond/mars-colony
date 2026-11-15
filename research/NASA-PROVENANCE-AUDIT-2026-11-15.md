@@ -9,8 +9,8 @@
 - Latitude-generated ice deposits and uncatalogued cave tiles/bonuses removed. Old saved maps/checkpoints migrate to plain terrain.
 - Day-300 escalating storms removed. Historical event references are traceable to seven NASA DONKI SEP records archived in donki-sep-may-2024.json. Earth observations are not presented as Mars impacts.
 - Science lessons, questions, Council evidence and upgrade descriptions now use the imported MOLA/Horizons/DONKI records or explicitly say game rule. Article-only claims and NIST information removed from these displays.
-- The selected intro film is disabled on entry and in settings because its audio/subtitles describe the removed radiation tool. Selected welcome artwork and hand artwork remain. Original film assets are retained for later editing, but are not offered as current instruction.
-- Mission and teacher guides replaced with current controls and provenance. New missions open immediately without a film or sign-in.
+- The original film was initially disabled during the dataset correction because it describes the earlier radiation tool. On the subsequent explicit user request, the existing Hades film with Arabic subtitles was restored as a skippable opening, with native player controls. Its narration has not been rewritten; the current interactive scanner remains a MOLA terrain reader.
+- Mission and teacher guides replaced with current controls and provenance. No sign-in is required. The opening film can be skipped immediately, then Begin mission starts the game.
 
 ## Scientific input inventory
 

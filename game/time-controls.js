@@ -10,7 +10,7 @@ function running(){return S.speed>0;}
 function set(n){if(n)pace=n;setSpeed(n);update();}
 function toggle(){if(window.Classroom?.connected&&!Classroom.host)return;set(running()?0:pace);}
 clock.querySelector('#timePause').onclick=toggle;clock.querySelectorAll('[data-time-pace]').forEach(b=>b.onclick=()=>set(+b.dataset.timePace));
-document.addEventListener('keydown',e=>{if(e.code!=='Space'||e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName)||e.target?.isContentEditable)return;e.preventDefault();e.stopImmediatePropagation();if(!modalOpen)toggle();},true);
+document.addEventListener('keydown',e=>{if(document.getElementById('missionFilm')?.open)return;if(e.code!=='Space'||e.repeat||/INPUT|TEXTAREA|SELECT/.test(e.target?.tagName)||e.target?.isContentEditable)return;e.preventDefault();e.stopImmediatePropagation();if(!modalOpen)toggle();},true);
 const previousSpeed=setSpeed;setSpeed=function(n){if(window.Blackout?.isActive()){S.speed=Math.max(0,Math.min(5,n));return;}return previousSpeed(n);};
 function update(){
  if(!S)return;const room=window.Classroom?.connected;
