@@ -1085,6 +1085,15 @@ function showScience(){
 }
 function showData(){
   modal({title:'Data sources',html:`
+   <h3>NASA inputs and game-created elements</h3>
+   <table><thead><tr><th>Label</th><th>Elements in this game</th></tr></thead><tbody>
+   <tr><td><b>NASA observations / calculations</b></td><td>MOLA global height samples, the NASA global Mars image, cached JPL Horizons distance/light-time calculations, and DONKI event records. Resampling, display exaggeration and conversion into game time are our implementation.</td></tr>
+   <tr><td><b>Simplified game models</b></td><td>Air thickness and sunlight formulas; oxygen, water, food and power production; resource units; starting reserves; building costs and capacities; harvest and construction times; solar boost percentages; dosimeter indices 100 / 96 / 30. NASA research supports the lessons, not these exact game outputs.</td></tr>
+   <tr><td><b>Fictional content / game rules</b></td><td>Individual rocks and their +3 Parts / +5 Water / +5 Air rewards; hidden air cartridges; colonists, buildings, artwork and dust particles; Appeal, Fame, immigration, countdowns, leaderboard and council rewards; the Blackout story and day-nine goal; day-300 storms and their increasing damage.</td></tr>
+   <tr><td><b>Not imported</b></td><td>SWIM ice probabilities are not used to place deposits. Ice tiles use a latitude estimate; caves and close-up rocks are illustrative. OSDR and RadLab datasets are not integrated.</td></tr>
+   </tbody></table>
+   <p><b>Rock water:</b> NASA confirms buried water ice on Mars. Finding a specific rock and instantly receiving 5 Water is a fictional reward. It is not an assay, a surveyed deposit, or a modeled extraction yield. Hollow rocks do not supply breathable air; our air reward is an invented sealed supply cache.</p>
+
    <p><b>Archived observations, saved inside the game.</b> These records support the science explanations. Earth-observed solar events do not prove a storm reached Mars.</p><p>${window.Junior?.isActive()?'Junior missions use scripted dust and radiation practice alerts, with five days to prepare. Their timing and consequences are invented training rules, not recorded Mars forecasts.':'Commander storm scenarios use the reference events below. After sol 230 the scenario list repeats and is labeled as a replay.'}</p>
    <table>${STORMS.map(s=>`<tr><td>${s.date}</td><td>${s.meas}</td><td><a href="${s.url}" target="_blank" rel="noopener">${s.src}</a></td></tr>`).join('')}</table>
    <p><b>Facts shown on cards</b></p>

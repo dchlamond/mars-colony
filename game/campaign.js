@@ -59,9 +59,9 @@ function afterDay(){
  }
  S.appeal=R.quality(S,e).score;
  const w=R.weather(S.sol);
- if(S.sol===290)event('alert',{title:'Extreme survival begins on day 300',text:'Prepare batteries, reserves, shelters and backup power. Historical storm scenarios repeat with increasingly harsh game rules in both campaigns.'});
+ if(S.sol===290)event('alert',{title:'Extreme survival begins on day 300',text:'Game scenario: day 300 and the escalating difficulty are our design, not a NASA historical date or forecast. Prepare batteries, reserves, shelters and backup power.'});
  if(w?.active){
-  if((S.sol-300)%30===0){event('alert',{title:'Extreme dust · level '+w.cycle,text:'2018 Opportunity-inspired blackout: '+w.duration+' days, '+Math.round(w.solar*1000)/10+'% of normal solar output in this scenario. Next cycles last longer.'});}
+  if((S.sol-300)%30===0){event('alert',{title:'Extreme dust · level '+w.cycle,text:'Game scenario inspired by the 2018 Opportunity storm: '+w.duration+' days, '+Math.round(w.solar*1000)/10+'% of normal solar output. These durations and losses are game rules, not recorded NASA values.'});}
   if(w.cold){S.battery=Math.max(0,S.battery-S.pop*.4*w.maintenance);S.parts=Math.max(0,S.parts-.25*w.maintenance);}
   if(w.radiation&&e.shelter<S.pop){d.unsafeDays++;if(d.unsafeDays>=2){const lost=Math.min(S.pop,Math.ceil((S.pop-e.shelter)*.25*w.maintenance));S.pop-=lost;log(lost+' unsheltered crew evacuated after the radiation alert.','bad');}}
   else d.unsafeDays=0;
