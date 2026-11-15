@@ -68,9 +68,16 @@ function validateMission(data){
  if(data.rngState!==undefined&&!Number.isFinite(data.rngState))throw Error('This save has invalid random state.');
  if(s.junior){if(!Number.isFinite(s.water))s.water=64;Junior.validateCapture({version:1,state:s,rngState:data.rngState});if(s.junior.checkpoint)Junior.validateCapture({version:1,state:s.junior.checkpoint,rngState:s.junior.checkpoint._rngState});}
  else if(s.blackout)throw Error('A blackout mission requires Junior rules.');
+ if(s.water!==undefined&&(!Number.isFinite(s.water)||s.water<0))throw Error('This save has invalid water.');
+ if(s.campaign){const c=s.campaign;if(c.version!==1||!Array.isArray(c.arrivals)||c.arrivals.length>12||!Array.isArray(c.districts)||c.districts.length>COLS*ROWS||!['dryDays','unsafeDays','warningDay'].every(k=>Number.isFinite(c[k])&&c[k]>=0))throw Error('This save has invalid campaign progress.');
+  if(c.pending&&(!Number.isFinite(c.pending.deadline)||!Number.isInteger(c.pending.pool)||c.pending.pool<0||c.pending.pool>100))throw Error('This save has an invalid shuttle countdown.');
+  for(const a of c.arrivals)if(!Array.isArray(a.names)||!Array.isArray(a.seats)||a.names.length!==a.seats.length||!a.names.every(n=>typeof n==='string')||!a.seats.every(n=>Number.isInteger(n)&&n>=0&&n<=100)||!Number.isFinite(a.waiting))throw Error('This save has invalid arrival records.');
+ }
+ if(s.fieldDiscoveries&&(s.fieldDiscoveries.version!==1||!s.fieldDiscoveries.entries||typeof s.fieldDiscoveries.entries!=='object'||Object.keys(s.fieldDiscoveries.entries).length>20))throw Error('This save has invalid discoveries.');
  return data;
 }
 function saveMission(){
+ if(window.Classroom?.connected){notice('Room progress is saved automatically in this tab. Leave the room to save a solo mission.');return false;}
  try{
   const data=validateMission(captureMission()),encoded=JSON.stringify(data),previous=localStorage.getItem(SAVE_KEY);
   // Keep the last readable save before replacing it; a quota/storage failure
@@ -89,6 +96,7 @@ function applyMission(data){
  if(R3)buildWorld();buildMenu();render();setLens(strategy.lens);document.dispatchEvent(new CustomEvent('blackout:update'));document.dispatchEvent(new CustomEvent('strategy:loaded'));
 }
 function loadMission(){
+ if(window.Classroom?.connected){notice('Leave the classroom room before loading a solo mission.');return false;}
  let previous=null,mutating=false;
  try{
   const raw=localStorage.getItem(SAVE_KEY);if(!raw)throw Error('No saved mission on this device yet.');
@@ -106,7 +114,7 @@ function takePhoto(){if(!R3?.fp){notice('Enter Walk on Mars first.');return;}try
 document.addEventListener('keydown',e=>{if(/input|textarea|select/i.test(e.target.tagName))return;if(e.key.toLowerCase()==='p'&&R3?.fp)takePhoto();});
 const baseWalkStep=walkStep;walkStep=function(dt){if(modalOpen)return;baseWalkStep(dt);R3.overlay.visible=true;const t=tileNear(R3.fp.x,R3.fp.z);if(t?.owner)$('fphud').textContent=S.rivals[t.owner-1].name+' territory · visiting only, no building';};window.G.walkStep=walkStep;
 // Preserve all existing science and facts. Rendering remains separate from the base economy.
-window.Strategy={openTab,setLens,saveMission,loadMission,savedMissionStatus,captureMission,validateMission,update:updateStrategy};
+window.Strategy={openTab,setLens,saveMission,loadMission,savedMissionStatus,captureMission,validateMission,restoreMission:data=>applyMission(validateMission(data)),update:updateStrategy};
 const closePanel=document.createElement('button');closePanel.id='closePanel';closePanel.textContent='Close panel';closePanel.onclick=()=>shell.hidden=true;shell.prepend(closePanel);
 const continueBtn=document.createElement('button');continueBtn.className='btn';continueBtn.textContent='Continue saved mission';continueBtn.onclick=loadMission;$('modal').querySelector('.btns')?.append(continueBtn);
 openTab('colony');setLens('territory');setSpeed(0);render();resize3D();

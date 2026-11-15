@@ -300,7 +300,7 @@ const DEF = {
   moxie:  { name:'Oxygen Extractor',  cost:8,  metal:4,  work:12, use:4, o2:3, worker:1, line:'about +3 air, uses 4 power', desc:'Pulls oxygen out of Mars air. Makes more on low ground where the air is thicker. Eats a lot of power.' },
   shield: { name:'Regolith Shield',   cost:0,  metal:6,  work:16, shelter:6, line:'Shelters 6 (14 in a cave)', desc:'A shelter under piled Mars soil. It needs no parts from Earth, only metal frames made here. Build it on a lava tube to protect many more.' },
   green:  { name:'Greenhouse',        cost:6,  metal:4,  work:14, use:2, food:5, worker:1, line:'+5 food after 20 sols (3 without water), uses 2 power', desc:'Grows food, but seedlings take 20 sols before the first harvest. Without water from an Ice Melter it grows only 3 instead of 5.' },
-  ice:    { name:'Ice Melter',        cost:6,  metal:4,  work:12, use:2, o2:4, worker:1, needs:'ice', line:'+4 air, waters 2 farms', desc:'Only on ice. Splits ice into oxygen and water. Cheap on power.' },
+  ice:    { name:'Water Processor',        cost:6,  metal:4,  work:12, use:2, o2:4, worker:1, line:'+4 air, +4 water, waters 2 farms', desc:'Water recovery and local processing. Place on a clear tile. Powered processing adds 4 stored water per day in Commander; crew use 0.25 each. These rates are game units.' },
   mine:   { name:'Regolith Mine',     cost:4,  metal:0,  work:10, use:2, worker:1, line:'+1 metal each sol, uses 2 power', desc:'Digs up Mars soil and smelts metal from it. It is dusty and noisy: colonists are unhappy if it is within 2 tiles of where they sleep.' },
   habitat:{ name:'Habitat',           cost:4,  metal:10, work:14, line:'Beds for 8 colonists', desc:'Homes for 8 more colonists. Without enough beds, people are crowded and unhappy.' },
   rover:  { name:'Rover Trip',        cost:1,  metal:0,  line:'Explore up to 10 tiles away, 2 crew', desc:'Two colonists drive out and claim new land for the colony. They cannot work while away, and out there they have no shelter if a solar storm hits. Pick a spot up to 10 tiles away.' },
@@ -313,8 +313,8 @@ const UPG={ solar:{txt:'+50% power'}, moxie:{txt:'+50% air, but uses 2 more powe
   shield:{txt:'Room for 4 more colonists'}, battery:{txt:'Stores 40 more power'}, habitat:{txt:'4 more beds'}, mine:{txt:'+1 metal each sol, but uses 1 more power',use:1}, dome:{txt:'Cheers up 12 colonists instead of 8, but uses 1 more power',use:1} };
 const DIFFS=[
   {key:'Explorer', blurb:'Best for a first game. More food and parts, 3 sols of storm warning, calmer rivals.', food:480,parts:36,metal:16,ship:10,warn:3,rescue:true,rival:50},
-  {key:'Commander',blurb:'The standard mission. You will need to plan ahead.', food:400,parts:30,metal:12,ship:8,warn:2,rescue:true,rival:58},
-  {key:'Veteran',  blurb:'For experts. Fewer supplies, 1 sol of storm warning, popular rivals.', food:380,parts:28,metal:10,ship:7,warn:1,rescue:true,rival:66}];
+  {key:'Commander',blurb:'The standard mission. You will need to plan ahead.', food:480,parts:36,metal:16,ship:10,warn:2,rescue:true,rival:58},
+  {key:'Veteran',  blurb:'For experts. Fewer supplies, 1 sol of storm warning, popular rivals.', food:440,parts:34,metal:16,ship:9,warn:1,rescue:true,rival:66}];
 let DF=DIFFS[1];
 let ME={name:'New Hope',av:'rocket',css:'#1f9d8a',color:0x1f9d8a};
 const AVS={rocket:'<path d="M16 5c4 3 5 9 3 14h-6c-2-5-1-11 3-14zM11 19l-3 4 4-1zM21 19l3 4-4-1z" fill="#fff"/><circle cx="16" cy="12" r="2" fill="#1f2a3a"/>',
@@ -342,13 +342,13 @@ const GOALS = [
   { text:'Build a Regolith Shield before the solar storm.', unlock:['shield','mine'], done:s=>count('shield')>=1,
     say:'The Sun sometimes throws out storms of radiation. Colonists need a shelter. It costs metal, not parts. A Regolith Mine makes more metal, but keep it away from the beds.' },
   { text:'Build a Greenhouse soon. Seedlings take 20 sols to grow.', unlock:['green','ice','habitat'], done:s=>count('green')>=1,
-    say:'The food we landed with will not last. A new greenhouse needs 20 sols before its first harvest, so start early. Water from an Ice Melter doubles the harvest.' },
+    say:'The food we landed with will not last. A new greenhouse needs 20 sols before its first harvest, so start early. Water from a Water Processor doubles the harvest.' },
   { text:'Grow to 10 colonists.', unlock:['battery','dome'], done:s=>s.pop>=10,
     say:'Colonists are your score, but each one breathes, eats and needs a bed. The pod sleeps 8. Build a Habitat before you run out of beds.' },
   { text:'Earn the Bronze fame medal. Handle a crisis well!', unlock:[], done:s=>s.fame>=20,
     say:'Earth remembers colonies that are ready when things go wrong. Stock up before storms.' },
-  { text:'Fill the Mars Independence bar and get through the radio blackout.', unlock:['reactor'], done:s=>false,
-    say:'Final goal: live without help from Earth. Every crate we ask for drains the bar.' }
+  { text:'Fill Independence, house 10 crew and earn a gold crisis grade.', unlock:['reactor'], done:s=>false,
+    say:'Final goal: sustain 10 crew, fill Independence and handle a crisis safely. Earth crates reduce Independence. After victory you can continue into extreme survival beyond day 300.' }
 ];
 
 /* ---------------- STATE ---------------- */
@@ -488,7 +488,7 @@ function tickSol(){
   const job=S.builds.find(b=>!b.done);
   if(S.cleaning>0){ S.cleaning--; if(S.cleaning===0){ S.panelClean=1; log('The panels are clean. Solar power is back to full.','good'); } }
   else if(job){
-    job.progress+=Math.min(eco.idle,4);
+    job.progress+=Math.max(1,Math.min(eco.idle,4)); // lander construction arm prevents a no-builders deadlock
     if(job.progress>=DEF[job.type].work) finishBuild(job);
   }
   // dust settles on solar panels every sol (faster in a dust storm); now and then the wind blows it off
@@ -528,7 +528,7 @@ function tickSol(){
   S.appeal+=(target-S.appeal)*0.08; S.appeal=Math.max(0,Math.min(100,S.appeal));
   S.cov=cov; S.comfort=comfort; S.o2days=o2days; S.fooddays=fooddays;
   if(S.appeal>=70) addFame(0.15,'Colonists have been happy for a long time.');
-  if(S.appeal<30&&S.sol%5===0&&S.pop>1){ S.pop--; S.rivals[0].pop++;
+  if(S.appeal<30&&S.sol%5===0&&S.pop>1&&!window.Classroom?.connected){ S.pop--; S.rivals[0].pop++;
     const why=S.o2days<3?'air is running low':S.fooddays<3?'food is running low':cov<0.5?'there is not enough shelter':'life here is too hard';
     log('1 colonist moved to Colony Ares: '+(S.crowd>2&&S.o2days>=3&&S.fooddays>=3?'there are not enough beds':why)+'.','bad'); }
 
@@ -541,7 +541,7 @@ function tickSol(){
   // --- Mars Independence
   if(S.goal>=5||count('green')>0){
     const green=o2days>=3&&fooddays>=3&&eco.shut===0&&S.o2>0&&S.food>0;
-    S.indep=Math.max(0,Math.min(100,S.indep+(green?100/300:-0.6)));
+    S.indep=Math.max(0,Math.min(100,S.indep+(green?100/180:-0.6)));
   }
 
   // --- goals
@@ -554,7 +554,7 @@ function tickSol(){
   S.rival=S.rivals.reduce((a,r)=>a+r.pop,0);
   window.ColonySystems?.endSol();
   if(S.pop<=0){ S.pop=0; endGame('lose'); }
-  else if(S.indep>=100&&S.conjSurvived>=1){ endGame('win'); }
+  else if(S.indep>=100&&S.pop>=10&&S.grades.some(g=>g.grade==='gold')){ endGame('win'); }
 }
 
 function finishBuild(b){
@@ -766,7 +766,7 @@ function endGame(kind){
   S.over=kind; setSpeed(0);
   const rows=S.grades.map(g=>`<tr><td>Sol ${g.sol}</td><td>${g.what}</td><td><b>${g.grade}</b></td></tr>`).join('')||'<tr><td colspan="3">No crises faced yet.</td></tr>';
   let lesson='';
-  if(kind==='win') lesson='Your colony made its own air and food, kept everyone shielded, and got through a radio blackout with no help. That is what "living off the land" means. NASA calls it in-situ resource utilization.';
+  if(kind==='win') lesson='Your colony made its own air and food, grew to at least ten people and earned a gold crisis grade. That is what "living off the land" means. NASA calls it in-situ resource utilization.';
   else if(S.cause==='oxygen') lesson=`You ran out of oxygen on Sol ${S.sol}. Real missions carry backup oxygen for exactly this, and they test air machines like MOXIE long before people arrive.`;
   else if(S.cause==='food') lesson=`The food ran out on Sol ${S.sol}. Real mission plans pack extra food and start growing plants early, because a crop takes weeks before anyone can eat it.`;
   else lesson=`The last colonists left on Sol ${S.sol}. A real outpost needs every system working together: power for air, air for people, people to run the machines.`;
@@ -781,7 +781,7 @@ function endGame(kind){
       <h3 style="margin-top:10px">Crises</h3><table>${rows}</table>
       <div class="real"><b>In the real world</b>${lesson}</div>
       <p><small>Real data in this game: solar storm events from NASA DONKI and the Curiosity RAD instrument. See "Data sources" for the full list.</small></p>`,
-    buttons:[{label:'Play again',primary:true,fn:()=>pickSite()},{label:'Data sources',fn:()=>showData()}]});
+    buttons:[...(window.Classroom?.connected?[{label:'Classroom results',primary:true,fn:()=>Classroom.open()},{label:'Leave room · restore solo colony',fn:()=>{Classroom.leave();return false;}}]:[{label:'Play again',primary:true,fn:()=>pickSite()}]),...(kind==='win'&&window.Campaign?[{label:'Continue · extreme survival',fn:()=>{S.over=null;Campaign.data().champion=true;S.speed=0;log('Campaign won. Continue toward extreme survival from day 300.','good');}}]:[]),{label:'Data sources',fn:()=>showData()}]});
 }
 
 function siteStats(i){ const st=SITES[i]; let best=null,bd=1e9; const probe={c:0,r:0};
@@ -1078,7 +1078,7 @@ function showScience(){
    <tr><th>Made up for the game</th><td>Fame medals, the rival colonies and their territory, part and metal costs, upgrades, rover trip times, crew shuttles every 10 sols and supplies every 30 sols, crates that land in 6 sols, and how much air or food each machine makes.</td></tr></table>
    <div class="real"><b>Real numbers</b>
    A sol is 24 h 39 min. MOXIE made up to 12 g of oxygen an hour. Curiosity measures about 0.64 millisieverts of radiation a day; on May 20, 2024 a solar storm delivered 8,100 micrograys at once. Radio signals take about 3 to 23 minutes. Mars clocks run 477 millionths of a second a day faster than Earth clocks.</div>
-   <h3>How colonists are shared out</h3><p>Every 10 sols a shuttle brings 2 or 3 colonists (6 at a launch window). That is 7 colonists per 30 sols, or 18 during a launch window. Supply deliveries and retirements still happen every 30 sols. Each colony gets a share based on how appealing it is. A better colony gets more. The allocation targets a 60% maximum share before rounding to whole people, and gives each open, liveable colony at least one when seats allow. This sharing rule is our invention.</p>
+   <h3>How colonists are shared out</h3><p>Every 10 days, an available shuttle brings ten explorers shared among open colonies after a ten-second countdown. Fame determines how many know each colony. Internal quality of life determines Appeal, which weights their choices. Empty beds cap arrivals; unplaced explorers wait in orbit. Supply deliveries arrive every 30 days. These population rules are game design, not NASA measurements. Junior starts with guided two-person invitations before shared campaign waves.</p>
    <h3>The radio blackout</h3><p>The blackout is real: about every 26 months the Sun sits between Earth and Mars. Its timing in this game (sol 373) is the game's own. It is not placed on the real calendar date.</p>
    <p><small>Hover over the time bar at the top for one more piece of real physics.</small></p>`,
    buttons:[{label:'Close',primary:true}]});
@@ -1575,7 +1575,7 @@ setTimeout(resize3D,600); setTimeout(resize3D,2500); if(document.fonts&&document
 
 function frame(now){
   const dt=Math.min(250,now-last); last=now;
-  if(S&&!modalOpen&&!S.over&&S.speed>0){ acc+=dt*S.speed; let n=0;
+  if(S&&!modalOpen&&!S.over&&S.speed>0&&!window.Campaign?.ownsClock){ acc+=dt*S.speed; let n=0;
     while(acc>=SOL_MS&&n<4&&!modalOpen&&!S.over){ acc-=SOL_MS; tickSol(); n++; }
     if(n) render(); }
   if(S&&R3) animate3D(now);
@@ -1602,6 +1602,8 @@ window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBL
 <script src="junior.js"></script>
 <script src="mission-systems.js"></script>
 <script src="blackout.js"></script>
+<script src="campaign-rules.js"></script>
+<script src="campaign.js"></script>
 <script src="ares-world.js"></script>
 <script src="vendor/Pass.js"></script>
 <script src="vendor/CopyShader.js"></script>
@@ -1615,5 +1617,10 @@ window.G={toggleWalk,walkStep,keys,get R3(){return R3},showCredits,ACADEMY,PROBL
 <script src="ares-ui.js"></script>
 <script src="blackout-ui.js"></script>
 <script src="blackout-audio.js"></script>
+<script src="field-discovery.js"></script>
+<script src="classroom.js"></script>
+<script src="campaign-ui.js"></script>
+<link rel="stylesheet" href="campaign.css">
+<style>body #fieldScientist{left:12px;right:auto}body #surfaceSurvey{left:18px;right:auto;top:170px;bottom:auto;max-height:calc(100dvh - 490px);overflow:auto}@media(max-width:700px){body #fieldScientist{left:-8px;right:auto;bottom:-25px;width:180px}body #surfaceSurvey{top:150px;max-height:calc(100dvh - 400px)}}@media(max-height:500px){body #fieldScientist{width:150px}body #surfaceSurvey{left:170px;top:65px;max-height:calc(100dvh - 85px)}}</style>
 </body>
 </html>

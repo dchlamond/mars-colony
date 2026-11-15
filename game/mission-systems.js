@@ -63,7 +63,7 @@ function fameInfo(){
  const score=Number.isFinite(S.fame)?S.fame:0,awards=Object.values(state().awards).sort((a,b)=>(b.sol||0)-(a.sol||0));
  const medals=MEDALS.map(m=>({name:m.name,threshold:m.at,earned:score>=m.at})),next=medals.find(m=>!m.earned);
  return {score,label:medals.filter(m=>m.earned).at(-1)?.name||'New expedition',awards,medals,fieldReadings:Object.values(state().surveys),nextMedal:next?{...next,remaining:next.threshold-score}:null,
-  explanation:S.junior?'Fame records completed missions and different kinds of evidence. Each award is earned once per mission save. Repeating a click or measurement gives no extra Fame. Medals celebrate progress; they do not unlock basic life support or change Junior invitations.':'Fame combines existing Commander achievements with new one-time field evidence. Existing medals still improve recruitment weight. Repeat readings do not award more Fame.'};
+  explanation:S.junior?'Fame records completed missions and different kinds of evidence. Each award is earned once per mission save. Repeating a click or measurement gives no extra Fame. Fame expands awareness for shared campaign arrivals. The first two invited Junior explorers remain a guided introduction.':'Fame combines existing Commander achievements with new one-time field evidence. Fame determines how many arriving explorers know your colony. Appeal and spare beds determine their allocation. Repeat readings do not award more Fame.'};
 }
 function recordSurvey(data){
  const condition=data?.condition,t=Number.isInteger(data?.c)&&Number.isInteger(data?.r)?tileAt(data.c,data.r):null;

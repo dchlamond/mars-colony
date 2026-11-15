@@ -7,4 +7,4 @@ const rows=e.run('(()=>{'+source.slice(start,end)+'})()');
 for(const row of rows)if(!Number.isFinite(row.sol)||!Number.isFinite(row.colonists))throw Error('Invalid campaign result');
 fs.mkdirSync(path.resolve(__dirname,'../dist/verification'),{recursive:true});
 fs.writeFileSync(path.resolve(__dirname,'../dist/verification/audit-commander-campaigns.json'),JSON.stringify(rows,null,2));
-console.log(JSON.stringify({campaigns:rows.length,wins:rows.filter(r=>r.win).length,timeouts:rows.filter(r=>r.result==='timeout').length,note:'Further Commander balance work recommended; these are two simple policies, not child playtests.'}));
+console.log(JSON.stringify({campaigns:rows.length,wins:rows.filter(r=>r.win).length,timeouts:rows.filter(r=>r.result==='timeout').length,note:'Two deterministic policies across all sites/difficulties; bot results are not a human difficulty rating.'}));

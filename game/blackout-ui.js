@@ -13,7 +13,7 @@
   const answerText = answer => answerLabels[answer?.answer??answer?.value??answer]||answer?.label||answer?.answer||answer||'Not recorded';
   const panel = document.createElement('section'); panel.id='blackoutPanel'; panel.hidden=true; panel.setAttribute('aria-label','Blackout mission');
   const nav = document.createElement('nav'); nav.id='blackoutDock'; nav.hidden=true; nav.setAttribute('aria-label','Mission actions');
-  nav.innerHTML=[['mission','Mission','compass'],['systems','Systems','home'],['explore','Explore','rover'],['crew','Crew','crew']].map(([key,label,glyph])=>`<button data-blackout-tab="${key}" aria-pressed="${key==='mission'}">${icon(glyph)}<span>${label}</span></button>`).join('');
+  nav.innerHTML=[['mission','Mission','compass'],['build','Build','build'],['systems','Systems','home'],['explore','Explore','rover'],['crew','Crew','crew']].map(([key,label,glyph])=>`<button data-blackout-tab="${key}" aria-pressed="${key==='mission'}">${icon(glyph)}<span>${label}</span></button>`).join('');
   const announce=document.createElement('div');announce.id='blackoutAnnounce';announce.className='blackout-sr-only';announce.setAttribute('role','status');announce.setAttribute('aria-live','polite');
   const watermark=document.createElement('div');watermark.id='blackoutArtCredit';watermark.textContent='Includes AI-generated artwork';watermark.title='Terrain colour and fictional adviser use AI-generated imagery. 3D structures and game systems are original authored work. See Credits.';
   const status=document.createElement('div');status.id='blackoutRadio';status.hidden=true;status.setAttribute('aria-label','Earth communication status');
@@ -101,7 +101,7 @@
   function openSystems(system){AresUI.close();ui.tab='systems';if(['air','water','power'].includes(system))ui.system=system;update(true);panel.querySelector('h2')?.focus({preventScroll:true});}
   function openTab(tab){
     if(tab==='mission')return openMission();if(tab==='systems')return openSystems();
-    ui.tab='external';panel.hidden=true;AresUI.close();AresUI.open(tab);nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.blackoutTab===tab)));
+    ui.tab='external';ui.externalTab=tab;panel.hidden=true;AresUI.close();AresUI.open(tab);nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.blackoutTab===tab)));
   }
   function downloadRecord(){
     const record=Blackout.exportRecord();if(!record){showMessage('Complete a mission to make a record.');return;}
@@ -136,7 +136,7 @@
     const c=v.comms||{};status.dataset.linkState=c.status||'ready';status.innerHTML=`<span class="blackout-signal" aria-hidden="true"></span><div><b>${esc(c.label||c.title||'Earth link')}</b><span>${esc(c.status==='blackout'?'Local decisions keep the crew working.':c.detail||'Plan ahead. Radio replies take time.')}</span></div>`;
     const signature=JSON.stringify([v,ui.tab,ui.system,ui.message,ui.tab==='systems'?systemsData():null]);
     if(force||signature!==ui.signature){const scroll=panel.scrollTop;panel.innerHTML=ui.tab==='systems'?systemsHtml():missionHtml(v);ui.signature=signature;if(ui.stage===v.stage)panel.scrollTop=scroll;else{panel.scrollTop=0;announce.textContent=(v.title||'Mission updated')+'. '+(v.detail||'');ui.stage=v.stage;}}
-    nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.blackoutTab===ui.tab)));
+    nav.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.blackoutTab===(ui.tab==='external'?ui.externalTab:ui.tab))));
     if(ui.tab==='mission'||ui.tab==='systems'){byId('commandPanel').hidden=true;byId('aresDrawer').hidden=true;}
     byId('aresResources').querySelectorAll('[data-ares-resource]').forEach(el=>el.classList.toggle('blackout-focus-resource',['air','water','power'].includes(el.dataset.aresResource)));
   }

@@ -20,7 +20,7 @@ function engine(){
  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const base=html.slice(html.indexOf("<script>\n'use strict';")+8,html.indexOf('</script>',html.indexOf("<script>\n'use strict';")));
  run(base.slice(0,base.indexOf('init3D(); newGame(); buildMenu(); render();'))+'\nrender=()=>{};syncScene=()=>{};buildMenu=()=>{};resize3D=()=>{};newGame();\n'+base.slice(base.indexOf('window.G={')),'index.html');
- for(const file of ['donki-snapshot.js','expedition.js','strategy.js','horizons-snapshot.js','operations.js','colony-systems.js','junior.js','mission-systems.js','blackout.js'])run(fs.readFileSync(path.join(root,file),'utf8'),file);
+ for(const file of ['donki-snapshot.js','expedition.js','strategy.js','horizons-snapshot.js','operations.js','colony-systems.js','junior.js','mission-systems.js','blackout.js','campaign-rules.js','campaign.js'])run(fs.readFileSync(path.join(root,file),'utf8'),file);
  run('render=()=>{};syncScene=()=>{};buildMenu=()=>{};modalQ=[];modalOpen=false;');
  return {run,context,nodes};
 }
